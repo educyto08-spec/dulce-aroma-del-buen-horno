@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - DULCE AROMA DEL BUEN HORNO</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos específicos y profesionales para el Panel de Control */
+        .admin-body {
+            background-color: #f4ece1;
+            padding: 30px 20px;
+        }
+        .admin-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--crema-suave);
+            padding: 20px 30px;
+            border-radius: 6px;
+            border: 1px solid var(--borde);
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(60,53,48,0.05);
+        }
+        .admin-header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            color: var(--guinda);
+        }
+        .btn-refresh-admin {
+            background-color: var(--guinda);
+            color: var(--blanco);
+            border: none;
+            padding: 10px 20px;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .btn-refresh-admin:hover {
+            background-color: var(--guinda-oscuro);
+        }
+        .grid-pedidos-admin {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+        .card-pedido-admin {
+            background-color: var(--blanco);
+            border: 1px solid var(--borde);
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(60,53,48,0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .card-pedido-admin.nuevo-pedido {
+            border-top: 5px solid #16a34a;
+        }
+        .admin-pedido-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--texto-mutado);
+            margin-bottom: 12px;
+            border-bottom: 1px solid #f5ebe0;
+            padding-bottom: 6px;
+        }
+        .admin-cliente-info {
+            background-color: #faf6f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+        }
+        .admin-cliente-info p {
+            margin: 4px 0;
+        }
+        .admin-productos-list {
+            margin: 10px 0;
+            padding-left: 18px;
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+        .admin-productos-list li {
+            margin-bottom: 6px;
+        }
+        .admin-pedido-entrega {
+            font-size: 0.85rem;
+            background-color: #eef9f1;
+            color: #155724;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            border-left: 3px solid #28a745;
+        }
+        .admin-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid #f5ebe0;
+        }
+        .admin-total-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--texto-oscuro);
+        }
+        .badge-atendido {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body class="admin-body">
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <h1><i class="fa-solid fa-store-slash"></i> Panel del Horno: Registro de Ventas</h1>
+                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--texto-mutado);">Monitoreo de pedidos entrantes en la plataforma web.</p>
+            </div>
+            <button class="btn-refresh-admin" onclick="cargarPedidosAdmin()">
+                <i class="fa-solid fa-rotate"></i> Actualizar Lista
+            </button>
+        </div>
+
+        <div id="contenedorPedidosAdmin" class="grid-pedidos-admin">
+            <p class="text-muted" style="grid-column: 1/-1;">🔄 Cargando base de datos de comandas...</p>
+        </div>
+    </div>
+
+    <script type="module" src="js/admin-script.js"></script>
+</body>
+</html>
