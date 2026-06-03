@@ -40,7 +40,11 @@ let carrito = JSON.parse(localStorage.getItem('carrito_miga_gold')) || [];
 let usuarioLogueado = null; 
 let correoUsuarioLogueado = null; 
 let estrellasSeleccionadas = 5; 
-let idDocumentoUsuarioFirestore = null; // Guardará el ID interno del registro para poder editarlo
+let idDocumentoUsuarioFirestore = null; 
+
+// --- VARIABLES DEL SISTEMA DE CUPONES ---
+let cuponAplicado = null;
+let descuentoActual = 0;
 
 // --- FUNCIÓN HELPER: TOAST EMERGENTE ---
 function mostrarToast(mensaje) {
@@ -115,7 +119,7 @@ function openSide(id) {
     if (panel) {
         panel.classList.add('active');
         if (id === 'sideCuenta') {
-            conmutarModoEdicionPerfil(false); // Abrir siempre en modo lectura normal
+            conmutarModoEdicionPerfil(false);
             cargarPerfilUsuario();
         }
     }
@@ -321,7 +325,6 @@ function actualizarInterfazUsuario() {
     }
 }
 
-// --- CARGAR DATOS DE PERFIL E HISTORIAL DESDE FIRESTORE ---
 async function cargarPerfilUsuario() {
     const user = auth.currentUser;
     if (!user) return;
@@ -334,15 +337,13 @@ async function cargarPerfilUsuario() {
         
         if (!userSnapshot.empty) {
             userSnapshot.forEach((docSnap) => {
-                idDocumentoUsuarioFirestore = docSnap.id; // Almacenamos el ID de referencia del doc para hacer updates
+                idDocumentoUsuarioFirestore = docSnap.id; 
                 const ud = docSnap.data();
                 
-                // Rellenar etiquetas de texto de lectura
                 document.getElementById('perfNombre').innerText = `${ud.nombre} ${ud.apellidos}`;
                 document.getElementById('perfTelefono').innerText = ud.telefono || "No registrado";
                 document.getElementById('perfDireccion').innerText = ud.direccion || "No registrada";
                 
-                // Rellenar de antemano el formulario de edición oculta
                 document.getElementById('editPerfNombre').value = ud.nombre || "";
                 document.getElementById('editPerfApellidos').value = ud.apellidos || "";
                 document.getElementById('editPerfTelefono').value = ud.telefono || "";
@@ -418,7 +419,6 @@ function conmutarModoEdicionPerfil(activarFormulario) {
     const divFormulario = document.getElementById('vistaFormularioPerfil');
     
     if (activarFormulario) {
-        // Validar que tengamos un ID del cliente en Firestore antes de permitir editar
         if(!idDocumentoUsuarioFirestore) {
             Swal.fire({
                 title: 'Perfil Invitado 🥐',
@@ -453,10 +453,8 @@ async function guardarDatosPerfilActualizados() {
     }
 
     try {
-        // Instanciar referencia directa al documento del usuario usando su ID guardado
         const usuarioRef = doc(db, "usuarios", idDocumentoUsuarioFirestore);
         
-        // Ejecutar actualización parcial en la nube
         await updateDoc(usuarioRef, {
             nombre: nuevoNombre,
             apellidos: nuevosApellidos,
@@ -464,7 +462,6 @@ async function guardarDatosPerfilActualizados() {
             direccion: nuevaDireccion
         });
 
-        // Actualizar el estado global del usuario logueado en la cabecera
         usuarioLogueado = nuevoNombre;
         actualizarInterfazUsuario();
 
@@ -475,7 +472,6 @@ async function guardarDatosPerfilActualizados() {
             confirmButtonColor: '#7a283c'
         });
 
-        // Apagar el formulario y volver a cargar los textos
         conmutarModoEdicionPerfil(false);
         cargarPerfilUsuario();
     } catch(err) {
@@ -528,6 +524,34 @@ function actualidorContadorGlobal() {
     }
 }
 
+// --- FUNCIÓN DE CUPONES (Integración) ---
+function aplicarCupon() {
+    const inputCupon = document.getElementById("inputCupon");
+    const codigo = inputCupon.value.trim().toUpperCase();
+    
+    const cuponesValidos = {
+        "CONCHALOVER": 0.10,
+        "PRIMERCOMPRA": 20,
+        "HORNO20": 0.20
+    };
+
+    if (cuponesValidos[codigo] !== undefined) {
+        cuponAplicado = codigo;
+        let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+        
+        if (codigo === "PRIMERCOMPRA") {
+            descuentoActual = cuponesValidos[codigo];
+        } else {
+            descuentoActual = total * cuponesValidos[codigo];
+        }
+
+        actualizarCarritoVisual();
+        mostrarToast(`¡Cupón ${codigo} aplicado con éxito!`);
+    } else {
+        Swal.fire("Cupón Inválido ❌", "El código ingresado no existe o no es válido.", "error");
+    }
+}
+
 function actualizarCarritoVisual() {
     const container = document.getElementById("cartItemsContainer");
     const totalText = document.getElementById("cartTotalText");
@@ -558,7 +582,9 @@ function actualizarCarritoVisual() {
                 </div>`;
         });
     }
-    totalText.textContent = `$${totalPrecioAcumulado.toFixed(2)}`;
+
+    let totalFinal = Math.max(0, totalPrecioAcumulado - descuentoActual);
+    totalText.textContent = `$${totalFinal.toFixed(2)} ${cuponAplicado ? `(Desc: -$${descuentoActual.toFixed(2)})` : ''}`;
 }
 
 function cambiarCantidad(index, cambio) {
@@ -588,6 +614,8 @@ function vaciarCarritoCompleto() {
     }).then((result) => {
         if (result.isConfirmed) {
             carrito = [];
+            cuponAplicado = null; // Reiniciar cupón
+            descuentoActual = 0;
             guardarCarritoEnStorage();
             actualidorContadorGlobal();
             actualizarCarritoVisual();
@@ -713,6 +741,8 @@ async function finalizarCompraServidor() {
             uidCliente: auth.currentUser ? auth.currentUser.uid : "invitado",
             productos: carrito,
             total: totalTextoHtml,
+            cuponUsado: cuponAplicado || "Ninguno",
+            descuentoAplicado: descuentoActual,
             fechaRecoleccion: fechaFormateada,
             horarioRecoleccion: selectHorario.value,
             fechaCreacion: Date.now()
@@ -740,6 +770,8 @@ async function finalizarCompraServidor() {
     window.open(urlWa, '_blank');
 
     carrito = [];
+    cuponAplicado = null;
+    descuentoActual = 0;
     guardarCarritoEnStorage();
     inputFecha.value = "";
     selectHorario.value = "";
@@ -924,3 +956,4 @@ window.cargarReseñas = cargarReseñas;
 window.cargarPerfilUsuario = cargarPerfilUsuario;
 window.conmutarModoEdicionPerfil = conmutarModoEdicionPerfil;
 window.guardarDatosPerfilActualizados = guardarDatosPerfilActualizados;
+window.aplicarCupon = aplicarCupon;

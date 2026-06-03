@@ -34,7 +34,7 @@ let vistaActiva = "pedidos";
 
 // --- CORREO AUTORIZADO COMO ADMINISTRADOR ---
 // Reemplaza este correo por el tuyo real con el que harás pruebas
-const CORREO_ADMINISTRADOR = "admin@dulcearoma.com"; 
+const CORREO_ADMINISTRADOR = "educyto08@gmail.com"; 
 
 // --- DETECTAR ACCESO Y SEGURIDAD ---
 onAuthStateChanged(auth, (user) => {

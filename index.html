@@ -21,13 +21,28 @@
         <div class="side-header">
             <div>
                 <h2>MI CARRITO</h2>
-                <span id="btnClearCart" onclick="vaciarCarritoCompleto()">Vaciar bolsa</span>
+                <span id="btnClearCart" onclick="vaciarCarritoCompleto()" style="cursor:pointer; text-decoration:underline; font-size:0.9rem;">Vaciar bolsa</span>
             </div>
             <span class="close-side" onclick="closeSide('cartSidebar')">&times;</span>
         </div>
          
         <div id="cartItemsContainer" class="side-body">
             <p class="empty-msg">Tu carrito está vacío</p>
+        </div>
+
+        <div class="seccion-logistica-pedido" id="bloqueCuponesCart" style="margin: 10px 15px; border-top: 1px dashed #e6d7c3; padding-top: 15px;">
+            <h3 style="font-size: 0.95rem; color: #7a283c; margin-bottom: 8px;">
+                <i class="fa-solid fa-ticket"></i> ¿Tienes un cupón?
+            </h3>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="inputCuponDescuento" placeholder="Ej: CONCHALOVER" 
+                       style="flex: 1; padding: 8px; border: 1px solid #e6d7c3; border-radius: 4px; text-transform: uppercase; font-weight: bold; background-color: #faf6f0;">
+                <button type="button" onclick="aplicarCuponDescuento()" 
+                        style="background: #7a283c; color: white; border: none; padding: 0 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                    Aplicar
+                </button>
+            </div>
+            <p id="mensajeCuponStatus" style="font-size: 0.8rem; margin: 6px 0 0 0; font-weight: bold; display: none;"></p>
         </div>
 
         <div class="seccion-logistica-pedido" id="bloqueLogisticaCart">
@@ -105,10 +120,9 @@
             </div>
 
             <hr class="divisor-perfil">
-
             <h4 style="color: #8c5a2b; margin-bottom: 15px;"><i class="fas fa-history"></i> Mis Pedidos Recientes</h4>
             <div id="contenedorHistorialPedidos">
-                <p class="text-muted">Buscando tus pedidos en el horno...</p>
+                <p class="text-muted">Inicia sesión para ver tu historial de pan...</p>
             </div>
         </div>
     </div>
@@ -458,4 +472,3 @@
     <script type="module" src="js/script.js"></script>
 </body>
 </html>
-	
