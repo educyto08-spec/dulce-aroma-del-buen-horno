@@ -135,7 +135,7 @@ body {
     z-index: 10;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
-.badge-producto.popular { background-color: #d97706; }   
+.badge-producto.popular { background-color: #d97706; }    
 .badge-producto.promo { background-color: #16a34a; }         
 .badge-producto.especial { background-color: var(--guinda); } 
 
@@ -489,110 +489,33 @@ footer p { margin: 6px 0; font-size: 0.85rem; }
 .footer-location { font-weight: 700; color: var(--guinda); }
 .footer-copyright { color: var(--texto-mutado); }
 
-/* ==========================================================================
-   NUEVOS ESTILOS: PANEL DE CUENTA E HISTORIAL DE PEDIDOS REALES (FIREBASE)
-   ========================================================================== */
+/* NUEVOS ESTILOS: PANEL DE CUENTA E HISTORIAL DE PEDIDOS */
+.perfil-datos-card { background-color: var(--pastel-albaricoque); border-left: 4px solid var(--guinda); padding: 16px; border-radius: 4px; margin-bottom: 20px; text-align: left; border: 1px solid var(--borde); }
+.perfil-datos-card h4 { margin: 0 0 12px 0; color: var(--guinda); font-size: 0.95rem; font-weight: 700; text-transform: uppercase; }
+.perfil-datos-card p { margin: 6px 0; font-size: 0.85rem; color: var(--texto-oscuro); }
+.divisor-perfil { border: 0; border-top: 1px dashed var(--borde); margin: 25px 0; }
+.card-pedido-historial { background-color: var(--blanco); border: 1px solid var(--borde); border-radius: 4px; padding: 14px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(60, 53, 48, 0.03); }
+.pedido-historial-header { display: flex; justify-content: space-between; font-size: 0.8rem; border-bottom: 1px solid var(--borde); padding-bottom: 6px; margin-bottom: 10px; }
+.pedido-id { font-weight: 700; color: var(--guinda); }
+.pedido-fecha { color: var(--texto-mutado); }
+.pedido-productos-list { list-style-type: none; padding-left: 0; }
+.pedido-productos-list li { margin-bottom: 4px; padding-left: 12px; position: relative; }
+.pedido-productos-list li::before { content: "•"; color: var(--guinda); position: absolute; left: 0; }
+.text-muted { font-size: 0.85rem; color: var(--texto-mutado); text-align: center; padding: 20px 0; }
 
-/* Tarjeta contenedora de datos personales */
-.perfil-datos-card {
-    background-color: var(--pastel-albaricoque);
-    border-left: 4px solid var(--guinda);
-    padding: 16px;
+/* Corrección visual para Cupones */
+#bloqueCuponesCart {
+    background-color: #fffaf5;
+    border: 1px solid var(--guinda);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px;
+}
+#mensajeCuponStatus {
+    margin-top: 8px;
+    padding: 5px;
     border-radius: 4px;
-    margin-bottom: 20px;
-    text-align: left;
-    border-top: 1px solid var(--borde);
-    border-right: 1px solid var(--borde);
-    border-bottom: 1px solid var(--borde);
-}
-.perfil-datos-card h4 {
-    margin: 0 0 12px 0;
-    color: var(--guinda);
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-.perfil-datos-card p {
-    margin: 6px 0;
-    font-size: 0.85rem;
-    color: var(--texto-oscuro);
-    line-height: 1.4;
-}
-.perfil-datos-card strong {
-    color: var(--guinda-oscuro);
-}
-
-/* Divisor estético para separar secciones */
-.divisor-perfil {
-    border: 0;
-    border-top: 1px dashed var(--borde);
-    margin: 25px 0;
-}
-
-/* Tarjeta individual para cada pedido en el historial */
-.card-pedido-historial {
-    background-color: var(--blanco);
-    border: 1px solid var(--borde);
-    border-radius: 4px;
-    padding: 14px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 8px rgba(60, 53, 48, 0.03);
-    text-align: left;
-    transition: transform 0.2s ease;
-}
-.card-pedido-historial:hover {
-    transform: translateY(-1px);
-}
-
-/* Cabecera del pedido (ID de referencia y Fecha) */
-.pedido-historial-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    text-align: center;
     font-size: 0.8rem;
-    border-bottom: 1px solid var(--borde);
-    padding-bottom: 6px;
-    margin-bottom: 10px;
-}
-.pedido-id {
-    font-weight: 700;
-    color: var(--guinda);
-}
-.pedido-fecha {
-    color: var(--texto-mutado);
-    font-weight: 500;
-}
-
-/* Listado de panes del pedido */
-.pedido-productos-list {
-    list-style-type: none;
-    padding-left: 0 !md;
-}
-.pedido-productos-list li {
-    margin-bottom: 4px;
-    position: relative;
-    padding-left: 12px;
-}
-.pedido-productos-list li::before {
-    content: "•";
-    color: var(--guinda);
-    position: absolute;
-    left: 0;
     font-weight: bold;
-}
-
-/* Mensajes informativos de carga o vacíos */
-.text-muted {
-    font-size: 0.85rem;
-    color: var(--texto-mutado);
-    text-align: center;
-    padding: 20px 0;
-}
-.text-danger {
-    font-size: 0.85rem;
-    color: #c93b3b;
-    text-align: center;
-    font-weight: 600;
-    padding: 20px 0;
 }

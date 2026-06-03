@@ -54,7 +54,7 @@ function mostrarToast(mensaje) {
     const toast = document.createElement('div');
     toast.className = 'toast-notificacion';
     toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${mensaje}</span>`;
-     
+    
     document.body.appendChild(toast);
 
     setTimeout(() => toast.classList.add('show'), 50);
@@ -78,12 +78,12 @@ function enfocarBuscador() {
     const inputBusqueda = document.getElementById('inputBuscador');
     if (seccionCatalogo && inputBusqueda) {
         seccionCatalogo.scrollIntoView({ behavior: 'smooth' });
-         
+        
         const checkScrollEnd = () => {
             inputBusqueda.focus();
             window.removeEventListener('scrollend', checkScrollEnd);
         };
-         
+        
         if ('onscrollend' in window) {
             window.addEventListener('scrollend', checkScrollEnd);
         } else {
@@ -96,7 +96,7 @@ function enfocarBuscador() {
 function buscarProductos() {
     const textoBuscado = document.getElementById("inputBuscador").value.toLowerCase();
     const productos = document.querySelectorAll(".item-producto");
-     
+    
     const botones = document.querySelectorAll(".btn-categoria");
     if(botones[0]) {
         botones.forEach(btn => btn.classList.remove("active"));
@@ -338,15 +338,13 @@ async function cargarPerfilUsuario() {
         
         if (!userSnapshot.empty) {
             userSnapshot.forEach((docSnap) => {
-                idDocumentoUsuarioFirestore = docSnap.id; // Almacenamos el ID de referencia del doc para hacer updates
+                idDocumentoUsuarioFirestore = docSnap.id; 
                 const ud = docSnap.data();
                 
-                // Rellenar etiquetas de texto de lectura
                 document.getElementById('perfNombre').innerText = `${ud.nombre} ${ud.apellidos}`;
                 document.getElementById('perfTelefono').innerText = ud.telefono || "No registrado";
                 document.getElementById('perfDireccion').innerText = ud.direccion || "No registrada";
                 
-                // Rellenar de antemano el formulario de edición oculta
                 document.getElementById('editPerfNombre').value = ud.nombre || "";
                 document.getElementById('editPerfApellidos').value = ud.apellidos || "";
                 document.getElementById('editPerfTelefono').value = ud.telefono || "";
@@ -422,7 +420,6 @@ function conmutarModoEdicionPerfil(activarFormulario) {
     const divFormulario = document.getElementById('vistaFormularioPerfil');
     
     if (activarFormulario) {
-        // Validar que tengamos un ID del cliente en Firestore antes de permitir editar
         if(!idDocumentoUsuarioFirestore) {
             Swal.fire({
                 title: 'Perfil Invitado 🥐',
@@ -457,10 +454,8 @@ async function guardarDatosPerfilActualizados() {
     }
 
     try {
-        // Instanciar referencia directa al documento del usuario usando su ID guardado
         const usuarioRef = doc(db, "usuarios", idDocumentoUsuarioFirestore);
         
-        // Ejecutar actualización parcial en la nube
         await updateDoc(usuarioRef, {
             nombre: nuevoNombre,
             apellidos: nuevosApellidos,
@@ -468,7 +463,6 @@ async function guardarDatosPerfilActualizados() {
             direccion: nuevaDireccion
         });
 
-        // Actualizar el estado global del usuario logueado en la cabecera
         usuarioLogueado = nuevoNombre;
         actualizarInterfazUsuario();
 
@@ -479,7 +473,6 @@ async function guardarDatosPerfilActualizados() {
             confirmButtonColor: '#7a283c'
         });
 
-        // Apagar el formulario y volver a cargar los textos
         conmutarModoEdicionPerfil(false);
         cargarPerfilUsuario();
     } catch(err) {
@@ -507,16 +500,17 @@ function aplicarCupon() {
 
     if (cuponesValidos[codigo] !== undefined) {
         cuponAplicado = codigo;
-        // Lógica de cálculo
-        let total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
         
+        let subtotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+        
+        // Calcular descuento
         if (codigo === "PRIMERCOMPRA") {
-            descuentoActual = cuponesValidos[codigo];
+            descuentoActual = Math.min(cuponesValidos[codigo], subtotal); // No descontar más que el total
         } else {
-            descuentoActual = total * cuponesValidos[codigo];
+            descuentoActual = subtotal * cuponesValidos[codigo];
         }
 
-        actualizarCarritoVisual(); // Refresca para mostrar el nuevo total
+        actualizarCarritoVisual();
         mostrarToast(`¡Cupón ${codigo} aplicado con éxito!`);
     } else {
         Swal.fire("Cupón Inválido ❌", "El código ingresado no existe o no es válido.", "error");
@@ -526,19 +520,19 @@ function aplicarCupon() {
 function agregarAlCarrito(nombre, precio, img) {
     const precioNumerico = parseFloat(precio);
     const itemExistente = carrito.find(item => item.nombre === nombre);
-     
+    
     if (itemExistente) {
         itemExistente.cantidad += 1;
     } else {
         carrito.push({ nombre, precio: precioNumerico, img, cantidad: 1 });
     }
-     
+    
     guardarCarritoEnStorage();
     actualidorContadorGlobal();
     actualizarCarritoVisual();
-     
+    
     mostrarToast(`¡${nombre} agregado a la bolsa! 🥐`);
-     
+    
     const badge = document.getElementById("cartCount");
     if (badge) {
         badge.classList.add("pop");
@@ -550,7 +544,7 @@ function actualidorContadorGlobal() {
     const totalUnidades = carrito.reduce((acumulador, item) => acumulador + item.cantidad, 0);
     const badge = document.getElementById("cartCount");
     if (badge) badge.textContent = totalUnidades;
-     
+    
     const bloqueLogistica = document.getElementById("bloqueLogisticaCart");
     if (bloqueLogistica) {
         if (totalUnidades > 0) {
@@ -575,7 +569,7 @@ function actualizarCarritoVisual() {
         carrito.forEach((item, index) => {
             const subtotalItem = item.precio * item.cantidad;
             totalPrecioAcumulado += subtotalItem;
-             
+            
             container.innerHTML += `
                 <div class="cart-item-row">
                     <img src="${item.img}" onerror="this.src='https://via.placeholder.com/65';">
@@ -599,11 +593,11 @@ function actualizarCarritoVisual() {
 
 function cambiarCantidad(index, cambio) {
     carrito[index].cantidad += cambio;
-     
+    
     if (carrito[index].cantidad <= 0) {
         carrito.splice(index, 1);
     }
-     
+    
     guardarCarritoEnStorage();
     actualidorContadorGlobal();
     actualizarCarritoVisual();
@@ -611,7 +605,7 @@ function cambiarCantidad(index, cambio) {
 
 function vaciarCarritoCompleto() {
     if (carrito.length === 0) return;
-     
+    
     Swal.fire({
         title: '¿Vaciar tu bolsa de pan? 🥖',
         text: "Esta acción removerá todos los artículos que has seleccionado.",
@@ -624,17 +618,17 @@ function vaciarCarritoCompleto() {
     }).then((result) => {
         if (result.isConfirmed) {
             carrito = [];
-            cuponAplicado = null; // Reiniciar
+            cuponAplicado = null; 
             descuentoActual = 0;
             guardarCarritoEnStorage();
             actualidorContadorGlobal();
             actualizarCarritoVisual();
-             
+            
             const inputFecha = document.getElementById("fechaEntrega");
             const selectHorario = document.getElementById("horarioEntrega");
             if (inputFecha) inputFecha.value = "";
             if (selectHorario) selectHorario.value = "";
-             
+            
             mostrarToast("Se ha vaciado tu carrito de compras.");
         }
     });
@@ -671,15 +665,15 @@ async function finalizarCompraServidor() {
         });
         return;
     }
-     
+    
     const inputFecha = document.getElementById("fechaEntrega");
     const selectHorario = document.getElementById("horarioEntrega");
-     
+    
     if (!inputFecha || !selectHorario) return;
-     
+    
     inputFecha.classList.remove("error");
     selectHorario.classList.remove("error");
-     
+    
     if (!inputFecha.value) {
         inputFecha.classList.add("error");
         Swal.fire({
@@ -690,7 +684,7 @@ async function finalizarCompraServidor() {
         }).then(() => inputFecha.focus());
         return;
     }
-     
+    
     if (!selectHorario.value) {
         selectHorario.classList.add("error");
         Swal.fire({
@@ -763,7 +757,7 @@ async function finalizarCompraServidor() {
         btnCheckout.disabled = false;
         btnCheckout.innerHTML = textoOriginalBtn;
     }
-     
+    
     const mensajeWhatsApp = `¡Hola, ${nombreParaMensaje}! 👋 Confirmamos que tu pedido en la web ${stringPedido} se ha registrado con éxito. Aquí tienes los detalles:
 
 🍦 Detalle: ${productosDetalleString}
@@ -773,9 +767,9 @@ async function finalizarCompraServidor() {
 🕒 Horario de recolección: ${selectHorario.value}
 
 ¡Te esperamos! Que tengas un excelente día. ✨`;
-     
+    
     const urlWa = `https://wa.me/529223773794?text=${encodeURIComponent(mensajeWhatsApp)}`;
-     
+    
     mostrarToast("🎉 ¡Pedido guardado! Redirigiendo a WhatsApp...");
     window.open(urlWa, '_blank');
 
@@ -795,7 +789,7 @@ function filtrarCategoria(categoria, e) {
     document.getElementById("inputBuscador").value = "";
     const botones = document.querySelectorAll(".btn-categoria");
     botones.forEach(btn => btn.classList.remove("active"));
-     
+    
     if (e && e.currentTarget) {
         e.currentTarget.classList.add("active");
     }
@@ -913,7 +907,7 @@ async function cargarReseñas() {
             card.innerHTML = estrellasHTML;
             card.appendChild(p);
             card.appendChild(userDiv);
-             
+            
             divContenedor.appendChild(card);
         });
     } catch (error) {
