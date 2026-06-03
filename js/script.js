@@ -116,8 +116,6 @@ function openSide(id) {
     }
 }
 
-window.openSide = openSide;
-
 function closeSide(id) {
     const panel = document.getElementById(id);
     if (panel) panel.classList.remove('active');
@@ -132,6 +130,7 @@ function closeAuth() {
     document.getElementById('modalAuth').style.display = 'none';
 }
 
+// --- CAMBIO DE PESTAÑAS (LOGIN / REGISTRO) ---
 function switchTab(type) {
     const loginForm = document.getElementById('formLogin');
     const registerForm = document.getElementById('formRegister');
@@ -405,7 +404,7 @@ function agregarAlCarrito(nombre, precio, img) {
     if (itemExistente) {
         itemExistente.cantidad += 1;
     } else {
-        carrito.push({ nombre, precio: precioNumerico, img, bandwidth: true, cantidad: 1 });
+        carrito.push({ nombre, precio: precioNumerico, img, cantidad: 1 });
     }
      
     guardarCarritoEnStorage();
@@ -530,9 +529,8 @@ function configurarRestriccionFechas() {
     }
 }
 
-// --- SUBIR COMPRA A FIRESTORE Y REDIRIGIR A WHATSAPP (VALIDACIÓN AVANZADA) ---
+// --- SUBIR COMPRA A FIRESTORE Y REDIRIGIR A WHATSAPP ---
 async function finalizarCompraServidor() {
-    // 1. Validación de carrito vacío
     if (carrito.length === 0) {
         Swal.fire({
             title: 'Bolsa vacía 🥖',
@@ -551,7 +549,6 @@ async function finalizarCompraServidor() {
     inputFecha.classList.remove("error");
     selectHorario.classList.remove("error");
      
-    // 2. Validación de campos obligatorios
     if (!inputFecha.value) {
         inputFecha.classList.add("error");
         Swal.fire({
@@ -574,16 +571,14 @@ async function finalizarCompraServidor() {
         return;
     }
 
-    // 3. CONTROL HORARIO: Validación de hora de cierre para pedidos del mismo día
+    // CONTROL HORARIO: Validación de hora de cierre para pedidos del mismo día
     const fechaSeleccionada = new Date(inputFecha.value + 'T00:00:00');
     const hoy = new Date();
     
-    // Ponemos hoy a las 00:00:00 para comparar solo el calendario puro
     const hoyCero = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
     const seleccionCero = new Date(fechaSeleccionada.getFullYear(), fechaSeleccionada.getMonth(), fechaSeleccionada.getDate());
 
     if (seleccionCero.getTime() === hoyCero.getTime()) {
-        // El cliente seleccionó HOY, evaluamos si ya es después de las 8:00 PM (Hora 20)
         if (hoy.getHours() >= 20) {
             inputFecha.classList.add("error");
             Swal.fire({
@@ -595,7 +590,6 @@ async function finalizarCompraServidor() {
             return;
         }
     } else if (seleccionCero.getTime() < hoyCero.getTime()) {
-        // En caso de que se logre alterar el input HTML y poner una fecha pasada
         inputFecha.classList.add("error");
         Swal.fire({
             title: 'Fecha Inválida 📅❌',
@@ -606,7 +600,6 @@ async function finalizarCompraServidor() {
         return;
     }
 
-    // Si pasa todas las validaciones, arrancamos el loader en el botón
     const btnCheckout = document.querySelector('.btn-checkout');
     const textoOriginalBtn = btnCheckout.innerHTML;
     btnCheckout.disabled = true;
@@ -654,7 +647,6 @@ async function finalizarCompraServidor() {
     mostrarToast("🎉 ¡Pedido guardado! Redirigiendo a WhatsApp...");
     window.open(urlWa, '_blank');
 
-    // Resetear Carrito
     carrito = [];
     guardarCarritoEnStorage();
     inputFecha.value = "";
@@ -789,9 +781,9 @@ function configuracionEventosFormularios() {
 
 // --- EXPONER FUNCIONES AL ÁMBITO GLOBAL ---
 window.scrollAlCatalogo = scrollAlCatalogo;
-window.enfocarBuscador = enfaporBuscador; // Safe alias
 window.enfocarBuscador = enfocarBuscador;
 window.buscarProductos = buscarProductos;
+window.openSide = openSide;
 window.closeSide = closeSide;
 window.openAuth = openAuth;
 window.closeAuth = closeAuth;
