@@ -70,10 +70,38 @@
         <div class="side-body">
             <div class="perfil-datos-card">
                 <h4>Datos de Envío y Contacto</h4>
-                <p><strong>Nombre:</strong> <span id="perfNombre">Cargando...</span></p>
-                <p><strong>Correo:</strong> <span id="perfCorreo">Cargando...</span></p>
-                <p><strong>Teléfono:</strong> <span id="perfTelefono">Cargando...</span></p>
-                <p><strong>Dirección:</strong> <span id="perfDireccion">Cargando...</span></p>
+                
+                <div id="vistaLecturaPerfil">
+                    <p><strong>Nombre:</strong> <span id="perfNombre">Cargando...</span></p>
+                    <p><strong>Correo:</strong> <span id="perfCorreo">Cargando...</span></p>
+                    <p><strong>Teléfono:</strong> <span id="perfTelefono">Cargando...</span></p>
+                    <p><strong>Dirección:</strong> <span id="perfDireccion">Cargando...</span></p>
+                    <button class="btn-pedir" id="btnActivarEdicionPerf" onclick="conmutarModoEdicionPerfil(true)" style="margin-top: 10px; width: 100%; padding: 8px;">EDITAR MIS DATOS</button>
+                </div>
+
+                <div id="vistaFormularioPerfil" style="display: none;">
+                    <div style="margin-bottom: 8px;">
+                        <label style="font-size: 0.8rem; font-weight: bold; color: #8c5a2b;">Nombre(s):</label>
+                        <input type="text" id="editPerfNombre" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px;">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="font-size: 0.8rem; font-weight: bold; color: #8c5a2b;">Apellidos:</label>
+                        <input type="text" id="editPerfApellidos" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px;">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="font-size: 0.8rem; font-weight: bold; color: #8c5a2b;">Teléfono:</label>
+                        <input type="tel" id="editPerfTelefono" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px;">
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 0.8rem; font-weight: bold; color: #8c5a2b;">Dirección Completa:</label>
+                        <input type="text" id="editPerfDireccion" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-pedir" onclick="guardarDatosPerfilActualizados()" style="flex:1; padding: 8px; background: #27ae60;">GUARDAR</button>
+                        <button class="btn-pedir" onclick="conmutarModoEdicionPerfil(false)" style="flex:1; padding: 8px; background: #7c726a;">CANCELAR</button>
+                    </div>
+                </div>
             </div>
 
             <hr class="divisor-perfil">
@@ -430,3 +458,4 @@
     <script type="module" src="js/script.js"></script>
 </body>
 </html>
+	

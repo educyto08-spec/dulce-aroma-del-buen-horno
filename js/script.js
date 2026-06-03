@@ -7,7 +7,9 @@ import {
     getDocs, 
     query, 
     orderBy,
-    where 
+    where,
+    doc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { 
     getAuth, 
@@ -37,7 +39,8 @@ const auth = getAuth(app);
 let carrito = JSON.parse(localStorage.getItem('carrito_miga_gold')) || [];
 let usuarioLogueado = null; 
 let correoUsuarioLogueado = null; 
-let estrellasSeleccionadas = 5; // Calificación por defecto al abrir la web
+let estrellasSeleccionadas = 5; 
+let idDocumentoUsuarioFirestore = null; // Guardará el ID interno del registro para poder editarlo
 
 // --- FUNCIÓN HELPER: TOAST EMERGENTE ---
 function mostrarToast(mensaje) {
@@ -112,6 +115,7 @@ function openSide(id) {
     if (panel) {
         panel.classList.add('active');
         if (id === 'sideCuenta') {
+            conmutarModoEdicionPerfil(false); // Abrir siempre en modo lectura normal
             cargarPerfilUsuario();
         }
     }
@@ -294,6 +298,7 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         usuarioLogueado = null;
         correoUsuarioLogueado = null;
+        idDocumentoUsuarioFirestore = null;
     }
     actualizarInterfazUsuario();
 });
@@ -316,6 +321,7 @@ function actualizarInterfazUsuario() {
     }
 }
 
+// --- CARGAR DATOS DE PERFIL E HISTORIAL DESDE FIRESTORE ---
 async function cargarPerfilUsuario() {
     const user = auth.currentUser;
     if (!user) return;
@@ -327,16 +333,26 @@ async function cargarPerfilUsuario() {
         const userSnapshot = await getDocs(qUsuarios);
         
         if (!userSnapshot.empty) {
-            userSnapshot.forEach((doc) => {
-                const ud = doc.data();
+            userSnapshot.forEach((docSnap) => {
+                idDocumentoUsuarioFirestore = docSnap.id; // Almacenamos el ID de referencia del doc para hacer updates
+                const ud = docSnap.data();
+                
+                // Rellenar etiquetas de texto de lectura
                 document.getElementById('perfNombre').innerText = `${ud.nombre} ${ud.apellidos}`;
                 document.getElementById('perfTelefono').innerText = ud.telefono || "No registrado";
                 document.getElementById('perfDireccion').innerText = ud.direccion || "No registrada";
+                
+                // Rellenar de antemano el formulario de edición oculta
+                document.getElementById('editPerfNombre').value = ud.nombre || "";
+                document.getElementById('editPerfApellidos').value = ud.apellidos || "";
+                document.getElementById('editPerfTelefono').value = ud.telefono || "";
+                document.getElementById('editPerfDireccion').value = ud.direccion || "";
             });
         } else {
             document.getElementById('perfNombre').innerText = user.email.split('@')[0].toUpperCase();
             document.getElementById('perfTelefono').innerText = "No registrado";
             document.getElementById('perfDireccion').innerText = "No registrada";
+            idDocumentoUsuarioFirestore = null;
         }
 
         const contenedorHistorial = document.getElementById('contenedorHistorialPedidos');
@@ -393,6 +409,83 @@ async function cargarPerfilUsuario() {
         if (contenedorHistorial) {
             contenedorHistorial.innerHTML = '<p class="text-danger">Error al conectar con la base de datos de historial.</p>';
         }
+    }
+}
+
+// --- LÓGICA DE INTERFAZ EDITAR PERFIL ---
+function conmutarModoEdicionPerfil(activarFormulario) {
+    const divLectura = document.getElementById('vistaLecturaPerfil');
+    const divFormulario = document.getElementById('vistaFormularioPerfil');
+    
+    if (activarFormulario) {
+        // Validar que tengamos un ID del cliente en Firestore antes de permitir editar
+        if(!idDocumentoUsuarioFirestore) {
+            Swal.fire({
+                title: 'Perfil Invitado 🥐',
+                text: 'Los usuarios de respaldo predeterminados no pueden editar sus campos.',
+                icon: 'info',
+                confirmButtonColor: '#7a283c'
+            });
+            return;
+        }
+        divLectura.style.display = 'none';
+        divFormulario.style.display = 'block';
+    } else {
+        divLectura.style.display = 'block';
+        divFormulario.style.display = 'none';
+    }
+}
+
+async function guardarDatosPerfilActualizados() {
+    const nuevoNombre = document.getElementById('editPerfNombre').value.trim().toUpperCase();
+    const nuevosApellidos = document.getElementById('editPerfApellidos').value.trim().toUpperCase();
+    const nuevoTelefono = document.getElementById('editPerfTelefono').value.trim();
+    const nuevaDireccion = document.getElementById('editPerfDireccion').value.trim();
+
+    if (!nuevoNombre || !nuevosApellidos || !nuevoTelefono || !nuevaDireccion) {
+        Swal.fire({
+            title: 'Campos Vacíos ⚠️',
+            text: 'Todos los campos de tu dirección y contacto son obligatorios.',
+            icon: 'warning',
+            confirmButtonColor: '#7a283c'
+        });
+        return;
+    }
+
+    try {
+        // Instanciar referencia directa al documento del usuario usando su ID guardado
+        const usuarioRef = doc(db, "usuarios", idDocumentoUsuarioFirestore);
+        
+        // Ejecutar actualización parcial en la nube
+        await updateDoc(usuarioRef, {
+            nombre: nuevoNombre,
+            apellidos: nuevosApellidos,
+            telefono: nuevoTelefono,
+            direccion: nuevaDireccion
+        });
+
+        // Actualizar el estado global del usuario logueado en la cabecera
+        usuarioLogueado = nuevoNombre;
+        actualizarInterfazUsuario();
+
+        Swal.fire({
+            title: '¡Perfil Actualizado! 💾🥖',
+            text: 'Tus datos de envío y contacto han sido guardados permanentemente.',
+            icon: 'success',
+            confirmButtonColor: '#7a283c'
+        });
+
+        // Apagar el formulario y volver a cargar los textos
+        conmutarModoEdicionPerfil(false);
+        cargarPerfilUsuario();
+    } catch(err) {
+        console.error("Error al actualizar perfil en Firestore: ", err);
+        Swal.fire({
+            title: 'Error al Guardar ❌',
+            text: 'Ocurrió un problema de comunicación con el servidor. Inténtalo más tarde.',
+            icon: 'error',
+            confirmButtonColor: '#7a283c'
+        });
     }
 }
 
@@ -686,9 +779,9 @@ function seleccionarEstrellasVoto(valor) {
     estrellas.forEach(est => {
         const valEst = parseInt(est.dataset.valor);
         if (valEst <= estrellasSeleccionadas) {
-            est.style.color = "#f1c40f"; // Color Dorado
+            est.style.color = "#f1c40f"; 
         } else {
-            est.style.color = "#ddd"; // Gris apagado
+            est.style.color = "#ddd"; 
         }
     });
 }
@@ -706,7 +799,7 @@ async function enviarReseña() {
         await addDoc(collection(db, "reseñas"), {
             texto: texto,
             usuario: nombreUsuario,
-            calificacion: estrellasSeleccionadas, // Guardar número de estrellas
+            calificacion: estrellasSeleccionadas, 
             fecha: Date.now()
         });
 
@@ -718,7 +811,7 @@ async function enviarReseña() {
         });
         
         input.value = "";
-        seleccionarEstrellasVoto(5); // Resetear a 5 estrellas por defecto
+        seleccionarEstrellasVoto(5); 
         cargarReseñas();
     } catch (error) {
         console.error("Error al guardar en Firebase: ", error);
@@ -752,9 +845,8 @@ async function cargarReseñas() {
             const card = document.createElement("div");
             card.className = "reseña-card";
 
-            // Dibujar estrellas dinámicas según el voto del cliente
             let estrellasHTML = '<div class="stars-container" style="color: #f1c40f; font-size: 0.9rem; margin-bottom: 6px;">';
-            const numEstrellas = datos.calificacion || 5; // Respaldo por si hay reseñas viejas sin estrellas
+            const numEstrellas = datos.calificacion || 5; 
             for (let i = 1; i <= 5; i++) {
                 if (i <= numEstrellas) {
                     estrellasHTML += '<i class="fa-solid fa-star" style="margin-right:2px;"></i>';
@@ -776,7 +868,6 @@ async function cargarReseñas() {
 
             userDiv.appendChild(span);
             
-            // Inyectar estrellas, texto y usuario en la tarjeta
             card.innerHTML = estrellasHTML;
             card.appendChild(p);
             card.appendChild(userDiv);
@@ -793,7 +884,7 @@ window.onload = () => {
     configurarRestriccionFechas();
     actualidorContadorGlobal();
     actualizarCarritoVisual();
-    seleccionarEstrellasVoto(5); // Iniciar pintando 5 estrellas por defecto
+    seleccionarEstrellasVoto(5); 
     cargarReseñas();
 };
 
@@ -831,3 +922,5 @@ window.seleccionarEstrellasVoto = seleccionarEstrellasVoto;
 window.enviarReseña = enviarReseña;
 window.cargarReseñas = cargarReseñas;
 window.cargarPerfilUsuario = cargarPerfilUsuario;
+window.conmutarModoEdicionPerfil = conmutarModoEdicionPerfil;
+window.guardarDatosPerfilActualizados = guardarDatosPerfilActualizados;
