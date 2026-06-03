@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DULCE AROMA DEL BUEN HORNO - Panadería Artesanal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link class="favicon" rel="icon" href="img/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-bar-content">
+            <span><i class="fa-solid fa-store"></i> HORNEADO DIARIO | RECOGE EN TIENDA</span>
+        </div>
+    </div>
+
+    <!-- PANEL LATERAL DEL CARRITO -->
+    <div id="cartSidebar" class="side-panel">
+        <div class="side-header">
+            <div>
+                <h2>MI CARRITO</h2>
+                <span id="btnClearCart" onclick="vaciarCarritoCompleto()">Vaciar bolsa</span>
+            </div>
+            <span class="close-side" onclick="closeSide('cartSidebar')">&times;</span>
+        </div>
+         
+        <div id="cartItemsContainer" class="side-body">
+            <p class="empty-msg">Tu carrito está vacío</p>
+        </div>
+
+        <div class="seccion-logistica-pedido" id="bloqueLogisticaCart">
+            <h3>Programar Entrega / Recogida</h3>
+            <div class="control-logistica">
+                <label for="fechaEntrega"><i class="fa-regular fa-calendar"></i> ¿Qué día pasas?</label>
+                <input type="date" id="fechaEntrega">
+            </div>
+            <div class="control-logistica">
+                <label for="horarioEntrega"><i class="fa-regular fa-clock"></i> Rango de horario</label>
+                <select id="horarioEntrega">
+                    <option value="">Selecciona un horario...</option>
+                    <option value="07:00 AM - 09:00 AM">07:00 AM - 09:00 AM (Pan Recién Horneado)</option>
+                    <option value="09:00 AM - 11:00 AM">09:00 AM - 11:00 AM</option>
+                    <option value="11:00 AM - 01:00 PM">11:00 AM - 01:00 PM</option>
+                    <option value="04:00 PM - 06:00 PM">04:00 PM - 06:00 PM (Horneada de la Tarde)</option>
+                    <option value="06:00 PM - 08:00 PM">06:00 PM - 08:00 PM</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="side-footer">
+            <div class="total-container">
+                <span>TOTAL:</span>
+                <span id="cartTotalText">$0.00</span>
+            </div>
+            <button class="btn-checkout" onclick="finalizarCompraServidor()">FINALIZAR COMPRA</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE AUTENTICACIÓN LOCAL -->
+    <div id="modalAuth" class="modal-auth">
+        <div class="auth-content">
+            <span class="close-auth" onclick="closeAuth()">&times;</span>
+            <div class="auth-header">
+                <button id="btnTabLogin" class="auth-tab active" onclick="switchTab('login')">INICIAR SESIÓN</button>
+                <button id="btnTabRegister" class="auth-tab" onclick="switchTab('register')">REGISTRARSE</button>
+            </div>
+             
+            <!-- Formulario Login -->
+            <form id="formLogin" class="auth-form">
+                <div class="auth-inputs">
+                    <input type="email" id="loginCorreo" placeholder="Correo electrónico" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                        <i class="fa-solid fa-eye id-toggle" onclick="togglePasswordVisibility('loginPassword', this)"></i>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit-auth">ENTRAR</button>
+            </form>
+
+            <!-- Formulario Registro -->
+            <form id="formRegister" class="auth-form" style="display: none;">
+                <div class="auth-inputs">
+                    <input type="text" id="regNombre" placeholder="Nombre(s)" required>
+                    <input type="text" id="regApellidos" placeholder="Apellidos" required>
+                    <input type="email" id="regCorreo" placeholder="Correo electrónico" required>
+                    <input type="tel" id="regTelefono" placeholder="Teléfono" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="regPassword" placeholder="Contraseña" required>
+                        <i class="fa-solid fa-eye id-toggle" onclick="togglePasswordVisibility('regPassword', this)"></i>
+                    </div>
+                    <input type="text" id="regDireccion" placeholder="Dirección de envío completa" required>
+                </div>
+                <button type="submit" class="btn-submit-auth">CREAR CUENTA</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ENCABEZADO -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">DULCE AROMA DEL BUEN HORNO</div>
+             
+            <nav class="nav-links">
+                <a href="#inicio">NOSOTROS</a>
+                <a href="#productos">PANES</a>
+                <a href="#promociones">PROMOCIONES</a>
+                <a href="#proximamente">PRÓXIMAMENTE</a>
+                <a href="#reseñas">OPINIONES</a>
+            </nav>
+
+            <div class="header-icons">
+                <a href="javascript:void(0)" onclick="enfocarBuscador()" class="icon-link"><i class="fa-solid fa-magnifying-glass"></i></a>
+                 
+                <div id="userSessionContainer" style="display: inline-block;">
+                    <a href="javascript:void(0)" onclick="openAuth()" class="icon-link" id="userIconAuth"><i class="fa-regular fa-user"></i></a>
+                </div>
+
+                <a href="javascript:void(0)" id="cartNavButton" onclick="openSide('cartSidebar')" class="icon-link cart-icon-wrapper">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cartCount" class="badge">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="inicio" class="hero">
+        <div class="hero-content">
+            <h2>El arte del pan en cada bocado</h2>
+            <p>Transformamos ingredientes selectos en experiencias crujientes y doradas. Elaborado con dedicación tradicional, horneado con pasión cada mañana y entregado directo a tu mesa.</p>
+            <button onclick="scrollAlCatalogo()">ORDENA AQUÍ</button>
+        </div>
+    </section>
+
+    <!-- SECCIÓN PROMOCIONES -->
+    <section id="promociones" class="seccion-promociones">
+        <h3>Promociones Exclusivas</h3>
+        <p class="promo-subtitle">Aprovecha nuestras ofertas especiales de la semana</p>
+        <div class="grid-promociones">
+            <div class="card-promocion">
+                <div class="promo-badge">2X1</div>
+                <h4>Martes de Donas</h4>
+                <p>En la compra de cualquier dona de chocolate o azúcar, ¡llévate la segunda completamente gratis!</p>
+            </div>
+            <div class="card-promocion">
+                <div class="promo-badge">COMBO</div>
+                <h4>Paquete Familiar</h4>
+                <p>Llévate nuestro Combo especial con un 15% de descuento directo en tu pedido seleccionándolo en el catálogo.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN CATÁLOGO DE PRODUCTOS -->
+    <section id="productos" class="productos-seccion">
+        <div class="breadcrumb">
+            <span>INICIO</span> &gt; <span>PRODUCTOS</span> &gt; <span class="active">TODOS</span>
+        </div>
+
+        <div class="contenedor-buscador-pan">
+            <i class="fa-solid fa-magnifying-glass icono-busqueda"></i>
+            <input type="text" id="inputBuscador" onkeyup="buscarProductos()" placeholder="Buscar tu pan favorito por nombre...">
+        </div>
+
+        <div class="categorias-bar">
+            <button class="btn-categoria active" onclick="filtrarCategoria('todos', event)">TODOS</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('combos', event)">COMBOS</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('pan-dulce', event)">PAN DULCE</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('donas', event)">DONAS</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('cremas', event)">CREMAS</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('pasteles', event)">PASTELES</button>
+            <button class="btn-categoria" onclick="filtrarCategoria('tradicional', event)">TRADICIONAL</button>
+        </div>
+
+        <div class="grid-productos">
+            <div class="item-producto" data-categoria="combos">
+                <div class="img-wrapper">
+                    <span class="badge-producto promo">AHORRO</span>
+                    <img src="img/Combo.jpeg" alt="Combo" onerror="this.style.display='none';">
+                </div>
+                <h4>Combo</h4>
+                <p class="descripcion">Variedad selecta para compartir.</p>
+                <p class="precio"> $60.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Combo', 60.00, 'img/Combo.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pan-dulce">
+                <div class="img-wrapper">
+                    <span class="badge-producto popular">MÁS VENDIDO</span>
+                    <img src="img/Roles de canela.jpeg" alt="Roles de canela" onerror="this.style.display='none';">
+                </div>
+                <h4>Roles de Canela</h4>
+                <p class="descripcion">Esponjosos con glaseado y canela premium.</p>
+                <p class="precio">$ 15.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Roles de Canela', 15.00, 'img/Roles de canela.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pan-dulce">
+                <div class="img-wrapper"><img src="img/Ojo.jpeg" alt="Ojo" onerror="this.style.display='none';"></div>
+                <h4>Ojo</h4>
+                <p class="descripcion">Tradicional pan dulce con textura suave.</p>
+                <p class="precio"> $12.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Ojo', 12.00, 'img/Ojo.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="cremas">
+                <div class="img-wrapper">
+                    <span class="badge-producto popular">FAVORITO</span>
+                    <img src="img/Barquillos.jpeg" alt="Barquillos" onerror="this.style.display='none';">
+                </div>
+                <h4>Barquillos</h4>
+                <p class="descripcion">Hojaldre relleno de crema pastelera.</p>
+                <p class="precio">$ 17.50</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Barquillos', 17.50, 'img/Barquillos.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pasteles">
+                <div class="img-wrapper"><img src="img/Niño envuelto.jpeg" alt="Niño envuelto" onerror="this.style.display='none';"></div>
+                <h4>Niño Envuelto</h4>
+                <p class="descripcion">Bizcocho suave relleno de mermelada.</p>
+                <p class="precio"> $18.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Niño Envuelto', 18.00, 'img/Niño envuelto.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pan-dulce">
+                <div class="img-wrapper"><img src="img/Volcán grande.jpeg" alt="Volcán grande" onerror="this.style.display='none';"></div>
+                <h4>Volcán Grande</h4>
+                <p class="descripcion">Relleno de chocolate intenso.</p>
+                <p class="precio">$ 22.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Volcán Grande', 22.00, 'img/Volcán grande.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="donas">
+                <div class="img-wrapper">
+                    <span class="badge-producto promo">2X1 MARTES</span>
+                    <img src="img/Donas de chocolate.jpeg" alt="Donas de chocolate" onerror="this.style.display='none';">
+                </div>
+                <h4>Donas de Chocolate</h4>
+                <p class="descripcion">Cobertura de chocolate real.</p>
+                <p class="precio"> $11.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Donas de Chocolate', 11.00, 'img/Donas de chocolate.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="tradicional">
+                <div class="img-wrapper"><img src="img/Empanadas.jpeg" alt="Empanadas" onerror="this.style.display='none';"></div>
+                <h4>Empanadas</h4>
+                <p class="descripcion">Rellenas de cajeta o mermelada.</p>
+                <p class="precio">$ 20.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Empanadas', 20.00, 'img/Empanadas.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="donas">
+                <div class="img-wrapper">
+                    <span class="badge-producto promo">2X1 MARTES</span>
+                    <img src="img/Donas de azúcar.jpeg" alt="Donas de azúcar" onerror="this.style.display='none';">
+                </div>
+                <h4>Donas de Azúcar</h4>
+                <p class="descripcion">Clásicas y muy esponjosas.</p>
+                <p class="precio"> $11.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Donas de Azúcar', 11.00, 'img/Donas de azúcar.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="tradicional">
+                <div class="img-wrapper"><img src="img/Pelona.jpeg" alt="Pelona" onerror="this.style.display='none';"></div>
+                <h4>Pelona</h4>
+                <p class="descripcion">Pan dulce tradicional mexicano.</p>
+                <p class="precio">$ 10.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Pelona', 10.00, 'img/Pelona.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="tradicional">
+                <div class="img-wrapper"><img src="img/Bisquet.jpeg" alt="Bisquet" onerror="this.style.display='none';"></div>
+                <h4>Bisquet</h4>
+                <p class="descripcion">Con mantequilla pura, ideal para café.</p>
+                <p class="precio"> $15.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Bisquet', 15.00, 'img/Bisquet.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="tradicional">
+                <div class="img-wrapper"><img src="img/Cocada.jpeg" alt="Cocada" onerror="this.style.display='none';"></div>
+                <h4>Cocada</h4>
+                <p class="descripcion">Elaborada con coco fresco.</p>
+                <p class="precio">$ 13.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Cocada', 13.00, 'img/Cocada.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pan-dulce">
+                <div class="img-wrapper"><img src="img/Gragea.jpeg" alt="Gragea" onerror="this.style.display='none';"></div>
+                <h4>Gragea</h4>
+                <p class="descripcion">Decorada con colores festivos.</p>
+                <p class="precio"> $12.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Gragea', 12.00, 'img/Gragea.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pasteles">
+                <div class="img-wrapper"><img src="img/Pan de pastel.jpeg" alt="Pan de pastel" onerror="this.style.display='none';"></div>
+                <h4>Pan de Pastel</h4>
+                <p class="descripcion">Sabor casero de fiesta.</p>
+                <p class="precio">$ 19.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Pan de Pastel', 19.00, 'img/Pan de pastel.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pan-dulce">
+                <div class="img-wrapper"><img src="img/Chino.jpeg" alt="Chino" onerror="this.style.display='none';"></div>
+                <h4>Chino</h4>
+                <p class="descripcion">Pan dulce característico.</p>
+                <p class="precio"> $12.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Chino', 12.00, 'img/Chino.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="tradicional">
+                <div class="img-wrapper">
+                    <span class="badge-producto especial">EDICIÓN ESPECIAL</span>
+                    <img src="img/Pan de muerto relleno de Nutella.jpeg" alt="Pan de muerto relleno de Nutella" onerror="this.style.display='none';">
+                </div>
+                <h4>Pan de muerto con Nutella</h4>
+                <p class="descripcion">Edición especial con Nutella.</p>
+                <p class="precio">$ 35.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Pan de muerto con Nutella', 35.00, 'img/Pan de muerto relleno de Nutella.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="tradicional">
+                <div class="img-wrapper"><img src="img/Budín.jpeg" alt="Budín" onerror="this.style.display='none';"></div>
+                <h4>Budín</h4>
+                <p class="descripcion">Receta artesanal tradicional.</p>
+                <p class="precio"> $14.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Budín', 14.00, 'img/Budín.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pan-dulce">
+                <div class="img-wrapper"><img src="img/Cuernitos.jpeg" alt="Cuernitos" onerror="this.style.display='none';"></div>
+                <h4>Cuernitos</h4>
+                <p class="descripcion">Hojaldrados y ligeros.</p>
+                <p class="precio">$ 11.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Cuernitos', 11.00, 'img/Cuernitos.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pasteles">
+                <div class="img-wrapper"><img src="img/Pan de pastel marmoleado.jpeg" alt="Pan de pastel marmoleado" onerror="this.style.display='none';"></div>
+                <h4>Pan de pastel marmoleado</h4>
+                <p class="descripcion">Vainilla y chocolate en equilibrio.</p>
+                <p class="precio"> $18.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Pan de pastel marmoleado', 18.00, 'img/Pan de pastel marmoleado.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pan-dulce">
+                <div class="img-wrapper"><img src="img/Domino.jpeg" alt="Domino" onerror="this.style.display='none';"></div>
+                <h4>Domino</h4>
+                <p class="descripcion">Pan de dos colores único.</p>
+                <p class="precio"> $12.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Domino', 12.00, 'img/Domino.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+
+            <div class="item-producto" data-categoria="pan-dulce">
+                <div class="img-wrapper"><img src="img/Puritos.jpeg" alt="Puritos" onerror="this.style.display='none';"></div>
+                <h4>Puritos</h4>
+                <p class="descripcion">Antojo perfecto para el café.</p>
+                <p class="precio">$10.00</p>
+                <button class="btn-pedir" onclick="agregarAlCarrito('Puritos', 10.00, 'img/Puritos.jpeg')">AGREGAR AL CARRITO</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN PRÓXIMAMENTE -->
+    <section id="proximamente" class="seccion-proximamente">
+        <h3>Próximamente en Tienda</h3>
+        <p class="prox-subtitle">Nuestras próximas creaciones en el horno artesanal</p>
+        <div class="grid-proximamente">
+            <div class="item-prox">
+                <div class="prox-img-placeholder"><i class="fa-solid fa-cookie-bite"></i></div>
+                <h4>Conchas de Matcha</h4>
+                <p>La receta clásica mexicana fusionada con auténtico té verde oriental.</p>
+            </div>
+            <div class="item-prox">
+                <div class="prox-img-placeholder"><i class="fa-solid fa-cake-candles"></i></div>
+                <h4>Tarta de Frutos del Bosque</h4>
+                <p>Base crujiente sablé rellena de crema pastelera ligera y selección de bayas silvestres.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN RESEÑAS -->
+    <section id="reseñas" class="seccion-reseñas">
+        <h3>Lo que opinan nuestros clientes</h3>
+        <p class="reseñas-subtitle">La frescura y el sabor artesanal respaldados por nuestra comunidad.</p>
+        <div id="lista-reseñas" class="grid-reseñas">
+            <!-- Las reseñas dinámicas se cargarán aquí desde Cloud Firestore -->
+        </div>
+         
+        <div class="form-reseña-contenedor">
+            <textarea id="texto-reseña" placeholder="Escribe tu opinión sobre nuestro pan artesanal..."></textarea>
+            <button onclick="enviarReseña()">Publicar Opinión</button>
+        </div>
+    </section>
+
+    <!-- PIE DE PÁGINA -->
+    <footer>
+        <div class="redes-sociales">
+            <a href="https://wa.me/529223773794" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61590232454249" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/dulcearoma_delbuenhorno" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p class="footer-location">📍 Zaragoza</p>
+        <p class="footer-copyright">&copy; 2026 Panadería LA MIGA DORADA. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- CAMBIO CLAVE: Agregado type="module" para soportar los imports de Firebase -->
+    <script type="module" src="js/script.js"></script>
+</body>
+</html>
