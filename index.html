@@ -367,7 +367,7 @@
             <div class="item-producto" data-categoria="pan-dulce">
                 <div class="img-wrapper"><img src="img/Domino.jpeg" alt="Domino" onerror="this.style.display='none';"></div>
                 <h4>Domino</h4>
-                <p class="descripcion">Pan de dos colores único.</p>
+                <p class="descripcion">Pan de dos colores unique.</p>
                 <p class="precio"> $12.00</p>
                 <button class="btn-pedir" onclick="agregarAlCarrito('Domino', 12.00, 'img/Domino.jpeg')">AGREGAR AL CARRITO</button>
             </div>
@@ -405,6 +405,13 @@
         <div id="lista-reseñas" class="grid-reseñas"></div>
          
         <div class="form-reseña-contenedor">
+            <div class="selector-estrellas-calif" style="margin-bottom: 12px; font-size: 1.4rem; color: #ddd; display: flex; gap: 5px; justify-content: center;">
+                <i class="fa-solid fa-star estrella-voto" data-valor="1" onclick="seleccionarEstrellasVoto(1)" style="cursor: pointer; transition: color 0.2s;"></i>
+                <i class="fa-solid fa-star estrella-voto" data-valor="2" onclick="seleccionarEstrellasVoto(2)" style="cursor: pointer; transition: color 0.2s;"></i>
+                <i class="fa-solid fa-star estrella-voto" data-valor="3" onclick="seleccionarEstrellasVoto(3)" style="cursor: pointer; transition: color 0.2s;"></i>
+                <i class="fa-solid fa-star estrella-voto" data-valor="4" onclick="seleccionarEstrellasVoto(4)" style="cursor: pointer; transition: color 0.2s;"></i>
+                <i class="fa-solid fa-star estrella-voto" data-valor="5" onclick="seleccionarEstrellasVoto(5)" style="cursor: pointer; transition: color 0.2s;"></i>
+            </div>
             <textarea id="texto-reseña" placeholder="Escribe tu opinión sobre nuestro pan artesanal..."></textarea>
             <button onclick="enviarReseña()">Publicar Opinión</button>
         </div>
@@ -418,7 +425,7 @@
         </div>
         <p class="footer-location">📍 Zaragoza</p>
         <p class="footer-copyright">&copy; 2026 DULCE AROMA DEL BUEN HORNO. Todos los derechos reservados.</p>
-    </header>
+    </footer>
 
     <script type="module" src="js/script.js"></script>
 </body>

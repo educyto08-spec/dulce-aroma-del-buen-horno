@@ -37,6 +37,7 @@ const auth = getAuth(app);
 let carrito = JSON.parse(localStorage.getItem('carrito_miga_gold')) || [];
 let usuarioLogueado = null; 
 let correoUsuarioLogueado = null; 
+let estrellasSeleccionadas = 5; // Calificación por defecto al abrir la web
 
 // --- FUNCIÓN HELPER: TOAST EMERGENTE ---
 function mostrarToast(mensaje) {
@@ -130,7 +131,6 @@ function closeAuth() {
     document.getElementById('modalAuth').style.display = 'none';
 }
 
-// --- CAMBIO DE PESTAÑAS (LOGIN / REGISTRO) ---
 function switchTab(type) {
     const loginForm = document.getElementById('formLogin');
     const registerForm = document.getElementById('formRegister');
@@ -571,7 +571,6 @@ async function finalizarCompraServidor() {
         return;
     }
 
-    // CONTROL HORARIO: Validación de hora de cierre para pedidos del mismo día
     const fechaSeleccionada = new Date(inputFecha.value + 'T00:00:00');
     const hoy = new Date();
     
@@ -680,7 +679,20 @@ function filtrarCategoria(categoria, e) {
     });
 }
 
-// --- GESTIÓN DE RESEÑAS CON CLOUD FIRESTORE REAL ---
+// --- GESTIÓN DE RESEÑAS CON CLOUD FIRESTORE REAL Y ESTRELLAS INTERACTIVAS ---
+function seleccionarEstrellasVoto(valor) {
+    estrellasSeleccionadas = parseInt(valor);
+    const estrellas = document.querySelectorAll(".estrella-voto");
+    estrellas.forEach(est => {
+        const valEst = parseInt(est.dataset.valor);
+        if (valEst <= estrellasSeleccionadas) {
+            est.style.color = "#f1c40f"; // Color Dorado
+        } else {
+            est.style.color = "#ddd"; // Gris apagado
+        }
+    });
+}
+
 async function enviarReseña() {
     const input = document.getElementById("texto-reseña");
     if (!input) return;
@@ -694,17 +706,19 @@ async function enviarReseña() {
         await addDoc(collection(db, "reseñas"), {
             texto: texto,
             usuario: nombreUsuario,
+            calificacion: estrellasSeleccionadas, // Guardar número de estrellas
             fecha: Date.now()
         });
 
         Swal.fire({
             title: '¡Gracias por tu opinión! ✨',
-            text: 'Tu reseña ha sido guardada de forma permanente en nuestra comunidad.',
+            text: 'Tu reseña y calificación han sido guardadas de forma permanente.',
             icon: 'success',
             confirmButtonColor: '#7a283c'
         });
         
         input.value = "";
+        seleccionarEstrellasVoto(5); // Resetear a 5 estrellas por defecto
         cargarReseñas();
     } catch (error) {
         console.error("Error al guardar en Firebase: ", error);
@@ -738,6 +752,18 @@ async function cargarReseñas() {
             const card = document.createElement("div");
             card.className = "reseña-card";
 
+            // Dibujar estrellas dinámicas según el voto del cliente
+            let estrellasHTML = '<div class="stars-container" style="color: #f1c40f; font-size: 0.9rem; margin-bottom: 6px;">';
+            const numEstrellas = datos.calificacion || 5; // Respaldo por si hay reseñas viejas sin estrellas
+            for (let i = 1; i <= 5; i++) {
+                if (i <= numEstrellas) {
+                    estrellasHTML += '<i class="fa-solid fa-star" style="margin-right:2px;"></i>';
+                } else {
+                    estrellasHTML += '<i class="fa-regular fa-star" style="color: #ddd; margin-right:2px;"></i>';
+                }
+            }
+            estrellasHTML += '</div>';
+
             const p = document.createElement("p");
             p.textContent = `"${datos.texto}"`;
 
@@ -749,6 +775,9 @@ async function cargarReseñas() {
             span.textContent = datos.usuario;
 
             userDiv.appendChild(span);
+            
+            // Inyectar estrellas, texto y usuario en la tarjeta
+            card.innerHTML = estrellasHTML;
             card.appendChild(p);
             card.appendChild(userDiv);
              
@@ -764,6 +793,7 @@ window.onload = () => {
     configurarRestriccionFechas();
     actualidorContadorGlobal();
     actualizarCarritoVisual();
+    seleccionarEstrellasVoto(5); // Iniciar pintando 5 estrellas por defecto
     cargarReseñas();
 };
 
@@ -797,6 +827,7 @@ window.cambiarCantidad = cambiarCantidad;
 window.vaciarCarritoCompleto = vaciarCarritoCompleto;
 window.finalizarCompraServidor = finalizarCompraServidor;
 window.filtrarCategoria = filtrarCategoria;
+window.seleccionarEstrellasVoto = seleccionarEstrellasVoto;
 window.enviarReseña = enviarReseña;
 window.cargarReseñas = cargarReseñas;
 window.cargarPerfilUsuario = cargarPerfilUsuario;
