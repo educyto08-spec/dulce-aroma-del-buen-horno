@@ -35,8 +35,8 @@ const auth = getAuth(app);
 
 // --- ESTADO GLOBAL ---
 let carrito = JSON.parse(localStorage.getItem('carrito_miga_gold')) || [];
-let usuarioLogueado = null; // Guardará el nombre del usuario activo
-let correoUsuarioLogueado = null; // Correo exacto para filtrar el historial de pedidos
+let usuarioLogueado = null; 
+let correoUsuarioLogueado = null; 
 
 // --- FUNCIÓN HELPER: TOAST EMERGENTE ---
 function mostrarToast(mensaje) {
@@ -110,14 +110,12 @@ function openSide(id) {
     const panel = document.getElementById(id);
     if (panel) {
         panel.classList.add('active');
-        // Si el usuario abre el panel de su cuenta, recargar los datos e historial en tiempo real
         if (id === 'sideCuenta') {
             cargarPerfilUsuario();
         }
     }
 }
 
-// Exponer openSide globalmente para arreglar el enlace de "HOLA, USUARIO"
 window.openSide = openSide;
 
 function closeSide(id) {
@@ -125,7 +123,7 @@ function closeSide(id) {
     if (panel) panel.classList.remove('active');
 }
 
-// --- SISTEMA DE AUTENTICACIÓN (FIREBASE AUTH & FIRESTORE COOPERATIVOS) ---
+// --- SISTEMA DE AUTENTICACIÓN ---
 function openAuth() {
     document.getElementById('modalAuth').style.display = 'flex';
 }
@@ -164,7 +162,6 @@ function togglePasswordVisibility(inputId, icon) {
     }
 }
 
-// 1. Manejo del Inicio de Sesión Real (Optimizado con SweetAlert y Loaders)
 async function handleLogin(event) {
     event.preventDefault();
     const correo = document.getElementById('loginCorreo').value.trim();
@@ -208,7 +205,6 @@ async function handleLogin(event) {
     }
 }
 
-// 2. Manejo del Registro Real de Usuarios (Optimizado con SweetAlert y Loaders)
 async function handleRegister(event) {
     event.preventDefault();
     const nombre = document.getElementById('regNombre').value.trim().toUpperCase();
@@ -268,7 +264,6 @@ async function handleRegister(event) {
     }
 }
 
-// 3. Cierre de Sesión Real
 async function cerrarSesionUsuario() {
     try {
         await signOut(auth);
@@ -279,13 +274,12 @@ async function cerrarSesionUsuario() {
     }
 }
 
-// 4. Observador de Estado de Autenticación Activo
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         correoUsuarioLogueado = user.email;
         try {
             const querySnapshot = await getDocs(collection(db, "usuarios"));
-            let nombreMostrar = user.email.split('@')[0].toUpperCase(); // Respaldo
+            let nombreMostrar = user.email.split('@')[0].toUpperCase(); 
             
             querySnapshot.forEach((doc) => {
                 const ud = doc.data();
@@ -323,7 +317,6 @@ function actualizarInterfazUsuario() {
     }
 }
 
-// --- CARGAR DATOS DE PERFIL E HISTORIAL DE PEDIDOS DESDE FIRESTORE ---
 async function cargarPerfilUsuario() {
     const user = auth.currentUser;
     if (!user) return;
@@ -331,7 +324,6 @@ async function cargarPerfilUsuario() {
     document.getElementById('perfCorreo').innerText = user.email;
 
     try {
-        // 1. Obtener Datos Extendidos del Perfil del Cliente
         const qUsuarios = query(collection(db, "usuarios"), where("uid", "==", user.uid));
         const userSnapshot = await getDocs(qUsuarios);
         
@@ -348,7 +340,6 @@ async function cargarPerfilUsuario() {
             document.getElementById('perfDireccion').innerText = "No registrada";
         }
 
-        // 2. Obtener Historial de Pedidos Reales del Cliente Filtrado por ID de Cliente
         const contenedorHistorial = document.getElementById('contenedorHistorialPedidos');
         contenedorHistorial.innerHTML = '<p class="text-muted">🔄 Consultando historial en la nube...</p>';
 
@@ -365,7 +356,7 @@ async function cargarPerfilUsuario() {
             return;
         }
 
-        contenedorHistorial.innerHTML = ""; // Limpiar el cargando
+        contenedorHistorial.innerHTML = ""; 
 
         pedidosSnapshot.forEach((doc) => {
             const pedido = doc.data();
@@ -414,7 +405,7 @@ function agregarAlCarrito(nombre, precio, img) {
     if (itemExistente) {
         itemExistente.cantidad += 1;
     } else {
-        carrito.push({ nombre, precio: precioNumerico, img, cantidad: 1 });
+        carrito.push({ nombre, precio: precioNumerico, img, bandwidth: true, cantidad: 1 });
     }
      
     guardarCarritoEnStorage();
@@ -479,7 +470,6 @@ function actualizarCarritoVisual() {
 }
 
 function cambiarCantidad(index, cambio) {
-    carrito[index].grid = true; 
     carrito[index].cantidad += cambio;
      
     if (carrito[index].cantidad <= 0) {
@@ -491,7 +481,6 @@ function cambiarCantidad(index, cambio) {
     actualizarCarritoVisual();
 }
 
-// Vaciar Carrito optimizado con SweetAlert2
 function vaciarCarritoCompleto() {
     if (carrito.length === 0) return;
      
@@ -541,8 +530,9 @@ function configurarRestriccionFechas() {
     }
 }
 
-// --- SUBIR COMPRA A FIRESTORE Y REDIRIGIR A WHATSAPP ---
+// --- SUBIR COMPRA A FIRESTORE Y REDIRIGIR A WHATSAPP (VALIDACIÓN AVANZADA) ---
 async function finalizarCompraServidor() {
+    // 1. Validación de carrito vacío
     if (carrito.length === 0) {
         Swal.fire({
             title: 'Bolsa vacía 🥖',
@@ -561,6 +551,7 @@ async function finalizarCompraServidor() {
     inputFecha.classList.remove("error");
     selectHorario.classList.remove("error");
      
+    // 2. Validación de campos obligatorios
     if (!inputFecha.value) {
         inputFecha.classList.add("error");
         Swal.fire({
@@ -583,7 +574,39 @@ async function finalizarCompraServidor() {
         return;
     }
 
-    // Capturar botón de checkout para loader
+    // 3. CONTROL HORARIO: Validación de hora de cierre para pedidos del mismo día
+    const fechaSeleccionada = new Date(inputFecha.value + 'T00:00:00');
+    const hoy = new Date();
+    
+    // Ponemos hoy a las 00:00:00 para comparar solo el calendario puro
+    const hoyCero = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    const seleccionCero = new Date(fechaSeleccionada.getFullYear(), fechaSeleccionada.getMonth(), fechaSeleccionada.getDate());
+
+    if (seleccionCero.getTime() === hoyCero.getTime()) {
+        // El cliente seleccionó HOY, evaluamos si ya es después de las 8:00 PM (Hora 20)
+        if (hoy.getHours() >= 20) {
+            inputFecha.classList.add("error");
+            Swal.fire({
+                title: 'Horno Apagado por Hoy 🥐💤',
+                text: 'Nuestra panadería cierra a las 8:00 PM. Por favor, programa tu recogida para el día de mañana.',
+                icon: 'error',
+                confirmButtonColor: '#7a283c'
+            });
+            return;
+        }
+    } else if (seleccionCero.getTime() < hoyCero.getTime()) {
+        // En caso de que se logre alterar el input HTML y poner una fecha pasada
+        inputFecha.classList.add("error");
+        Swal.fire({
+            title: 'Fecha Inválida 📅❌',
+            text: 'No es posible agendar una recogida para una fecha que ya pasó.',
+            icon: 'error',
+            confirmButtonColor: '#7a283c'
+        });
+        return;
+    }
+
+    // Si pasa todas las validaciones, arrancamos el loader en el botón
     const btnCheckout = document.querySelector('.btn-checkout');
     const textoOriginalBtn = btnCheckout.innerHTML;
     btnCheckout.disabled = true;
@@ -766,6 +789,7 @@ function configuracionEventosFormularios() {
 
 // --- EXPONER FUNCIONES AL ÁMBITO GLOBAL ---
 window.scrollAlCatalogo = scrollAlCatalogo;
+window.enfocarBuscador = enfaporBuscador; // Safe alias
 window.enfocarBuscador = enfocarBuscador;
 window.buscarProductos = buscarProductos;
 window.closeSide = closeSide;
