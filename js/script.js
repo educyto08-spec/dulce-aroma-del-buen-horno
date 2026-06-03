@@ -117,6 +117,9 @@ function openSide(id) {
     }
 }
 
+// Exponer openSide globalmente para arreglar el enlace de "HOLA, USUARIO"
+window.openSide = openSide;
+
 function closeSide(id) {
     const panel = document.getElementById(id);
     if (panel) panel.classList.remove('active');
@@ -161,28 +164,51 @@ function togglePasswordVisibility(inputId, icon) {
     }
 }
 
-// 1. Manejo del Inicio de Sesión Real
+// 1. Manejo del Inicio de Sesión Real (Optimizado con SweetAlert y Loaders)
 async function handleLogin(event) {
     event.preventDefault();
     const correo = document.getElementById('loginCorreo').value.trim();
     const contrasena = document.getElementById('loginPassword').value;
 
+    const btnSubmit = event.target.querySelector('.btn-submit-auth');
+    const textoOriginal = btnSubmit.innerHTML;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verificando...`;
+
     try {
         await signInWithEmailAndPassword(auth, correo, contrasena);
         closeAuth();
         document.getElementById('formLogin').reset();
-        mostrarToast("¡Sesión iniciada correctamente! 🥐");
+        
+        Swal.fire({
+            title: '¡Bienvenido de vuelta! 🥐',
+            text: 'Tu sesión ha iniciado correctamente.',
+            icon: 'success',
+            confirmButtonColor: '#7a283c',
+            timer: 2000,
+            timerProgressBar: true
+        });
     } catch (error) {
         console.error("Error al iniciar sesión: ", error.code);
+        let mensajeError = "Error al iniciar sesión. Inténtalo de nuevo más tarde.";
+        
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-            alert("El correo o la contraseña son incorrectos.");
-        } else {
-            alert("Error al iniciar sesión. Inténtalo de nuevo más tarde.");
+            mensajeError = "El correo o la contraseña que ingresaste son incorrectos.";
         }
+        
+        Swal.fire({
+            title: '¡Oh no! 🥖',
+            text: mensajeError,
+            icon: 'error',
+            confirmButtonColor: '#7a283c'
+        });
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = textoOriginal;
     }
 }
 
-// 2. Manejo del Registro Real de Usuarios (Auth + Firestore Perfil)
+// 2. Manejo del Registro Real de Usuarios (Optimizado con SweetAlert y Loaders)
 async function handleRegister(event) {
     event.preventDefault();
     const nombre = document.getElementById('regNombre').value.trim().toUpperCase();
@@ -192,12 +218,15 @@ async function handleRegister(event) {
     const contrasena = document.getElementById('regPassword').value;
     const direccion = document.getElementById('regDireccion').value.trim();
 
+    const btnSubmit = event.target.querySelector('.btn-submit-auth');
+    const textoOriginal = btnSubmit.innerHTML;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Horneando cuenta...`;
+
     try {
-        // Crear usuario en Firebase Authentication
         const userCredential = await createUserWithEmailAndPassword(auth, correo, contrasena);
         const user = userCredential.user;
 
-        // Guardar datos extendidos del perfil en Firestore
         await addDoc(collection(db, "usuarios"), {
             uid: user.uid,
             nombre: nombre,
@@ -209,17 +238,33 @@ async function handleRegister(event) {
         });
 
         closeAuth();
-        alert(`¡Cuenta creada con éxito!\nBienvenido a Dulce Aroma del Buen Horno, ${nombre}.`);
         document.getElementById('formRegister').reset();
+
+        Swal.fire({
+            title: `¡Excelente, ${nombre}! 🎉`,
+            text: 'Tu cuenta ha sido creada con éxito. Ya puedes disfrutar de nuestra panadería.',
+            icon: 'success',
+            confirmButtonColor: '#7a283c'
+        });
     } catch (error) {
         console.error("Error al registrar usuario: ", error.code);
+        let mensajeError = "No se pudo crear la cuenta. Inténtalo de nuevo.";
+        
         if (error.code === 'auth/email-already-in-use') {
-            alert("Este correo electrónico ya se encuentra registrado.");
+            mensajeError = "Este correo electrónico ya se encuentra registrado por otro cliente.";
         } else if (error.code === 'auth/weak-password') {
-            alert("La contraseña debe tener al menos 6 caracteres.");
-        } else {
-            alert("No se pudo crear la cuenta. Inténtalo de nuevo.");
+            mensajeError = "La contraseña es muy débil. Debe tener al menos 6 caracteres.";
         }
+
+        Swal.fire({
+            title: 'Error de Registro ❌',
+            text: mensajeError,
+            icon: 'warning',
+            confirmButtonColor: '#7a283c'
+        });
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = textoOriginal;
     }
 }
 
@@ -283,7 +328,6 @@ async function cargarPerfilUsuario() {
     const user = auth.currentUser;
     if (!user) return;
 
-    // Colocar correo del usuario
     document.getElementById('perfCorreo').innerText = user.email;
 
     try {
@@ -304,7 +348,7 @@ async function cargarPerfilUsuario() {
             document.getElementById('perfDireccion').innerText = "No registrada";
         }
 
-        // 2. Obtener Historial de Pedidos Reales del Cliente Filtrado por Correo
+        // 2. Obtener Historial de Pedidos Reales del Cliente Filtrado por ID de Cliente
         const contenedorHistorial = document.getElementById('contenedorHistorialPedidos');
         contenedorHistorial.innerHTML = '<p class="text-muted">🔄 Consultando historial en la nube...</p>';
 
@@ -328,7 +372,6 @@ async function cargarPerfilUsuario() {
             const cardPedido = document.createElement('div');
             cardPedido.className = 'card-pedido-historial';
 
-            // Formatear los productos ordenados en un listado
             let productosHTML = "";
             if (Array.isArray(pedido.productos)) {
                 pedido.productos.forEach(prod => {
@@ -336,7 +379,6 @@ async function cargarPerfilUsuario() {
                 });
             }
 
-            // Convertir la fecha de creación en algo legible
             const fechaFormateada = pedido.fechaCreacion ? new Date(pedido.fechaCreacion).toLocaleDateString() : 'Reciente';
 
             cardPedido.innerHTML = `
@@ -437,7 +479,7 @@ function actualizarCarritoVisual() {
 }
 
 function cambiarCantidad(index, cambio) {
-    carrito[index].grid = true; // Safe fallback
+    carrito[index].grid = true; 
     carrito[index].cantidad += cambio;
      
     if (carrito[index].cantidad <= 0) {
@@ -449,22 +491,34 @@ function cambiarCantidad(index, cambio) {
     actualizarCarritoVisual();
 }
 
+// Vaciar Carrito optimizado con SweetAlert2
 function vaciarCarritoCompleto() {
     if (carrito.length === 0) return;
      
-    if (confirm("¿Estás seguro de que deseas remover todos los artículos de tu bolsa?")) {
-        carrito = [];
-        guardarCarritoEnStorage();
-        actualidorContadorGlobal();
-        actualizarCarritoVisual();
-         
-        const inputFecha = document.getElementById("fechaEntrega");
-        const selectHorario = document.getElementById("horarioEntrega");
-        if (inputFecha) inputFecha.value = "";
-        if (selectHorario) selectHorario.value = "";
-         
-        mostrarToast("Se ha vaciado tu carrito de compras.");
-    }
+    Swal.fire({
+        title: '¿Vaciar tu bolsa de pan? 🥖',
+        text: "Esta acción removerá todos los artículos que has seleccionado.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#7a283c',
+        cancelButtonColor: '#7c726a',
+        confirmButtonText: 'Sí, vaciar',
+        cancelButtonText: 'Mantener panes'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            carrito = [];
+            guardarCarritoEnStorage();
+            actualidorContadorGlobal();
+            actualizarCarritoVisual();
+             
+            const inputFecha = document.getElementById("fechaEntrega");
+            const selectHorario = document.getElementById("horarioEntrega");
+            if (inputFecha) inputFecha.value = "";
+            if (selectHorario) selectHorario.value = "";
+             
+            mostrarToast("Se ha vaciado tu carrito de compras.");
+        }
+    });
 }
 
 function guardarCarritoEnStorage() {
@@ -490,7 +544,12 @@ function configurarRestriccionFechas() {
 // --- SUBIR COMPRA A FIRESTORE Y REDIRIGIR A WHATSAPP ---
 async function finalizarCompraServidor() {
     if (carrito.length === 0) {
-        alert("El carrito está vacío.");
+        Swal.fire({
+            title: 'Bolsa vacía 🥖',
+            text: 'Agrega al menos un pancito antes de finalizar tu compra.',
+            icon: 'warning',
+            confirmButtonColor: '#7a283c'
+        });
         return;
     }
      
@@ -504,17 +563,31 @@ async function finalizarCompraServidor() {
      
     if (!inputFecha.value) {
         inputFecha.classList.add("error");
-        alert("Por favor, selecciona la fecha para recoger tu pan.");
-        inputFecha.focus();
+        Swal.fire({
+            title: 'Falta la Fecha 📅',
+            text: 'Por favor, selecciona qué día pasarás a recoger tu pedido.',
+            icon: 'info',
+            confirmButtonColor: '#7a283c'
+        }).then(() => inputFecha.focus());
         return;
     }
      
     if (!selectHorario.value) {
         selectHorario.classList.add("error");
-        alert("Por favor, selecciona un rango de horario conveniente.");
-        selectHorario.focus();
+        Swal.fire({
+            title: 'Falta el Horario 🕒',
+            text: 'Por favor, dinos en qué rango de horario te viene bien pasar.',
+            icon: 'info',
+            confirmButtonColor: '#7a283c'
+        }).then(() => selectHorario.focus());
         return;
     }
+
+    // Capturar botón de checkout para loader
+    const btnCheckout = document.querySelector('.btn-checkout');
+    const textoOriginalBtn = btnCheckout.innerHTML;
+    btnCheckout.disabled = true;
+    btnCheckout.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registrando comanda...`;
 
     const idAleatorio = Math.floor(Date.now() / 100000);
     const stringPedido = `#WEB-${idAleatorio}`;
@@ -525,7 +598,6 @@ async function finalizarCompraServidor() {
     const totalTextoHtml = document.getElementById("cartTotalText").textContent;
     let nombreParaMensaje = usuarioLogueado ? usuarioLogueado : "Cliente Invitado";
 
-    // GUARDAR EN CLOUD FIRESTORE EL PEDIDO PARA EL ADMINISTRADOR antes de ir a WhatsApp
     try {
         await addDoc(collection(db, "pedidos"), {
             codigoPedido: stringPedido,
@@ -539,6 +611,9 @@ async function finalizarCompraServidor() {
         });
     } catch(err) {
         console.error("Error al registrar respaldo del pedido en Firestore: ", err);
+    } finally {
+        btnCheckout.disabled = false;
+        btnCheckout.innerHTML = textoOriginalBtn;
     }
      
     const mensajeWhatsApp = `¡Hola, ${nombreParaMensaje}! 👋 Confirmamos que tu pedido en la web ${stringPedido} se ha registrado con éxito. Aquí tienes los detalles:
@@ -607,12 +682,23 @@ async function enviarReseña() {
             fecha: Date.now()
         });
 
-        mostrarToast("✨ ¡Tu opinión ha sido guardada de forma permanente!");
+        Swal.fire({
+            title: '¡Gracias por tu opinión! ✨',
+            text: 'Tu reseña ha sido guardada de forma permanente en nuestra comunidad.',
+            icon: 'success',
+            confirmButtonColor: '#7a283c'
+        });
+        
         input.value = "";
         cargarReseñas();
     } catch (error) {
         console.error("Error al guardar en Firebase: ", error);
-        alert("No se pudo conectar con el servidor para guardar tu opinión.");
+        Swal.fire({
+            title: 'Error de Conexión ❌',
+            text: 'No se pudo conectar con el servidor para guardar tu opinión.',
+            icon: 'error',
+            confirmButtonColor: '#7a283c'
+        });
     }
 }
 
@@ -682,7 +768,6 @@ function configuracionEventosFormularios() {
 window.scrollAlCatalogo = scrollAlCatalogo;
 window.enfocarBuscador = enfocarBuscador;
 window.buscarProductos = buscarProductos;
-window.openSide = openSide;
 window.closeSide = closeSide;
 window.openAuth = openAuth;
 window.closeAuth = closeAuth;
