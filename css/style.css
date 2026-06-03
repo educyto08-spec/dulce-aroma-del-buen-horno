@@ -99,12 +99,10 @@ body {
     transition: transform 0.2s ease;
 }
 
-/* Animación del contador (Badge Pop) */
 .badge.pop {
     transform: scale(1.4);
 }
 
-/* Estilos para el enlace de "Vaciar bolsa" */
 #btnClearCart {
     font-size: 0.75rem;
     color: #c93b3b;
@@ -118,7 +116,6 @@ body {
     color: #a12b2b;
 }
 
-/* Badges de Diseño sobre las Imágenes */
 .img-wrapper {
     position: relative;
 }
@@ -136,21 +133,19 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 .badge-producto.popular { background-color: #d97706; }    
-.badge-producto.promo { background-color: #16a34a; }         
+.badge-producto.promo { background-color: #16a34a; }        
 .badge-producto.especial { background-color: var(--guinda); } 
 
-/* Bloque del Selector de Logística e Incidencias en el Carrito */
+/* CORRECCIÓN: Bloque del Selector de Logística y Cupones */
 .seccion-logistica-pedido {
     padding: 15px;
     margin: 15px 0;
     background-color: var(--pastel-rosa);
     border-radius: 4px;
     border: 1px solid var(--borde);
-    display: none; /* Se activa mediante JS si hay productos */
+    display: block; /* AHORA SE MUESTRA SIEMPRE */
 }
-.seccion-logistica-pedido.active {
-    display: block;
-}
+
 .seccion-logistica-pedido h3 {
     margin: 0 0 12px 0;
     font-size: 0.9rem;
@@ -194,7 +189,6 @@ body {
     background-color: #fff5f5;
 }
 
-/* Notificación Flotante "Toast" dinámica */
 .toast-notificacion {
     position: fixed;
     bottom: 25px;
@@ -223,7 +217,6 @@ body {
     font-size: 1rem;
 }
 
-/* Buscador de Productos */
 .contenedor-buscador-pan {
     position: relative;
     max-width: 500px;
@@ -253,7 +246,6 @@ body {
     font-size: 1rem;
 }
 
-/* Estructura Modal de Autenticación */
 .modal-auth {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -334,7 +326,6 @@ body {
     background-color: var(--guinda-oscuro);
 }
 
-/* Sección de Promociones Reales */
 .seccion-promociones {
     max-width: 1200px;
     margin: 50px auto;
@@ -374,7 +365,6 @@ body {
     margin: 0; font-size: 0.9rem; color: var(--texto-oscuro); line-height: 1.5;
 }
 
-/* Sección de Próximamente */
 .seccion-proximamente {
     max-width: 1200px;
     margin: 60px auto;
@@ -407,7 +397,6 @@ body {
     margin: 0; font-size: 0.85rem; color: var(--texto-mutado); line-height: 1.5;
 }
 
-/* Hero */
 .hero { 
     padding: 100px 20px;  
     text-align: center; 
@@ -421,7 +410,6 @@ body {
 .hero button { background-color: var(--guinda); color: var(--blanco); border: none; padding: 14px 40px; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; border-radius: 4px; cursor: pointer; transition: background-color 0.2s ease; }
 .hero button:hover { background-color: var(--guinda-oscuro); }
 
-/* Catálogo */
 .productos-seccion { max-width: 1200px; margin: auto; padding: 30px 20px; }
 .breadcrumb { font-size: 0.75rem; color: var(--texto-mutado); margin-bottom: 25px; }
 .breadcrumb .active { color: var(--guinda); font-weight: bold; }
@@ -441,7 +429,6 @@ body {
 .btn-pedir { background-color: var(--blanco); color: var(--guinda); border: 1px solid var(--guinda); padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.8rem; transition: all 0.2s ease; }
 .btn-pedir:hover { background-color: var(--guinda); color: var(--blanco); }
 
-/* Panel Lateral */
 .side-panel { position: fixed; top: 0; right: -400px; width: 360px; height: 100%; background-color: var(--crema-suave); border-left: 1px solid var(--borde); box-shadow: -5px 0 25px rgba(0,0,0,0.05); z-index: 2500; transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
 .side-panel.active { right: 0; }
 .side-header { padding: 24px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
@@ -464,7 +451,6 @@ body {
 .btn-qty:hover { border-color: var(--guinda); color: var(--guinda); }
 .qty-value { font-size: 0.9rem; font-weight: 600; min-width: 15px; text-align: center; }
 
-/* Reseñas */
 .seccion-reseñas { max-width: 1200px; margin: 60px auto; padding: 40px 20px; text-align: center; }
 .seccion-reseñas h3 { font-size: 1.8rem; margin: 0 0 8px 0; color: var(--texto-oscuro); }
 .reseñas-subtitle { color: var(--texto-mutado); margin-bottom: 35px; font-size: 0.95rem; }
@@ -480,7 +466,6 @@ body {
 .form-reseña-contenedor button { background-color: var(--guinda); color: var(--blanco); border: none; padding: 12px 35px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: background-color 0.2s ease; }
 .form-reseña-contenedor button:hover { background-color: var(--guinda-oscuro); }
 
-/* Footer */
 footer { background-color: var(--crema-suave); border-top: 1px solid var(--borde); color: var(--texto-oscuro); padding: 40px 20px; text-align: center; }
 .redes-sociales { font-size: 1.5rem; margin-bottom: 20px; }
 .redes-sociales a { color: var(--texto-oscuro); margin: 0 15px; transition: color 0.2s ease; }
@@ -489,7 +474,6 @@ footer p { margin: 6px 0; font-size: 0.85rem; }
 .footer-location { font-weight: 700; color: var(--guinda); }
 .footer-copyright { color: var(--texto-mutado); }
 
-/* NUEVOS ESTILOS: PANEL DE CUENTA E HISTORIAL DE PEDIDOS */
 .perfil-datos-card { background-color: var(--pastel-albaricoque); border-left: 4px solid var(--guinda); padding: 16px; border-radius: 4px; margin-bottom: 20px; text-align: left; border: 1px solid var(--borde); }
 .perfil-datos-card h4 { margin: 0 0 12px 0; color: var(--guinda); font-size: 0.95rem; font-weight: 700; text-transform: uppercase; }
 .perfil-datos-card p { margin: 6px 0; font-size: 0.85rem; color: var(--texto-oscuro); }
@@ -503,7 +487,6 @@ footer p { margin: 6px 0; font-size: 0.85rem; }
 .pedido-productos-list li::before { content: "•"; color: var(--guinda); position: absolute; left: 0; }
 .text-muted { font-size: 0.85rem; color: var(--texto-mutado); text-align: center; padding: 20px 0; }
 
-/* Corrección visual para Cupones */
 #bloqueCuponesCart {
     background-color: #fffaf5;
     border: 1px solid var(--guinda);
