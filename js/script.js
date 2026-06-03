@@ -6,7 +6,8 @@ import {
     addDoc, 
     getDocs, 
     query, 
-    orderBy 
+    orderBy,
+    where 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { 
     getAuth, 
@@ -34,7 +35,8 @@ const auth = getAuth(app);
 
 // --- ESTADO GLOBAL ---
 let carrito = JSON.parse(localStorage.getItem('carrito_miga_gold')) || [];
-let usuarioLogueado = null; // Se manejará dinámicamente con el observador de Firebase
+let usuarioLogueado = null; // Guardará el nombre del usuario activo
+let correoUsuarioLogueado = null; // Correo exacto para filtrar el historial de pedidos
 
 // --- FUNCIÓN HELPER: TOAST EMERGENTE ---
 function mostrarToast(mensaje) {
@@ -106,7 +108,13 @@ function buscarProductos() {
 // --- GESTIÓN DE PANELES LATERALES ---
 function openSide(id) {
     const panel = document.getElementById(id);
-    if (panel) panel.classList.add('active');
+    if (panel) {
+        panel.classList.add('active');
+        // Si el usuario abre el panel de su cuenta, recargar los datos e historial en tiempo real
+        if (id === 'sideCuenta') {
+            cargarPerfilUsuario();
+        }
+    }
 }
 
 function closeSide(id) {
@@ -160,10 +168,10 @@ async function handleLogin(event) {
     const contrasena = document.getElementById('loginPassword').value;
 
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, correo, contrasena);
+        await signInWithEmailAndPassword(auth, correo, contrasena);
         closeAuth();
-        // El observador onAuthStateChanged se encargará de actualizar la interfaz
         document.getElementById('formLogin').reset();
+        mostrarToast("¡Sesión iniciada correctamente! 🥐");
     } catch (error) {
         console.error("Error al iniciar sesión: ", error.code);
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
@@ -216,9 +224,10 @@ async function handleRegister(event) {
 }
 
 // 3. Cierre de Sesión Real
-async function cerrarSesion() {
+async function cerrarSesionUsuario() {
     try {
         await signOut(auth);
+        closeSide('sideCuenta');
         mostrarToast("Has cerrado sesión.");
     } catch (error) {
         console.error("Error al cerrar sesión: ", error);
@@ -228,10 +237,10 @@ async function cerrarSesion() {
 // 4. Observador de Estado de Autenticación Activo
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // Buscar el perfil extendido en la colección usuarios usando el UID
+        correoUsuarioLogueado = user.email;
         try {
             const querySnapshot = await getDocs(collection(db, "usuarios"));
-            let nombreMostrar = user.email.split('@')[0].toUpperCase(); // Respaldo por defecto
+            let nombreMostrar = user.email.split('@')[0].toUpperCase(); // Respaldo
             
             querySnapshot.forEach((doc) => {
                 const ud = doc.data();
@@ -246,6 +255,7 @@ onAuthStateChanged(auth, async (user) => {
         }
     } else {
         usuarioLogueado = null;
+        correoUsuarioLogueado = null;
     }
     actualizarInterfazUsuario();
 });
@@ -255,15 +265,101 @@ function actualizarInterfazUsuario() {
     if (container) {
         if (usuarioLogueado) {
             container.innerHTML = `
-                <span style="color: #631919; font-weight: bold; font-size: 0.8rem; margin-right: 10px;">
+                <span onclick="openSide('sideCuenta')" style="color: #631919; font-weight: bold; font-size: 0.8rem; margin-right: 10px; cursor: pointer; text-decoration: underline;">
                     HOLA, ${usuarioLogueado}
                 </span>
-                <a href="javascript:void(0)" onclick="cerrarSesion()" class="icon-link" style="color: #c93b3b; font-size: 0.8rem; font-weight: bold; text-decoration: none;">SALIR</a>
+                <a href="javascript:void(0)" onclick="cerrarSesionUsuario()" class="icon-link" style="color: #c93b3b; font-size: 0.8rem; font-weight: bold; text-decoration: none;">SALIR</a>
             `;
         } else {
             container.innerHTML = `
-                <a href="javascript:void(0)" onclick="openAuth()" class="icon-link" style="font-size: 0.8rem; font-weight: bold; text-decoration: none;">INICIAR SESIÓN</a>
+                <a href="javascript:void(0)" onclick="openAuth()" class="icon-link" style="font-size: 0.8rem; font-weight: bold; text-decoration: none;"><i class="fa-regular fa-user"></i> INICIAR SESIÓN</a>
             `;
+        }
+    }
+}
+
+// --- CARGAR DATOS DE PERFIL E HISTORIAL DE PEDIDOS DESDE FIRESTORE ---
+async function cargarPerfilUsuario() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Colocar correo del usuario
+    document.getElementById('perfCorreo').innerText = user.email;
+
+    try {
+        // 1. Obtener Datos Extendidos del Perfil del Cliente
+        const qUsuarios = query(collection(db, "usuarios"), where("uid", "==", user.uid));
+        const userSnapshot = await getDocs(qUsuarios);
+        
+        if (!userSnapshot.empty) {
+            userSnapshot.forEach((doc) => {
+                const ud = doc.data();
+                document.getElementById('perfNombre').innerText = `${ud.nombre} ${ud.apellidos}`;
+                document.getElementById('perfTelefono').innerText = ud.telefono || "No registrado";
+                document.getElementById('perfDireccion').innerText = ud.direccion || "No registrada";
+            });
+        } else {
+            document.getElementById('perfNombre').innerText = user.email.split('@')[0].toUpperCase();
+            document.getElementById('perfTelefono').innerText = "No registrado";
+            document.getElementById('perfDireccion').innerText = "No registrada";
+        }
+
+        // 2. Obtener Historial de Pedidos Reales del Cliente Filtrado por Correo
+        const contenedorHistorial = document.getElementById('contenedorHistorialPedidos');
+        contenedorHistorial.innerHTML = '<p class="text-muted">🔄 Consultando historial en la nube...</p>';
+
+        const qPedidos = query(
+            collection(db, "pedidos"),
+            where("uidCliente", "==", user.uid),
+            orderBy("fechaCreacion", "desc")
+        );
+        
+        const pedidosSnapshot = await getDocs(qPedidos);
+
+        if (pedidosSnapshot.empty) {
+            contenedorHistorial.innerHTML = '<p class="text-muted">Aún no has realizado pedidos en nuestra web. ¡Tu pancito te espera! 🥐</p>';
+            return;
+        }
+
+        contenedorHistorial.innerHTML = ""; // Limpiar el cargando
+
+        pedidosSnapshot.forEach((doc) => {
+            const pedido = doc.data();
+            const cardPedido = document.createElement('div');
+            cardPedido.className = 'card-pedido-historial';
+
+            // Formatear los productos ordenados en un listado
+            let productosHTML = "";
+            if (Array.isArray(pedido.productos)) {
+                pedido.productos.forEach(prod => {
+                    productosHTML += `<li>${prod.cantidad}x ${prod.nombre} - $${(prod.precio * prod.cantidad).toFixed(2)}</li>`;
+                });
+            }
+
+            // Convertir la fecha de creación en algo legible
+            const fechaFormateada = pedido.fechaCreacion ? new Date(pedido.fechaCreacion).toLocaleDateString() : 'Reciente';
+
+            cardPedido.innerHTML = `
+                <div class="pedido-historial-header">
+                    <span class="pedido-id">Ref: ${pedido.codigoPedido || '#WEB-XXXX'}</span>
+                    <span class="pedido-fecha">${fechaFormateada}</span>
+                </div>
+                <ul class="pedido-productos-list" style="margin: 8px 0; padding-left: 20px; font-size: 0.85rem; color: #555;">
+                    ${productosHTML}
+                </ul>
+                <div class="pedido-historial-footer" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; border-top: 1px solid #f5f5f5; padding-top: 6px; margin-top: 6px;">
+                    <div><strong>Total: ${pedido.total}</strong></div>
+                    <span class="badge-estado" style="background: #e1f5fe; color: #0288d1; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">Recibido 🥖</span>
+                </div>
+            `;
+            contenedorHistorial.appendChild(cardPedido);
+        });
+
+    } catch (error) {
+        console.error("Error al cargar datos del perfil e historial: ", error);
+        const contenedorHistorial = document.getElementById('contenedorHistorialPedidos');
+        if (contenedorHistorial) {
+            contenedorHistorial.innerHTML = '<p class="text-danger">Error al conectar con la base de datos de historial.</p>';
         }
     }
 }
@@ -341,6 +437,7 @@ function actualizarCarritoVisual() {
 }
 
 function cambiarCantidad(index, cambio) {
+    carrito[index].grid = true; // Safe fallback
     carrito[index].cantidad += cambio;
      
     if (carrito[index].cantidad <= 0) {
@@ -593,7 +690,7 @@ window.switchTab = switchTab;
 window.togglePasswordVisibility = togglePasswordVisibility;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
-window.cerrarSesion = cerrarSesion;
+window.cerrarSesionUsuario = cerrarSesionUsuario;
 window.agregarAlCarrito = agregarAlCarrito;
 window.cambiarCantidad = cambiarCantidad;
 window.vaciarCarritoCompleto = vaciarCarritoCompleto;
@@ -601,3 +698,4 @@ window.finalizarCompraServidor = finalizarCompraServidor;
 window.filtrarCategoria = filtrarCategoria;
 window.enviarReseña = enviarReseña;
 window.cargarReseñas = cargarReseñas;
+window.cargarPerfilUsuario = cargarPerfilUsuario;

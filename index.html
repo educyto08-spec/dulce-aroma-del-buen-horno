@@ -57,6 +57,33 @@
         </div>
     </div>
 
+    <div id="sideCuenta" class="side-panel">
+        <div class="side-header">
+            <div>
+                <h2>MI PERFIL</h2>
+                <span id="btnCerrarSesion" onclick="cerrarSesionUsuario()" style="color: #e74c3c; cursor: pointer; font-size: 0.9rem; font-weight: bold;">Cerrar sesión</span>
+            </div>
+            <span class="close-side" onclick="closeSide('sideCuenta')">&times;</span>
+        </div>
+        
+        <div class="side-body">
+            <div class="perfil-datos-card">
+                <h4>Datos de Envío y Contacto</h4>
+                <p><strong>Nombre:</strong> <span id="perfNombre">Cargando...</span></p>
+                <p><strong>Correo:</strong> <span id="perfCorreo">Cargando...</span></p>
+                <p><strong>Teléfono:</strong> <span id="perfTelefono">Cargando...</span></p>
+                <p><strong>Dirección:</strong> <span id="perfDireccion">Cargando...</span></p>
+            </div>
+
+            <hr class="divisor-perfil">
+
+            <h4 style="color: #8c5a2b; margin-bottom: 15px;"><i class="fas fa-history"></i> Mis Pedidos Recientes</h4>
+            <div id="contenedorHistorialPedidos">
+                <p class="text-muted">Buscando tus pedidos en el horno...</p>
+            </div>
+        </div>
+    </div>
+
     <div id="modalAuth" class="modal-auth">
         <div class="auth-content">
             <span class="close-auth" onclick="closeAuth()">&times;</span>
@@ -374,8 +401,7 @@
     <section id="reseñas" class="seccion-reseñas">
         <h3>Lo que opinan nuestros clientes</h3>
         <p class="reseñas-subtitle">La frescura y el sabor artesanal respaldados por nuestra comunidad.</p>
-        <div id="lista-reseñas" class="grid-reseñas">
-            </div>
+        <div id="lista-reseñas" class="grid-reseñas"></div>
          
         <div class="form-reseña-contenedor">
             <textarea id="texto-reseña" placeholder="Escribe tu opinión sobre nuestro pan artesanal..."></textarea>
@@ -391,7 +417,7 @@
         </div>
         <p class="footer-location">📍 Zaragoza</p>
         <p class="footer-copyright">&copy; 2026 DULCE AROMA DEL BUEN HORNO. Todos los derechos reservados.</p>
-    </footer>
+    </header>
 
     <script type="module" src="js/script.js"></script>
 </body>
