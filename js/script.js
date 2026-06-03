@@ -140,7 +140,7 @@ function handleRegister(event) {
     localStorage.setItem('usuario_panaderia', usuarioLogueado);
     actualizarInterfazUsuario();
     closeAuth();
-    alert(`¡Cuenta creada con éxito!\nBienvenido a La Miga Dorada, ${nombre}.`);
+    alert(`¡Cuenta creada con éxito!\nBienvenido a Dulce Aroma del Buen Horno, ${nombre}.`);
 }
 
 function cerrarSesion() {
@@ -161,7 +161,6 @@ function actualizarInterfazUsuario() {
                 <a href="javascript:void(0)" onclick="cerrarSesion()" class="icon-link" style="color: #c93b3b; font-size: 0.8rem; font-weight: bold; text-decoration: none;">SALIR</a>
             `;
         } else {
-            // Estructura por defecto cuando no hay usuario logueado
             container.innerHTML = `
                 <a href="javascript:void(0)" onclick="openAuth()" class="icon-link" style="font-size: 0.8rem; font-weight: bold; text-decoration: none;">INICIAR SESIÓN</a>
             `;
@@ -193,7 +192,6 @@ function agregarAlCarrito(nombre, precio, img) {
     }
 }
 
-// Nota: se mantiene el nombre original de tu función "actualidorContadorGlobal"
 function actualidorContadorGlobal() {
     const totalUnidades = carrito.reduce((acumulador, item) => acumulador + item.cantidad, 0);
     const badge = document.getElementById("cartCount");
@@ -272,7 +270,6 @@ function vaciarCarritoCompleto() {
     }
 }
 
-// Guardar en LocalStorage para no perder datos al recargar
 function guardarCarritoEnStorage() {
     localStorage.setItem('carrito_miga_gold', JSON.stringify(carrito));
 }
@@ -322,18 +319,15 @@ function finalizarCompraServidor() {
         return;
     }
 
-    // Generar un número identificador de ticket local al no tener Base de Datos
     const idAleatorio = Math.floor(Date.now() / 100000);
     const stringPedido = `#WEB-${idAleatorio}`;
 
-    // Formatear los productos y la fecha adecuadamente
     const productosDetalleString = carrito.map(item => `${item.nombre} (x${item.cantidad})`).join(", ");
     const partesFecha = inputFecha.value.split("-");
     const fechaFormateada = `${partesFecha[2]}/${partesFecha[1]}/${partesFecha[0]}`;
     const totalTextoHtml = document.getElementById("cartTotalText").textContent;
     let nombreParaMensaje = usuarioLogueado ? usuarioLogueado : "Cliente";
      
-    // PLANTILLA DE MENSAJE ORIGINAL RESPETANDO ESPACIOS, EMOJIS Y SALTOS EXACTOS:
     const mensajeWhatsApp = `¡Hola, ${nombreParaMensaje}! 👋 Confirmamos que tu pedido en la web ${stringPedido} se ha registrado con éxito. Aquí tienes los detalles:
 
 🍦 Detalle: ${productosDetalleString}
@@ -347,11 +341,8 @@ function finalizarCompraServidor() {
     const urlWa = `https://wa.me/529223773794?text=${encodeURIComponent(mensajeWhatsApp)}`;
      
     mostrarToast("🎉 ¡Pedido listo! Redirigiendo a WhatsApp...");
-
-    // Abrir WhatsApp automáticamente en pestaña nueva
     window.open(urlWa, '_blank');
 
-    // Limpieza de inputs y carrito local
     carrito = [];
     guardarCarritoEnStorage();
     inputFecha.value = "";
@@ -393,7 +384,6 @@ function enviarReseña() {
     const texto = input.value.trim();
     if (texto === "") return;
 
-    // Añadir visualmente la reseña arriba en la lista localmente
     const divContenedor = document.getElementById("lista-reseñas");
     if (divContenedor) {
         const card = document.createElement("div");
@@ -413,7 +403,6 @@ function enviarReseña() {
         card.appendChild(p);
         card.appendChild(userDiv);
          
-        // Insertar al inicio de la lista
         divContenedor.insertBefore(card, divContenedor.firstChild);
     }
 
@@ -422,6 +411,7 @@ function enviarReseña() {
 }
 
 window.onload = () => {
+    configuracionEventosFormularios();
     configurarRestriccionFechas();
     actualidorContadorGlobal();
     actualizarCarritoVisual();
@@ -432,3 +422,31 @@ window.onclick = (event) => {
     const modalAuth = document.getElementById("modalAuth");
     if (event.target == modalAuth) closeAuth();
 };
+
+// Vinculación de formularios locales para evitar recarga de página al dar Enter
+function configuracionEventosFormularios() {
+    const fLogin = document.getElementById('formLogin');
+    const fRegister = document.getElementById('formRegister');
+    if(fLogin) fLogin.addEventListener('submit', handleLogin);
+    if(fRegister) fRegister.addEventListener('submit', handleRegister);
+}
+
+// --- EXPONER FUNCIONES AL ÁMBITO GLOBAL ---
+window.scrollAlCatalogo = scrollAlCatalogo;
+window.enfocarBuscador = enfocarBuscador;
+window.buscarProductos = buscarProductos;
+window.openSide = openSide;
+window.closeSide = closeSide;
+window.openAuth = openAuth;
+window.closeAuth = closeAuth;
+window.switchTab = switchTab;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.cerrarSesion = cerrarSesion;
+window.agregarAlCarrito = agregarAlCarrito;
+window.cambiarCantidad = cambiarCantidad;
+window.vaciarCarritoCompleto = vaciarCarritoCompleto;
+window.finalizarCompraServidor = finalizarCompraServidor;
+window.filtrarCategoria = filtrarCategoria;
+window.enviarReseña = enviarReseña;

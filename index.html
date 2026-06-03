@@ -16,7 +16,6 @@
         </div>
     </div>
 
-    <!-- PANEL LATERAL DEL CARRITO -->
     <div id="cartSidebar" class="side-panel">
         <div class="side-header">
             <div>
@@ -58,7 +57,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE AUTENTICACIÓN LOCAL -->
     <div id="modalAuth" class="modal-auth">
         <div class="auth-content">
             <span class="close-auth" onclick="closeAuth()">&times;</span>
@@ -67,7 +65,6 @@
                 <button id="btnTabRegister" class="auth-tab" onclick="switchTab('register')">REGISTRARSE</button>
             </div>
              
-            <!-- Formulario Login -->
             <form id="formLogin" class="auth-form">
                 <div class="auth-inputs">
                     <input type="email" id="loginCorreo" placeholder="Correo electrónico" required>
@@ -79,7 +76,6 @@
                 <button type="submit" class="btn-submit-auth">ENTRAR</button>
             </form>
 
-            <!-- Formulario Registro -->
             <form id="formRegister" class="auth-form" style="display: none;">
                 <div class="auth-inputs">
                     <input type="text" id="regNombre" placeholder="Nombre(s)" required>
@@ -97,7 +93,6 @@
         </div>
     </div>
 
-    <!-- ENCABEZADO -->
     <header class="main-header">
         <div class="header-container">
             <div class="logo">DULCE AROMA DEL BUEN HORNO</div>
@@ -125,7 +120,6 @@
         </div>
     </header>
 
-    <!-- HERO SECTION -->
     <section id="inicio" class="hero">
         <div class="hero-content">
             <h2>El arte del pan en cada bocado</h2>
@@ -134,7 +128,6 @@
         </div>
     </section>
 
-    <!-- SECCIÓN PROMOCIONES -->
     <section id="promociones" class="seccion-promociones">
         <h3>Promociones Exclusivas</h3>
         <p class="promo-subtitle">Aprovecha nuestras ofertas especiales de la semana</p>
@@ -152,7 +145,6 @@
         </div>
     </section>
 
-    <!-- SECCIÓN CATÁLOGO DE PRODUCTOS -->
     <section id="productos" class="productos-seccion">
         <div class="breadcrumb">
             <span>INICIO</span> &gt; <span>PRODUCTOS</span> &gt; <span class="active">TODOS</span>
@@ -362,7 +354,6 @@
         </div>
     </section>
 
-    <!-- SECCIÓN PRÓXIMAMENTE -->
     <section id="proximamente" class="seccion-proximamente">
         <h3>Próximamente en Tienda</h3>
         <p class="prox-subtitle">Nuestras próximas creaciones en el horno artesanal</p>
@@ -380,13 +371,11 @@
         </div>
     </section>
 
-    <!-- SECCIÓN RESEÑAS -->
     <section id="reseñas" class="seccion-reseñas">
         <h3>Lo que opinan nuestros clientes</h3>
         <p class="reseñas-subtitle">La frescura y el sabor artesanal respaldados por nuestra comunidad.</p>
         <div id="lista-reseñas" class="grid-reseñas">
-            <!-- Las reseñas dinámicas se cargarán aquí desde Cloud Firestore -->
-        </div>
+            </div>
          
         <div class="form-reseña-contenedor">
             <textarea id="texto-reseña" placeholder="Escribe tu opinión sobre nuestro pan artesanal..."></textarea>
@@ -394,7 +383,6 @@
         </div>
     </section>
 
-    <!-- PIE DE PÁGINA -->
     <footer>
         <div class="redes-sociales">
             <a href="https://wa.me/529223773794" target="_blank"><i class="fab fa-whatsapp"></i></a>
@@ -402,10 +390,9 @@
             <a href="https://www.instagram.com/dulcearoma_delbuenhorno" target="_blank"><i class="fab fa-instagram"></i></a>
         </div>
         <p class="footer-location">📍 Zaragoza</p>
-        <p class="footer-copyright">&copy; 2026 Panadería LA MIGA DORADA. Todos los derechos reservados.</p>
+        <p class="footer-copyright">&copy; 2026 DULCE AROMA DEL BUEN HORNO. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- CAMBIO CLAVE: Agregado type="module" para soportar los imports de Firebase -->
     <script type="module" src="js/script.js"></script>
 </body>
 </html>
