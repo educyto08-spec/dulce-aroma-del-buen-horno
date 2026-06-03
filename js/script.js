@@ -1,6 +1,40 @@
+// --- IMPORTACIONES DE FIREBASE ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    getDocs, 
+    query, 
+    orderBy 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// Tus credenciales del proyecto
+const firebaseConfig = {
+  apiKey: "AIzaSyCummr4hK95UXm8OoYkSWOBhtDpngpzbwE",
+  authDomain: "dulce-aroma-del-buen-hor-8480a.firebaseapp.com",
+  databaseURL: "https://dulce-aroma-del-buen-hor-8480a-default-rtdb.firebaseio.com",
+  projectId: "dulce-aroma-del-buen-hor-8480a",
+  storageBucket: "dulce-aroma-del-buen-hor-8480a.firebasestorage.app",
+  messagingSenderId: "397232001248",
+  appId: "1:397232001248:web:b60abee05f6ed57af30085"
+};
+
+// Inicializar Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 // --- ESTADO GLOBAL ---
 let carrito = JSON.parse(localStorage.getItem('carrito_miga_gold')) || [];
-let usuarioLogueado = localStorage.getItem('usuario_panaderia') || null;
+let usuarioLogueado = null; // Se manejará dinámicamente con el observador de Firebase
 
 // --- FUNCIÓN HELPER: TOAST EMERGENTE ---
 function mostrarToast(mensaje) {
@@ -80,7 +114,7 @@ function closeSide(id) {
     if (panel) panel.classList.remove('active');
 }
 
-// --- SISTEMA DE AUTENTICACIÓN LOCAL EN JS ---
+// --- SISTEMA DE AUTENTICACIÓN (FIREBASE AUTH & FIRESTORE COOPERATIVOS) ---
 function openAuth() {
     document.getElementById('modalAuth').style.display = 'flex';
 }
@@ -89,7 +123,6 @@ function closeAuth() {
     document.getElementById('modalAuth').style.display = 'none';
 }
 
-// Cambiar de pestaña Login / Registro
 function switchTab(type) {
     const loginForm = document.getElementById('formLogin');
     const registerForm = document.getElementById('formRegister');
@@ -120,42 +153,109 @@ function togglePasswordVisibility(inputId, icon) {
     }
 }
 
-function handleLogin(event) {
+// 1. Manejo del Inicio de Sesión Real
+async function handleLogin(event) {
     event.preventDefault();
-    const correo = document.getElementById('loginCorreo').value;
-    const nombreUsuario = correo.split('@')[0].toUpperCase();
-     
-    usuarioLogueado = nombreUsuario;
-    localStorage.setItem('usuario_panaderia', usuarioLogueado);
-    actualizarInterfazUsuario();
-    closeAuth();
-    mostrarToast(`¡Bienvenido, ${nombreUsuario}! 🥐`);
+    const correo = document.getElementById('loginCorreo').value.trim();
+    const contrasena = document.getElementById('loginPassword').value;
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, correo, contrasena);
+        closeAuth();
+        // El observador onAuthStateChanged se encargará de actualizar la interfaz
+        document.getElementById('formLogin').reset();
+    } catch (error) {
+        console.error("Error al iniciar sesión: ", error.code);
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            alert("El correo o la contraseña son incorrectos.");
+        } else {
+            alert("Error al iniciar sesión. Inténtalo de nuevo más tarde.");
+        }
+    }
 }
 
-function handleRegister(event) {
+// 2. Manejo del Registro Real de Usuarios (Auth + Firestore Perfil)
+async function handleRegister(event) {
     event.preventDefault();
-    const nombre = document.getElementById('regNombre').value.toUpperCase();
-     
-    usuarioLogueado = nombre;
-    localStorage.setItem('usuario_panaderia', usuarioLogueado);
-    actualizarInterfazUsuario();
-    closeAuth();
-    alert(`¡Cuenta creada con éxito!\nBienvenido a Dulce Aroma del Buen Horno, ${nombre}.`);
+    const nombre = document.getElementById('regNombre').value.trim().toUpperCase();
+    const apellidos = document.getElementById('regApellidos').value.trim().toUpperCase();
+    const correo = document.getElementById('regCorreo').value.trim();
+    const telefono = document.getElementById('regTelefono').value.trim();
+    const contrasena = document.getElementById('regPassword').value;
+    const direccion = document.getElementById('regDireccion').value.trim();
+
+    try {
+        // Crear usuario en Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, correo, contrasena);
+        const user = userCredential.user;
+
+        // Guardar datos extendidos del perfil en Firestore
+        await addDoc(collection(db, "usuarios"), {
+            uid: user.uid,
+            nombre: nombre,
+            apellidos: apellidos,
+            correo: correo,
+            telefono: telefono,
+            direccion: direccion,
+            fechaRegistro: Date.now()
+        });
+
+        closeAuth();
+        alert(`¡Cuenta creada con éxito!\nBienvenido a Dulce Aroma del Buen Horno, ${nombre}.`);
+        document.getElementById('formRegister').reset();
+    } catch (error) {
+        console.error("Error al registrar usuario: ", error.code);
+        if (error.code === 'auth/email-already-in-use') {
+            alert("Este correo electrónico ya se encuentra registrado.");
+        } else if (error.code === 'auth/weak-password') {
+            alert("La contraseña debe tener al menos 6 caracteres.");
+        } else {
+            alert("No se pudo crear la cuenta. Inténtalo de nuevo.");
+        }
+    }
 }
 
-function cerrarSesion() {
-    usuarioLogueado = null;
-    localStorage.removeItem('usuario_panaderia');
-    actualizarInterfazUsuario();
-    mostrarToast("Has cerrado sesión.");
+// 3. Cierre de Sesión Real
+async function cerrarSesion() {
+    try {
+        await signOut(auth);
+        mostrarToast("Has cerrado sesión.");
+    } catch (error) {
+        console.error("Error al cerrar sesión: ", error);
+    }
 }
+
+// 4. Observador de Estado de Autenticación Activo
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // Buscar el perfil extendido en la colección usuarios usando el UID
+        try {
+            const querySnapshot = await getDocs(collection(db, "usuarios"));
+            let nombreMostrar = user.email.split('@')[0].toUpperCase(); // Respaldo por defecto
+            
+            querySnapshot.forEach((doc) => {
+                const ud = doc.data();
+                if (ud.uid === user.uid) {
+                    nombreMostrar = ud.nombre;
+                }
+            });
+
+            usuarioLogueado = nombreMostrar;
+        } catch (e) {
+            usuarioLogueado = user.email.split('@')[0].toUpperCase();
+        }
+    } else {
+        usuarioLogueado = null;
+    }
+    actualizarInterfazUsuario();
+});
 
 function actualizarInterfazUsuario() {
     const container = document.getElementById('userSessionContainer');
     if (container) {
         if (usuarioLogueado) {
             container.innerHTML = `
-                <span style="color: var(--guinda); font-weight: bold; font-size: 0.8rem; margin-right: 10px;">
+                <span style="color: #631919; font-weight: bold; font-size: 0.8rem; margin-right: 10px;">
                     HOLA, ${usuarioLogueado}
                 </span>
                 <a href="javascript:void(0)" onclick="cerrarSesion()" class="icon-link" style="color: #c93b3b; font-size: 0.8rem; font-weight: bold; text-decoration: none;">SALIR</a>
@@ -290,8 +390,8 @@ function configurarRestriccionFechas() {
     }
 }
 
-// --- ENVIAR PEDIDO DIRECTO A WHATSAPP ---
-function finalizarCompraServidor() {
+// --- SUBIR COMPRA A FIRESTORE Y REDIRIGIR A WHATSAPP ---
+async function finalizarCompraServidor() {
     if (carrito.length === 0) {
         alert("El carrito está vacío.");
         return;
@@ -326,7 +426,23 @@ function finalizarCompraServidor() {
     const partesFecha = inputFecha.value.split("-");
     const fechaFormateada = `${partesFecha[2]}/${partesFecha[1]}/${partesFecha[0]}`;
     const totalTextoHtml = document.getElementById("cartTotalText").textContent;
-    let nombreParaMensaje = usuarioLogueado ? usuarioLogueado : "Cliente";
+    let nombreParaMensaje = usuarioLogueado ? usuarioLogueado : "Cliente Invitado";
+
+    // GUARDAR EN CLOUD FIRESTORE EL PEDIDO PARA EL ADMINISTRADOR antes de ir a WhatsApp
+    try {
+        await addDoc(collection(db, "pedidos"), {
+            codigoPedido: stringPedido,
+            cliente: nombreParaMensaje,
+            uidCliente: auth.currentUser ? auth.currentUser.uid : "invitado",
+            productos: carrito,
+            total: totalTextoHtml,
+            fechaRecoleccion: fechaFormateada,
+            horarioRecoleccion: selectHorario.value,
+            fechaCreacion: Date.now()
+        });
+    } catch(err) {
+        console.error("Error al registrar respaldo del pedido en Firestore: ", err);
+    }
      
     const mensajeWhatsApp = `¡Hola, ${nombreParaMensaje}! 👋 Confirmamos que tu pedido en la web ${stringPedido} se ha registrado con éxito. Aquí tienes los detalles:
 
@@ -340,9 +456,10 @@ function finalizarCompraServidor() {
      
     const urlWa = `https://wa.me/529223773794?text=${encodeURIComponent(mensajeWhatsApp)}`;
      
-    mostrarToast("🎉 ¡Pedido listo! Redirigiendo a WhatsApp...");
+    mostrarToast("🎉 ¡Pedido guardado! Redirigiendo a WhatsApp...");
     window.open(urlWa, '_blank');
 
+    // Resetear Carrito
     carrito = [];
     guardarCarritoEnStorage();
     inputFecha.value = "";
@@ -376,38 +493,72 @@ function filtrarCategoria(categoria, e) {
     });
 }
 
-// --- GESTIÓN DE RESEÑAS EN TIEMPO REAL EN EL FRONTEND ---
-function enviarReseña() {
+// --- GESTIÓN DE RESEÑAS CON CLOUD FIRESTORE REAL ---
+async function enviarReseña() {
     const input = document.getElementById("texto-reseña");
     if (!input) return;
 
     const texto = input.value.trim();
     if (texto === "") return;
 
-    const divContenedor = document.getElementById("lista-reseñas");
-    if (divContenedor) {
-        const card = document.createElement("div");
-        card.className = "reseña-card";
+    const nombreUsuario = usuarioLogueado ? usuarioLogueado : "Cliente Invitado";
 
-        const p = document.createElement("p");
-        p.textContent = `"${texto}"`;
+    try {
+        await addDoc(collection(db, "reseñas"), {
+            texto: texto,
+            usuario: nombreUsuario,
+            fecha: Date.now()
+        });
 
-        const userDiv = document.createElement("div");
-        userDiv.className = "reseña-user";
-        userDiv.innerHTML = '<i class="fa-solid fa-circle-user"></i>';
-
-        const span = document.createElement("span");
-        span.textContent = usuarioLogueado ? usuarioLogueado : "Cliente Invitado";
-
-        userDiv.appendChild(span);
-        card.appendChild(p);
-        card.appendChild(userDiv);
-         
-        divContenedor.insertBefore(card, divContenedor.firstChild);
+        mostrarToast("✨ ¡Tu opinión ha sido guardada de forma permanente!");
+        input.value = "";
+        cargarReseñas();
+    } catch (error) {
+        console.error("Error al guardar en Firebase: ", error);
+        alert("No se pudo conectar con el servidor para guardar tu opinión.");
     }
+}
 
-    mostrarToast("✨ ¡Tu opinión ha sido publicada!");
-    input.value = "";
+async function cargarReseñas() {
+    const divContenedor = document.getElementById("lista-reseñas");
+    if (!divContenedor) return;
+
+    divContenedor.innerHTML = ""; 
+
+    try {
+        const q = query(collection(db, "reseñas"), orderBy("fecha", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            divContenedor.innerHTML = '<p class="empty-msg" style="grid-column: 1/-1; text-align: center;">Sé el primero en dejar una opinión sobre nuestro pan artesanal.</p>';
+            return;
+        }
+
+        querySnapshot.forEach((doc) => {
+            const datos = doc.data();
+            
+            const card = document.createElement("div");
+            card.className = "reseña-card";
+
+            const p = document.createElement("p");
+            p.textContent = `"${datos.texto}"`;
+
+            const userDiv = document.createElement("div");
+            userDiv.className = "reseña-user";
+            userDiv.innerHTML = '<i class="fa-solid fa-circle-user"></i>';
+
+            const span = document.createElement("span");
+            span.textContent = datos.usuario;
+
+            userDiv.appendChild(span);
+            card.appendChild(p);
+            card.appendChild(userDiv);
+             
+            divContenedor.appendChild(card);
+        });
+    } catch (error) {
+        console.error("Error al leer de Firebase: ", error);
+    }
 }
 
 window.onload = () => {
@@ -415,7 +566,7 @@ window.onload = () => {
     configurarRestriccionFechas();
     actualidorContadorGlobal();
     actualizarCarritoVisual();
-    actualizarInterfazUsuario();
+    cargarReseñas();
 };
 
 window.onclick = (event) => {
@@ -423,7 +574,6 @@ window.onclick = (event) => {
     if (event.target == modalAuth) closeAuth();
 };
 
-// Vinculación de formularios locales para evitar recarga de página al dar Enter
 function configuracionEventosFormularios() {
     const fLogin = document.getElementById('formLogin');
     const fRegister = document.getElementById('formRegister');
@@ -450,3 +600,4 @@ window.vaciarCarritoCompleto = vaciarCarritoCompleto;
 window.finalizarCompraServidor = finalizarCompraServidor;
 window.filtrarCategoria = filtrarCategoria;
 window.enviarReseña = enviarReseña;
+window.cargarReseñas = cargarReseñas;
