@@ -6,6 +6,7 @@
     <title>Panel de Administración - DULCE AROMA DEL BUEN HORNO</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Estilos específicos y profesionales para el Panel de Control */
         .admin-body {
@@ -20,21 +21,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--crema-suave);
+            background-color: #fff;
             padding: 20px 30px;
             border-radius: 6px;
-            border: 1px solid var(--borde);
+            border: 1px solid #e6d7c3;
             margin-bottom: 30px;
             box-shadow: 0 4px 12px rgba(60,53,48,0.05);
         }
         .admin-header h1 {
             margin: 0;
             font-size: 1.6rem;
-            color: var(--guinda);
+            color: #7a283c;
         }
         .btn-refresh-admin {
-            background-color: var(--guinda);
-            color: var(--blanco);
+            background-color: #7a283c;
+            color: #fff;
             border: none;
             padding: 10px 20px;
             font-weight: 700;
@@ -44,18 +45,38 @@
             align-items: center;
             gap: 8px;
             font-size: 0.85rem;
+            transition: background 0.2s;
         }
         .btn-refresh-admin:hover {
-            background-color: var(--guinda-oscuro);
+            background-color: #5c1e2d;
         }
-        .grid-pedidos-admin {
+        .admin-tabs-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .btn-tab-admin {
+            padding: 10px 25px;
+            background: #e6d7c3;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-tab-admin.active {
+            background: #7a283c;
+            color: white;
+        }
+        .grid-pedidos-admin, .grid-reseñas-admin {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 20px;
         }
-        .card-pedido-admin {
-            background-color: var(--blanco);
-            border: 1px solid var(--borde);
+        .card-pedido-admin, .card-reseña-admin {
+            background-color: #fff;
+            border: 1px solid #e6d7c3;
             border-radius: 6px;
             padding: 20px;
             box-shadow: 0 4px 15px rgba(60,53,48,0.03);
@@ -67,11 +88,14 @@
         .card-pedido-admin.nuevo-pedido {
             border-top: 5px solid #16a34a;
         }
-        .admin-pedido-meta {
+        .card-reseña-admin {
+            border-top: 5px solid #f1c40f;
+        }
+        .admin-pedido-meta, .admin-reseña-meta {
             display: flex;
             justify-content: space-between;
             font-size: 0.8rem;
-            color: var(--texto-mutado);
+            color: #7c726a;
             margin-bottom: 12px;
             border-bottom: 1px solid #f5ebe0;
             padding-bottom: 6px;
@@ -91,6 +115,7 @@
             padding-left: 18px;
             font-size: 0.9rem;
             flex-grow: 1;
+            color: #333;
         }
         .admin-productos-list li {
             margin-bottom: 6px;
@@ -115,15 +140,36 @@
         .admin-total-price {
             font-size: 1.2rem;
             font-weight: 700;
-            color: var(--texto-oscuro);
+            color: #333;
         }
-        .badge-atendido {
-            background-color: #e2e8f0;
-            color: #4a5568;
-            font-size: 0.75rem;
+        .selector-estado-pedido {
+            padding: 5px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: #fdfdfd;
             font-weight: bold;
-            padding: 4px 10px;
-            border-radius: 12px;
+            cursor: pointer;
+        }
+        .btn-eliminar-reseña {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+        .btn-eliminar-reseña:hover {
+            background: #c0392b;
+        }
+        .text-muted {
+            color: #7c726a;
+            font-style: italic;
         }
     </style>
 </head>
@@ -132,16 +178,30 @@
     <div class="admin-container">
         <div class="admin-header">
             <div>
-                <h1><i class="fa-solid fa-store-slash"></i> Panel del Horno: Registro de Ventas</h1>
-                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--texto-mutado);">Monitoreo de pedidos entrantes en la plataforma web.</p>
+                <h1><i class="fa-solid fa-screwdriver-wrench"></i> Panel del Horno: Backoffice General</h1>
+                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #7c726a;">Monitoreo de comandas entrantes y moderación del catálogo y reseñas públicas.</p>
             </div>
-            <button class="btn-refresh-admin" onclick="cargarPedidosAdmin()">
-                <i class="fa-solid fa-rotate"></i> Actualizar Lista
+            <button class="btn-refresh-admin" onclick="actualizarVistaActivaAdmin()">
+                <i class="fa-solid fa-rotate"></i> Sincronizar Nube
             </button>
         </div>
 
-        <div id="contenedorPedidosAdmin" class="grid-pedidos-admin">
-            <p class="text-muted" style="grid-column: 1/-1;">🔄 Cargando base de datos de comandas...</p>
+        <div class="admin-tabs-bar">
+            <button id="tabPedidos" class="btn-tab-admin active" onclick="cambiarSeccionAdmin('pedidos')"><i class="fa-solid fa-receipt"></i> Pedidos Recibidos</button>
+            <button id="tabReseñas" class="btn-tab-admin" onclick="cambiarSeccionAdmin('reseñas')"><i class="fa-solid fa-star"></i> Moderar Opiniones</button>
+            <button class="btn-tab-admin" onclick="regresarAlSitioPublico()" style="margin-left: auto; background: #7c726a; color: white;"><i class="fa-solid fa-arrow-left"></i> Volver a la Tienda</button>
+        </div>
+
+        <div id="seccionPedidosAdmin">
+            <div id="contenedorPedidosAdmin" class="grid-pedidos-admin">
+                <p class="text-muted" style="grid-column: 1/-1;">🔄 Conectando con el horno de Firestore...</p>
+            </div>
+        </div>
+
+        <div id="seccionReseñasAdmin" style="display: none;">
+            <div id="contenedorReseñasAdmin" class="grid-reseñas-admin">
+                <p class="text-muted" style="grid-column: 1/-1;">🔄 Cargando opiniones del servidor...</p>
+            </div>
         </div>
     </div>
 
