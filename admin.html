@@ -10,7 +10,7 @@
     <style>
         /* Estilos específicos y profesionales para el Panel de Control */
         .admin-body {
-            background-color: #f4ece1;
+            background-color: #faf5eb;
             padding: 30px 20px;
         }
         .admin-container {
@@ -24,17 +24,17 @@
             background-color: #fff;
             padding: 20px 30px;
             border-radius: 6px;
-            border: 1px solid #e6d7c3;
+            border: 1px solid #e5d5c0;
             margin-bottom: 30px;
             box-shadow: 0 4px 12px rgba(60,53,48,0.05);
         }
         .admin-header h1 {
             margin: 0;
             font-size: 1.6rem;
-            color: #7a283c;
+            color: #7b5533;
         }
         .btn-refresh-admin {
-            background-color: #7a283c;
+            background-color: #7b5533;
             color: #fff;
             border: none;
             padding: 10px 20px;
@@ -48,7 +48,7 @@
             transition: background 0.2s;
         }
         .btn-refresh-admin:hover {
-            background-color: #5c1e2d;
+            background-color: #4a3220;
         }
         .admin-tabs-bar {
             display: flex;
@@ -57,7 +57,7 @@
         }
         .btn-tab-admin {
             padding: 10px 25px;
-            background: #e6d7c3;
+            background: #e5d5c0;
             border: none;
             border-radius: 4px;
             font-weight: bold;
@@ -66,7 +66,7 @@
             transition: all 0.2s;
         }
         .btn-tab-admin.active {
-            background: #7a283c;
+            background: #7b5533;
             color: white;
         }
         .grid-pedidos-admin, .grid-reseñas-admin {
@@ -76,7 +76,7 @@
         }
         .card-pedido-admin, .card-reseña-admin {
             background-color: #fff;
-            border: 1px solid #e6d7c3;
+            border: 1px solid #e5d5c0;
             border-radius: 6px;
             padding: 20px;
             box-shadow: 0 4px 15px rgba(60,53,48,0.03);
@@ -101,7 +101,7 @@
             padding-bottom: 6px;
         }
         .admin-cliente-info {
-            background-color: #faf6f0;
+            background-color: #fdfaf4;
             padding: 10px;
             border-radius: 4px;
             margin-bottom: 12px;
@@ -171,6 +171,11 @@
             color: #7c726a;
             font-style: italic;
         }
+        .admin-msg-full { grid-column: 1 / -1; }
+        .admin-stars { color: #d4a017; font-size: 0.9rem; margin-bottom: 8px; }
+        .admin-star-empty { color: #ddd; }
+        .admin-reseña-texto { font-size: 0.9rem; color: #333; font-style: italic; margin: 5px 0; }
+        .btn-tab-volver { margin-left: auto; background: #8b7355; color: white; }
     </style>
 </head>
 <body class="admin-body">
@@ -189,7 +194,7 @@
         <div class="admin-tabs-bar">
             <button id="tabPedidos" class="btn-tab-admin active" onclick="cambiarSeccionAdmin('pedidos')"><i class="fa-solid fa-receipt"></i> Pedidos Recibidos</button>
             <button id="tabReseñas" class="btn-tab-admin" onclick="cambiarSeccionAdmin('reseñas')"><i class="fa-solid fa-star"></i> Moderar Opiniones</button>
-            <button class="btn-tab-admin" onclick="regresarAlSitioPublico()" style="margin-left: auto; background: #7c726a; color: white;"><i class="fa-solid fa-arrow-left"></i> Volver a la Tienda</button>
+            <button type="button" class="btn-tab-admin btn-tab-volver" onclick="regresarAlSitioPublico()"><i class="fa-solid fa-arrow-left"></i> Volver a la Tienda</button>
         </div>
 
         <div id="seccionPedidosAdmin">

@@ -1,65 +1,60 @@
-// --- IMPORTACIONES DE FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-    getFirestore, 
-    collection, 
-    getDocs, 
-    query, 
-    orderBy,
-    where,
-    doc,
-    updateDoc,
-    deleteDoc
+import {
+    getFirestore, collection, getDocs, query, orderBy, doc, updateDoc, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { firebaseConfig } from "./firebase-config.js";
 
-// Credenciales unificadas del proyecto
-const firebaseConfig = {
-  apiKey: "AIzaSyCummr4hK95UXm8OoYkSWOBhtDpngpzbwE",
-  authDomain: "dulce-aroma-del-buen-hor-8480a.firebaseapp.com",
-  databaseURL: "https://dulce-aroma-del-buen-hor-8480a-default-rtdb.firebaseio.com",
-  projectId: "dulce-aroma-del-buen-hor-8480a",
-  storageBucket: "dulce-aroma-del-buen-hor-8480a.firebasestorage.app",
-  messagingSenderId: "397232001248",
-  appId: "1:397232001248:web:b60abee05f6ed57af30085"
-};
-
-// Inicializar
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Estado global de la vista activa en el administrador
-let vistaActiva = "pedidos"; 
+let vistaActiva = "pedidos";
+const ADMIN_EMAILS_RESPALDO = ["educyto08@gmail.com"];
 
-// --- CORREO AUTORIZADO COMO ADMINISTRADOR ---
-// Reemplaza este correo por el tuyo real con el que harás pruebas
-const CORREO_ADMINISTRADOR = "educyto08@gmail.com"; 
+function escapeHtml(texto) {
+    const div = document.createElement("div");
+    div.textContent = texto ?? "";
+    return div.innerHTML;
+}
 
-// --- DETECTAR ACCESO Y SEGURIDAD ---
-onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        desviarAIndiceConAlerta("¡Acceso Denegado! ❌", "Debes iniciar sesión en la tienda principal antes de intentar ingresar al panel.");
-    } else if (user.email !== CORREO_ADMINISTRADOR) {
-        desviarAIndiceConAlerta("¡No eres Administrador! 👨‍🍳❌", "Tu cuenta de cliente no cuenta con los permisos necesarios para modificar las comandas.");
-    } else {
-        // Acceso permitido
-        actualizarVistaActivaAdmin();
+async function obtenerEmailsAdmin() {
+    try {
+        const snap = await getDoc(doc(db, "config", "admin"));
+        if (snap.exists() && Array.isArray(snap.data().emails) && snap.data().emails.length > 0) {
+            return snap.data().emails;
+        }
+    } catch (e) {
+        console.warn("No se pudo leer config/admin, usando lista local.", e);
     }
+    return ADMIN_EMAILS_RESPALDO;
+}
+
+async function esUsuarioAdmin(email) {
+    if (!email) return false;
+    const lista = await obtenerEmailsAdmin();
+    return lista.includes(email);
+}
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        desviarAIndiceConAlerta("¡Acceso Denegado! ❌", "Debes iniciar sesión en la tienda principal antes de ingresar al panel.");
+        return;
+    }
+    const permitido = await esUsuarioAdmin(user.email);
+    if (!permitido) {
+        desviarAIndiceConAlerta("¡No eres Administrador! 👨‍🍳❌", "Tu cuenta no tiene permisos para este panel.");
+        return;
+    }
+    actualizarVistaActivaAdmin();
 });
 
 function desviarAIndiceConAlerta(titulo, mensaje) {
-    Swal.fire({
-        title: titulo,
-        text: mensaje,
-        icon: 'error',
-        confirmButtonColor: '#7a283c'
-    }).then(() => {
+    Swal.fire({ title: titulo, text: mensaje, icon: "error", confirmButtonColor: "#7b5533" }).then(() => {
         window.location.href = "index.html";
     });
 }
 
-// --- INTERCAMBIO DE PESTAÑAS ---
 function cambiarSeccionAdmin(seccion) {
     vistaActiva = seccion;
     const divPed = document.getElementById("seccionPedidosAdmin");
@@ -82,123 +77,100 @@ function cambiarSeccionAdmin(seccion) {
 }
 
 function actualizarVistaActivaAdmin() {
-    if (vistaActiva === "pedidos") {
-        cargarPedidosAdmin();
-    } else {
-        cargarReseñasAdmin();
-    }
+    if (vistaActiva === "pedidos") cargarPedidosAdmin();
+    else cargarReseñasAdmin();
 }
 
-// --- FASE 1: GESTIÓN DE PEDIDOS ---
 async function cargarPedidosAdmin() {
     const contenedor = document.getElementById("contenedorPedidosAdmin");
     if (!contenedor) return;
 
-    contenedor.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">🔄 Extrayendo bitácora de comandas...</p>';
+    contenedor.innerHTML = '<p class="text-muted admin-msg-full">🔄 Extrayendo comandas...</p>';
 
     try {
         const q = query(collection(db, "pedidos"), orderBy("fechaCreacion", "desc"));
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
-            contenedor.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">Aún no se registran comandas de pan de parte de tus clientes en la web.</p>';
+            contenedor.innerHTML = '<p class="text-muted admin-msg-full">Aún no hay comandas registradas.</p>';
             return;
         }
 
         contenedor.innerHTML = "";
 
-        snapshot.forEach(async (docSnap) => {
+        snapshot.forEach((docSnap) => {
             const pedido = docSnap.data();
             const idDoc = docSnap.id;
-
-            const card = document.createElement("div");
-            card.className = "card-pedido-admin nuevo-pedido";
-
-            // Listar panes comprados
             let listaProductosHTML = "";
             if (Array.isArray(pedido.productos)) {
-                pedido.productos.forEach(prod => {
-                    listaProductosHTML += `<li><strong>${prod.cantidad}x</strong> ${prod.nombre}</li>`;
+                pedido.productos.forEach((prod) => {
+                    listaProductosHTML += `<li><strong>${prod.cantidad}x</strong> ${escapeHtml(prod.nombre)}</li>`;
                 });
             }
 
-            const fechaCompra = pedido.fechaCreacion ? new Date(pedido.fechaCreacion).toLocaleString() : 'Reciente';
+            const fechaCompra = pedido.fechaCreacion ? new Date(pedido.fechaCreacion).toLocaleString() : "Reciente";
             const estadoActual = pedido.estado || "Recibido 🥖";
 
-            // Buscar si tenemos datos extendidos del cliente
-            let telefonoCliente = "Buscando...";
-            let direccionCliente = "Recoge en Tienda";
-
+            const card = document.createElement("div");
+            card.className = "card-pedido-admin nuevo-pedido";
             card.innerHTML = `
                 <div class="admin-pedido-meta">
-                    <span><strong>Ref:</strong> ${pedido.codigoPedido || '#WEB-XXXX'}</span>
+                    <span><strong>Ref:</strong> ${escapeHtml(pedido.codigoPedido || "#WEB-XXXX")}</span>
                     <span>${fechaCompra}</span>
                 </div>
                 <div class="admin-cliente-info">
-                    <p><i class="fa-solid fa-user"></i> <strong>Cliente:</strong> ${pedido.cliente}</p>
-                    <p><i class="fa-solid fa-map-location-dot"></i> <strong>Dirección:</strong> ${pedido.direccionRecoleccion || 'Recoge en Tienda'}</p>
+                    <p><i class="fa-solid fa-user" aria-hidden="true"></i> <strong>Cliente:</strong> ${escapeHtml(pedido.cliente)}</p>
+                    <p><i class="fa-solid fa-box" aria-hidden="true"></i> <strong>Entrega:</strong> ${escapeHtml(pedido.metodoEntrega || "Recoger en tienda")}</p>
+                    <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <strong>Dirección:</strong> ${escapeHtml(pedido.direccionEntrega || pedido.direccionRecoleccion || "—")}</p>
                 </div>
-                <ul class="admin-productos-list">
-                    ${listaProductosHTML}
-                </ul>
+                <ul class="admin-productos-list">${listaProductosHTML}</ul>
                 <div class="admin-pedido-entrega">
-                    <i class="fa-regular fa-clock"></i> Cita: ${pedido.fechaRecoleccion} | ${pedido.horarioRecoleccion}
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i> Cita: ${escapeHtml(pedido.fechaRecoleccion)} | ${escapeHtml(pedido.horarioRecoleccion)}
                 </div>
                 <div class="admin-total-row">
-                    <span class="admin-total-price">${pedido.total}</span>
-                    <select class="selector-estado-pedido" onchange="cambiarEstadoPedidoEnNube('${idDoc}', this.value)">
-                        <option value="Recibido 🥖" ${estadoActual === 'Recibido 🥖' ? 'selected' : ''}>Recibido 🥖</option>
-                        <option value="En Horno 🔥" ${estadoActual === 'En Horno 🔥' ? 'selected' : ''}>En Horno 🔥</option>
-                        <option value="Listo / Entregado ✅" ${estadoActual === 'Listo / Entregado ✅' ? 'selected' : ''}>Listo / Entregado ✅</option>
+                    <span class="admin-total-price">${escapeHtml(String(pedido.total))}</span>
+                    <select class="selector-estado-pedido" data-pedido-id="${idDoc}" aria-label="Estado del pedido">
+                        <option value="Recibido 🥖" ${estadoActual === "Recibido 🥖" ? "selected" : ""}>Recibido 🥖</option>
+                        <option value="En Horno 🔥" ${estadoActual === "En Horno 🔥" ? "selected" : ""}>En Horno 🔥</option>
+                        <option value="Listo / Entregado ✅" ${estadoActual === "Listo / Entregado ✅" ? "selected" : ""}>Listo / Entregado ✅</option>
                     </select>
                 </div>
             `;
+            card.querySelector(".selector-estado-pedido").addEventListener("change", (e) => {
+                cambiarEstadoPedidoEnNube(idDoc, e.target.value);
+            });
             contenedor.appendChild(card);
         });
-
     } catch (err) {
-        console.error("Error al traer pedidos al admin: ", err);
-        contenedor.innerHTML = '<p class="text-danger" style="grid-column: 1/-1;">Error crítico al consultar Firestore.</p>';
+        console.error(err);
+        contenedor.innerHTML = '<p class="text-danger admin-msg-full">Error al consultar Firestore. Verifica las reglas de seguridad.</p>';
     }
 }
 
 async function cambiarEstadoPedidoEnNube(idDoc, nuevoEstado) {
     try {
-        const pedidoRef = doc(db, "pedidos", idDoc);
-        await updateDoc(pedidoRef, {
-            estado: nuevoEstado
+        await updateDoc(doc(db, "pedidos", idDoc), { estado: nuevoEstado });
+        Swal.mixin({ toast: true, position: "top-end", showConfirmButton: false, timer: 1500 }).fire({
+            icon: "success", title: "Estado actualizado"
         });
-        
-        // Notificación flotante rápida
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 1500,
-            timerProgressBar: true
-        });
-        Toast.fire({
-            icon: 'success',
-            title: 'Estado de comanda actualizado'
-        });
-    } catch(err) {
-        console.error("Error al mutar estado del pedido: ", err);
+    } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "No se pudo actualizar el estado.", "error");
     }
 }
 
-// --- FASE 2: MODERACIÓN DE RESEÑAS ---
 async function cargarReseñasAdmin() {
     const contenedor = document.getElementById("contenedorReseñasAdmin");
     if (!contenedor) return;
 
-    contenedor.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">🔄 Extrayendo opiniones públicas...</p>';
+    contenedor.innerHTML = '<p class="text-muted admin-msg-full">🔄 Cargando opiniones...</p>';
 
     try {
-        const q = query(collection(db, "reseñas"), orderBy("fecha", "desc"));
+        const q = query(collection(db, "resenas"), orderBy("fecha", "desc"));
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
-            contenedor.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">No hay opiniones publicadas por clientes en el feed.</p>';
+            contenedor.innerHTML = '<p class="text-muted admin-msg-full">No hay opiniones publicadas.</p>';
             return;
         }
 
@@ -207,74 +179,59 @@ async function cargarReseñasAdmin() {
         snapshot.forEach((docSnap) => {
             const reseña = docSnap.data();
             const idDoc = docSnap.id;
+            const numEstrellas = reseña.calificacion || 5;
+            let estrellasHTML = '<div class="admin-stars">';
+            for (let i = 1; i <= 5; i++) {
+                estrellasHTML += i <= numEstrellas
+                    ? '<i class="fa-solid fa-star" aria-hidden="true"></i> '
+                    : '<i class="fa-regular fa-star admin-star-empty" aria-hidden="true"></i> ';
+            }
+            estrellasHTML += ` (${numEstrellas}/5)</div>`;
 
             const card = document.createElement("div");
             card.className = "card-reseña-admin";
-
-            // Dibujar estrellas doradas fijas
-            let estrellasHTML = '<div style="color: #f1c40f; font-size: 0.9rem; margin-bottom: 8px;">';
-            const numEstrellas = reseña.calificacion || 5;
-            for (let i = 1; i <= 5; i++) {
-                if (i <= numEstrellas) {
-                    estrellasHTML += '<i class="fa-solid fa-star"></i> ';
-                } else {
-                    estrellasHTML += '<i class="fa-regular fa-star" style="color: #ddd;"></i> ';
-                }
-            }
-            estrellasHTML += ` (${numEstrellas} / 5)</div>`;
-
             card.innerHTML = `
-                <div class="admin-reseña-meta">
-                    <span><strong>Autor:</strong> ${reseña.usuario}</span>
-                </div>
+                <div class="admin-reseña-meta"><span><strong>Autor:</strong> ${escapeHtml(reseña.usuario)}</span></div>
                 ${estrellasHTML}
-                <p style="font-size: 0.9rem; color: #333; font-style: italic; margin: 5px 0;">"${reseña.texto}"</p>
-                <button class="btn-eliminar-reseña" onclick="eliminarReseñaInapropiada('${idDoc}')">
-                    <i class="fa-solid fa-trash-can"></i> ELIMINAR OPINIÓN
+                <p class="admin-reseña-texto">"${escapeHtml(reseña.texto)}"</p>
+                <button type="button" class="btn-eliminar-reseña" data-reseña-id="${idDoc}">
+                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i> ELIMINAR OPINIÓN
                 </button>
             `;
+            card.querySelector(".btn-eliminar-reseña").addEventListener("click", () => eliminarReseñaInapropiada(idDoc));
             contenedor.appendChild(card);
         });
-
     } catch (err) {
-        console.error("Error al cargar reseñas en admin: ", err);
+        console.error(err);
     }
 }
 
 async function eliminarReseñaInapropiada(idDoc) {
-    Swal.fire({
-        title: '¿Eliminar este comentario? 🗑️',
-        text: "Esta opinión desaparecerá permanentemente de la sección pública de testimonios.",
-        icon: 'warning',
+    const result = await Swal.fire({
+        title: "¿Eliminar este comentario? 🗑️",
+        text: "Desaparecerá permanentemente del sitio público.",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#e74c3c',
-        cancelButtonColor: '#7c726a',
-        confirmButtonText: 'Sí, borrar',
-        cancelButtonText: 'Mantener'
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            try {
-                await deleteDoc(doc(db, "reseñas", idDoc));
-                Swal.fire(
-                    '¡Eliminado! 🔥',
-                    'La reseña fue borrada de la base de datos con éxito.',
-                    'success'
-                );
-                cargarReseñasAdmin(); // Recargar el grid
-            } catch(err) {
-                console.error("Error al borrar opinión: ", err);
-            }
-        }
+        confirmButtonColor: "#e74c3c",
+        cancelButtonColor: "#7c726a",
+        confirmButtonText: "Sí, borrar",
+        cancelButtonText: "Mantener"
     });
+    if (!result.isConfirmed) return;
+    try {
+        await deleteDoc(doc(db, "resenas", idDoc));
+        Swal.fire("¡Eliminado! 🔥", "La reseña fue borrada.", "success");
+        cargarReseñasAdmin();
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 function regresarAlSitioPublico() {
     window.location.href = "index.html";
 }
 
-// --- EXPONER ACCIONES A LA VENTANA GLOBAL ---
-window.cambiarSeccionAdmin = cambiarSeccionAdmin;
-window.actualizarVistaActivaAdmin = actualizarVistaActivaAdmin;
-window.cambiarEstadoPedidoEnNube = cambiarEstadoPedidoEnNube;
-window.eliminarReseñaInapropiada = eliminarReseñaInapropiada;
-window.regresarAlSitioPublico = regresarAlSitioPublico;
+Object.assign(window, {
+    cambiarSeccionAdmin, actualizarVistaActivaAdmin, cambiarEstadoPedidoEnNube,
+    eliminarReseñaInapropiada, regresarAlSitioPublico
+});

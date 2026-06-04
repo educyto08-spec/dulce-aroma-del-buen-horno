@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email == 'educyto08@gmail.com';
+    }
+
+    match /usuarios/{docId} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /pedidos/{pedidoId} {
+      allow create: if request.resource.data.keys().hasAll(['codigoPedido', 'productos', 'fechaCreacion']);
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.uidCliente == request.auth.uid);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /resenas/{resenaId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll(['texto', 'usuario', 'fecha']);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /productos/{productoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /config/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
