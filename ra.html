@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Realidad Aumentada — Dulce Aroma del Buen Horno</title>
+    <meta name="description" content="Vista previa en realidad aumentada de nuestra panadería. Escanea el código QR CODIGORA.">
+    <meta name="theme-color" content="#7b5533">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        body.ra-page { margin: 0; min-height: 100dvh; background: linear-gradient(165deg, #f8f4ef 0%, #ebe3d8 100%); font-family: 'Plus Jakarta Sans', sans-serif; color: #3c3530; }
+        .ra-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(123, 85, 51, 0.15); background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10; }
+        .ra-header h1 { font-family: 'Playfair Display', serif; font-size: 1.35rem; margin: 8px 0 4px; color: #5c3d24; }
+        .ra-header p { margin: 0; font-size: 0.85rem; color: #7a6f66; }
+        .ra-back { display: inline-flex; align-items: center; gap: 6px; color: #7b5533; text-decoration: none; font-size: 0.8rem; font-weight: 600; }
+        .ra-viewer-wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 40px; }
+        model-viewer { width: 100%; height: min(62vh, 480px); background: #fff; border-radius: 12px; border: 1px solid rgba(123, 85, 51, 0.2); --poster-color: #f8f4ef; }
+        .ra-hint { text-align: center; font-size: 0.85rem; color: #7a6f66; margin-top: 16px; line-height: 1.5; }
+        .ra-fallback-img { width: 100%; border-radius: 12px; margin-top: 20px; box-shadow: 0 8px 32px rgba(60,53,48,0.1); }
+        .ra-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 24px; }
+        .ra-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
+        .ra-btn-primary { background: #7b5533; color: #fff; }
+        .ra-btn-secondary { background: #fff; color: #7b5533; border: 2px solid #7b5533; }
+    </style>
+</head>
+<body class="ra-page">
+    <header class="ra-header">
+        <a href="index.html" class="ra-back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver a la tienda</a>
+        <h1>Realidad Aumentada</h1>
+        <p>Así se verá nuestra panadería — experiencia CODIGORA</p>
+    </header>
+
+    <main class="ra-viewer-wrap">
+        <model-viewer
+            src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+            alt="Vista previa 3D de la panadería Dulce Aroma"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            touch-action="pan-y"
+            shadow-intensity="1"
+            exposure="1"
+            environment-image="neutral"
+            poster="img/Combo.webp">
+            <button slot="ar-button" class="ra-btn ra-btn-primary" style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);">
+                <i class="fa-solid fa-cube" aria-hidden="true"></i> Ver en tu espacio (AR)
+            </button>
+        </model-viewer>
+
+        <p class="ra-hint">
+            En tu celular, toca <strong>«Ver en tu espacio»</strong> para colocar el modelo con la cámara.
+            Pronto sustituiremos el modelo por el diseño final del local.
+        </p>
+
+        <img src="img/Combo.webp" alt="Referencia visual de la panadería" class="ra-fallback-img" width="720" height="405" loading="lazy">
+
+        <div class="ra-actions">
+            <a href="index.html#productos" class="ra-btn ra-btn-primary"><i class="fa-solid fa-bread-slice" aria-hidden="true"></i> Ver catálogo</a>
+            <a href="https://wa.me/529223773794" class="ra-btn ra-btn-secondary" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp</a>
+        </div>
+    </main>
+</body>
+</html>

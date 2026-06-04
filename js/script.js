@@ -155,35 +155,69 @@ function cerrarMenuMovil() {
 }
 
 // --- Catálogo dinámico ---
+function productoDisponible(p) {
+    return p.disponible !== false;
+}
+
+function fusionarConCatalogoLocal(remotos) {
+    const porId = new Map(PRODUCTOS_CATALOGO.map((p) => [p.id, p]));
+    const porNombre = new Map(PRODUCTOS_CATALOGO.map((p) => [(p.nombre || "").toLowerCase(), p]));
+    const idsIncluidos = new Set();
+
+    const fusionados = remotos.map((r) => {
+        const local = porId.get(r.id) || porNombre.get((r.nombre || "").toLowerCase());
+        if (local) {
+            idsIncluidos.add(local.id);
+            return { ...r, ...local, id: r.id || local.id };
+        }
+        return { ...r, disponible: false, motivoAgotado: "AGOTADO" };
+    });
+
+    PRODUCTOS_CATALOGO.forEach((local) => {
+        if (!idsIncluidos.has(local.id)) fusionados.push(local);
+    });
+
+    return fusionados.length ? fusionados : [...PRODUCTOS_CATALOGO];
+}
+
 function crearTarjetaProducto(p) {
     const nombre = escapeHtml(p.nombre);
     const desc = escapeHtml(p.descripcion);
     const img = escapeHtml(p.img);
     const cat = escapeHtml(p.categoria);
     const precio = Number(p.precio).toFixed(2);
+    const agotado = !productoDisponible(p);
+    const etiquetaAgotado = escapeHtml(p.motivoAgotado || "AGOTADO");
     const badge = p.badge
         ? `<span class="badge-producto ${escapeHtml(p.badge.tipo)}">${escapeHtml(p.badge.texto)}</span>`
         : "";
+    const badgeAgotado = agotado ? `<span class="badge-agotado">${etiquetaAgotado}</span>` : "";
 
     const articulo = document.createElement("article");
-    articulo.className = "item-producto";
+    articulo.className = agotado ? "item-producto item-producto--agotado" : "item-producto";
     articulo.dataset.categoria = cat;
     articulo.dataset.nombre = (p.nombre || "").toLowerCase();
     articulo.dataset.descripcion = (p.descripcion || "").toLowerCase();
+    articulo.dataset.disponible = agotado ? "no" : "si";
     articulo.innerHTML = `
         <div class="img-wrapper">
             ${badge}
+            ${badgeAgotado}
             <img src="${img}" alt="${nombre}" loading="lazy" decoding="async" width="260" height="180"
                  onerror="this.style.display='none';">
         </div>
         <h4>${nombre}</h4>
         <p class="descripcion">${desc}</p>
-        <p class="precio">$${precio}</p>
-        <button type="button" class="btn-pedir"><i class="fa-solid fa-plus" aria-hidden="true"></i> Agregar</button>
+        <p class="precio">${agotado ? '<span class="precio-tachado">$' + precio + '</span> <span class="precio-no-disponible">No disponible</span>' : '$' + precio}</p>
+        <button type="button" class="btn-pedir${agotado ? " btn-pedir--agotado" : ""}" ${agotado ? "disabled" : ""}>
+            <i class="fa-solid ${agotado ? "fa-ban" : "fa-plus"}" aria-hidden="true"></i> ${agotado ? "Agotado" : "Agregar"}
+        </button>
     `;
-    articulo.querySelector(".btn-pedir").addEventListener("click", () => {
-        agregarAlCarrito(p.nombre, Number(p.precio), p.img);
-    });
+    if (!agotado) {
+        articulo.querySelector(".btn-pedir").addEventListener("click", () => {
+            agregarAlCarrito(p.nombre, Number(p.precio), p.img);
+        });
+    }
     return articulo;
 }
 
@@ -200,11 +234,11 @@ async function inicializarCatalogo() {
     if (!grid) return;
     grid.innerHTML = '<p class="catalogo-cargando">Cargando catálogo...</p>';
 
-    let productos = PRODUCTOS_CATALOGO;
+    let productos = [...PRODUCTOS_CATALOGO];
     try {
         const snap = await getDocs(collection(db, "productos"));
         if (!snap.empty) {
-            productos = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            productos = fusionarConCatalogoLocal(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
         }
     } catch (e) {
         console.warn("Catálogo desde Firestore no disponible, usando lista local.", e);
@@ -431,10 +465,51 @@ function actualizarInterfazUsuario() {
     }
 }
 
+function actualizarAvatarPerfil(fotoUrl) {
+    const img = document.getElementById("perfilAvatarImg");
+    const placeholder = document.getElementById("perfilAvatarPlaceholder");
+    if (!img || !placeholder) return;
+    if (fotoUrl) {
+        img.src = fotoUrl;
+        img.hidden = false;
+        placeholder.hidden = true;
+    } else {
+        img.removeAttribute("src");
+        img.hidden = true;
+        placeholder.hidden = false;
+    }
+}
+
+async function manejarFotoPerfil(event) {
+    const file = event.target.files?.[0];
+    if (!file || !idDocumentoUsuarioFirestore) return;
+    if (!file.type.startsWith("image/")) {
+        Swal.fire({ title: "Formato no válido", text: "Elige una imagen JPG o PNG.", icon: "warning", confirmButtonColor: "#7b5533" });
+        return;
+    }
+    if (file.size > 800000) {
+        Swal.fire({ title: "Imagen muy grande", text: "Usa una foto menor a 800 KB.", icon: "warning", confirmButtonColor: "#7b5533" });
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+        try {
+            await updateDoc(doc(db, "usuarios", idDocumentoUsuarioFirestore), { fotoPerfil: reader.result });
+            actualizarAvatarPerfil(reader.result);
+            mostrarToast("Foto de perfil actualizada");
+        } catch (err) {
+            console.error(err);
+            Swal.fire({ title: "No se pudo guardar la foto", icon: "error", confirmButtonColor: "#7b5533" });
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
 async function cargarPerfilUsuario() {
     const user = auth.currentUser;
     if (!user) return;
-    document.getElementById("perfCorreo").innerText = user.email;
+    const elCorreo = document.getElementById("perfCorreo");
+    if (elCorreo) elCorreo.innerText = user.email;
 
     try {
         const qUsuarios = query(collection(db, "usuarios"), where("uid", "==", user.uid));
@@ -444,18 +519,34 @@ async function cargarPerfilUsuario() {
             userSnapshot.forEach((docSnap) => {
                 idDocumentoUsuarioFirestore = docSnap.id;
                 const ud = docSnap.data();
-                document.getElementById("perfNombre").innerText = `${ud.nombre} ${ud.apellidos}`;
-                document.getElementById("perfTelefono").innerText = ud.telefono || "No registrado";
-                document.getElementById("perfDireccion").innerText = ud.direccion || "No registrada";
-                document.getElementById("editPerfNombre").value = ud.nombre || "";
-                document.getElementById("editPerfApellidos").value = ud.apellidos || "";
-                document.getElementById("editPerfTelefono").value = ud.telefono || "";
-                document.getElementById("editPerfDireccion").value = ud.direccion || "";
+                const nombreCompleto = `${ud.nombre || ""} ${ud.apellidos || ""}`.trim();
+                const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+                const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+
+                setText("perfNombre", nombreCompleto || user.email.split("@")[0].toUpperCase());
+                setText("perfTelefono", ud.telefono || "No registrado");
+                setText("perfDireccion", ud.direccion || "No registrada");
+                setText("perfNotas", ud.notas?.trim() ? ud.notas : "Sin notas. Puedes agregar preferencias de pedido o alergias.");
+                setVal("editPerfNombre", ud.nombre || "");
+                setVal("editPerfApellidos", ud.apellidos || "");
+                setVal("editPerfTelefono", ud.telefono || "");
+                setVal("editPerfDireccion", ud.direccion || "");
+                setVal("editPerfNotas", ud.notas || "");
+
+                actualizarAvatarPerfil(ud.fotoPerfil || null);
+
+                const miembro = document.getElementById("perfMiembroDesde");
+                if (miembro && ud.fechaRegistro) {
+                    miembro.textContent = `Cliente desde ${new Date(ud.fechaRegistro).toLocaleDateString("es-MX", { month: "long", year: "numeric" })}`;
+                }
             });
         } else {
             document.getElementById("perfNombre").innerText = user.email.split("@")[0].toUpperCase();
             document.getElementById("perfTelefono").innerText = "No registrado";
             document.getElementById("perfDireccion").innerText = "No registrada";
+            const notasEl = document.getElementById("perfNotas");
+            if (notasEl) notasEl.innerText = "Sin notas.";
+            actualizarAvatarPerfil(null);
             idDocumentoUsuarioFirestore = null;
         }
 
@@ -526,15 +617,16 @@ async function guardarDatosPerfilActualizados() {
     const nuevosApellidos = document.getElementById("editPerfApellidos").value.trim().toUpperCase();
     const nuevoTelefono = document.getElementById("editPerfTelefono").value.trim();
     const nuevaDireccion = document.getElementById("editPerfDireccion").value.trim();
+    const nuevasNotas = document.getElementById("editPerfNotas")?.value.trim() || "";
 
     if (!nuevoNombre || !nuevosApellidos || !nuevoTelefono || !nuevaDireccion) {
-        Swal.fire({ title: "Campos Vacíos ⚠️", text: "Todos los campos son obligatorios.", icon: "warning", confirmButtonColor: "#7b5533" });
+        Swal.fire({ title: "Campos Vacíos ⚠️", text: "Nombre, apellidos, teléfono y dirección son obligatorios.", icon: "warning", confirmButtonColor: "#7b5533" });
         return;
     }
 
     try {
         await updateDoc(doc(db, "usuarios", idDocumentoUsuarioFirestore), {
-            nombre: nuevoNombre, apellidos: nuevosApellidos, telefono: nuevoTelefono, direccion: nuevaDireccion
+            nombre: nuevoNombre, apellidos: nuevosApellidos, telefono: nuevoTelefono, direccion: nuevaDireccion, notas: nuevasNotas
         });
         usuarioLogueado = nuevoNombre;
         actualizarInterfazUsuario();
@@ -564,6 +656,13 @@ function aplicarCupon() {
 }
 
 function agregarAlCarrito(nombre, precio, img) {
+    const card = [...document.querySelectorAll(".item-producto")].find(
+        (el) => el.querySelector("h4")?.textContent === nombre
+    );
+    if (card?.dataset.disponible === "no") {
+        mostrarToast("Este producto no está disponible por ahora.");
+        return;
+    }
     const precioNumerico = parseFloat(precio);
     const itemExistente = carrito.find((item) => item.nombre === nombre);
     if (itemExistente) itemExistente.cantidad += 1;
@@ -896,6 +995,16 @@ function configuracionEventosFormularios() {
 
     document.querySelectorAll(".estrella-voto").forEach((est) => {
         est.addEventListener("click", () => seleccionarEstrellasVoto(est.dataset.valor));
+    });
+
+    document.getElementById("inputFotoPerfil")?.addEventListener("change", manejarFotoPerfil);
+    document.getElementById("btnToggleQrRa")?.addEventListener("click", () => {
+        const panel = document.getElementById("panelQrRa");
+        const btn = document.getElementById("btnToggleQrRa");
+        if (!panel || !btn) return;
+        const abierto = panel.hidden;
+        panel.hidden = !abierto;
+        btn.setAttribute("aria-expanded", abierto ? "true" : "false");
     });
 
     document.getElementById("menuToggle")?.addEventListener("click", () => toggleMenuMovil());

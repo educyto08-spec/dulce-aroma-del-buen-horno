@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="DULCE AROMA DEL BUEN HORNO - Panadería Artesanal">
     <meta property="og:description" content="Pan recién horneado, pedidos en línea y recogida en tienda. Zaragoza.">
-    <meta property="og:image" content="img/Combo.jpeg">
+    <meta property="og:image" content="img/Combo.webp">
     <meta property="og:locale" content="es_MX">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -144,25 +144,55 @@
         </div>
     </aside>
 
-    <aside id="sideCuenta" class="side-panel" role="dialog" aria-labelledby="perfilTitle" aria-modal="true">
+    <aside id="sideCuenta" class="side-panel side-panel-perfil" role="dialog" aria-labelledby="perfilTitle" aria-modal="true">
         <div class="side-header">
             <div>
-                <h2 id="perfilTitle">MI PERFIL</h2>
+                <h2 id="perfilTitle">Mi cuenta</h2>
                 <button type="button" id="btnCerrarSesion" class="btn-link-danger" onclick="cerrarSesionUsuario()">Cerrar sesión</button>
             </div>
             <button type="button" class="close-side" onclick="closeSide('sideCuenta')" aria-label="Cerrar perfil">&times;</button>
         </div>
-        <div class="side-body">
-            <div class="perfil-datos-card">
-                <h4>Datos de Envío y Contacto</h4>
-                <div id="vistaLecturaPerfil">
-                    <p><strong>Nombre:</strong> <span id="perfNombre">Cargando...</span></p>
-                    <p><strong>Correo:</strong> <span id="perfCorreo">Cargando...</span></p>
-                    <p><strong>Teléfono:</strong> <span id="perfTelefono">Cargando...</span></p>
-                    <p><strong>Dirección:</strong> <span id="perfDireccion">Cargando...</span></p>
-                    <button type="button" class="btn-pedir" id="btnActivarEdicionPerf" onclick="conmutarModoEdicionPerfil(true)">EDITAR MIS DATOS</button>
+        <div class="side-body perfil-body">
+            <div class="perfil-hero-card">
+                <div class="perfil-avatar-wrap">
+                    <div class="perfil-avatar" id="perfilAvatarRing">
+                        <img id="perfilAvatarImg" class="perfil-avatar-img" alt="" width="88" height="88" hidden>
+                        <div id="perfilAvatarPlaceholder" class="perfil-avatar-placeholder" aria-hidden="true">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                    </div>
+                    <label class="perfil-cambiar-foto" for="inputFotoPerfil">
+                        <i class="fa-solid fa-camera" aria-hidden="true"></i> Cambiar foto
+                    </label>
+                    <input type="file" id="inputFotoPerfil" accept="image/jpeg,image/png,image/webp" hidden>
                 </div>
-                <div id="vistaFormularioPerfil" class="perfil-formulario">
+                <div class="perfil-hero-texto">
+                    <p class="perfil-nombre-display" id="perfNombre">Cargando...</p>
+                    <p class="perfil-correo-display" id="perfCorreo">—</p>
+                    <p class="perfil-miembro" id="perfMiembroDesde">Cliente registrado</p>
+                </div>
+            </div>
+
+            <div id="vistaLecturaPerfil" class="perfil-secciones">
+                <div class="perfil-datos-card perfil-card-moderna">
+                    <h4><i class="fa-solid fa-address-card" aria-hidden="true"></i> Contacto y entrega</h4>
+                    <dl class="perfil-dl">
+                        <div><dt>Teléfono</dt><dd id="perfTelefono">—</dd></div>
+                        <div><dt>Dirección</dt><dd id="perfDireccion">—</dd></div>
+                    </dl>
+                </div>
+                <div class="perfil-datos-card perfil-card-moderna perfil-notas-card">
+                    <h4><i class="fa-solid fa-note-sticky" aria-hidden="true"></i> Notas personales</h4>
+                    <p class="perfil-notas-texto" id="perfNotas">Sin notas.</p>
+                </div>
+                <button type="button" class="btn-pedir btn-perfil-editar" id="btnActivarEdicionPerf" onclick="conmutarModoEdicionPerfil(true)">
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i> Editar perfil
+                </button>
+            </div>
+
+            <div id="vistaFormularioPerfil" class="perfil-formulario perfil-form-moderno">
+                <div class="perfil-datos-card perfil-card-moderna">
+                    <h4>Editar información</h4>
                     <div class="campo-perfil">
                         <label for="editPerfNombre">Nombre(s)</label>
                         <input type="text" id="editPerfNombre" autocomplete="given-name">
@@ -179,14 +209,19 @@
                         <label for="editPerfDireccion">Dirección completa</label>
                         <input type="text" id="editPerfDireccion" autocomplete="street-address">
                     </div>
+                    <div class="campo-perfil">
+                        <label for="editPerfNotas">Notas (alergias, preferencias, instrucciones)</label>
+                        <textarea id="editPerfNotas" rows="3" placeholder="Ej: Sin nueces, timbre azul, dejar en portería..."></textarea>
+                    </div>
                     <div class="fila-botones-perfil">
-                        <button type="button" class="btn-pedir btn-guardar-perfil" onclick="guardarDatosPerfilActualizados()">GUARDAR</button>
-                        <button type="button" class="btn-pedir btn-cancelar-perfil" onclick="conmutarModoEdicionPerfil(false)">CANCELAR</button>
+                        <button type="button" class="btn-pedir btn-guardar-perfil" onclick="guardarDatosPerfilActualizados()">Guardar cambios</button>
+                        <button type="button" class="btn-pedir btn-cancelar-perfil" onclick="conmutarModoEdicionPerfil(false)">Cancelar</button>
                     </div>
                 </div>
             </div>
+
             <hr class="divisor-perfil">
-            <h4 class="titulo-historial-perfil"><i class="fas fa-history" aria-hidden="true"></i> Mis Pedidos Recientes</h4>
+            <h4 class="titulo-historial-perfil"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Mis pedidos recientes</h4>
             <div id="contenedorHistorialPedidos">
                 <p class="text-muted">Inicia sesión para ver tu historial de pan...</p>
             </div>
@@ -291,12 +326,32 @@
             <div class="card-promocion">
                 <div class="promo-badge">2X1</div>
                 <h4>Martes de Donas</h4>
-                <p>En la compra de cualquier dona de chocolate o azúcar, ¡llévate la segunda completamente gratis!</p>
+                <p>Compra dona de chocolate o azúcar y llévate la segunda gratis. Válido martes en mostrador y pedidos web.</p>
             </div>
             <div class="card-promocion">
-                <div class="promo-badge">COMBO</div>
-                <h4>Paquete Familiar</h4>
-                <p>Llévate nuestro Combo especial con un 15% de descuento directo en tu pedido seleccionándolo en el catálogo.</p>
+                <div class="promo-badge">-15%</div>
+                <h4>Viernes de Roles</h4>
+                <p>15% de descuento en Roles de Canela cada viernes. Cupón en carrito: <strong>HORNO20</strong> (mín. 3 piezas).</p>
+            </div>
+            <div class="card-promocion">
+                <div class="promo-badge">3×2</div>
+                <h4>Empanadas del jueves</h4>
+                <p>Lleva 3 empanadas y paga 2. Ideal para la merienda o para compartir en familia.</p>
+            </div>
+            <div class="card-promocion">
+                <div class="promo-badge">$10</div>
+                <h4>Mañanas de Cuernito</h4>
+                <p>Antes de las 9:00 AM, cuernitos a precio especial de $10 (según disponibilidad del día).</p>
+            </div>
+            <div class="card-promocion">
+                <div class="promo-badge">ENVÍO</div>
+                <h4>Envío bonificado</h4>
+                <p>Pedidos mayores a $250 MXN: envío a domicilio con $15 de descuento en la tarifa (Zaragoza).</p>
+            </div>
+            <div class="card-promocion">
+                <div class="promo-badge">PASTEL</div>
+                <h4>Dúo Marmoleado</h4>
+                <p>Pan de Pastel + Pan Marmoleado juntos con $5 de ahorro al pedir ambos en la misma orden.</p>
             </div>
         </div>
     </section>
@@ -375,6 +430,19 @@
         <p class="footer-location">📍 C Heroes Nacionales colonia Marco Antonio Muñoz  #4</p>
         <p class="footer-horario"><i class="fa-regular fa-clock" aria-hidden="true"></i> Lun–Dom: 7:00 AM – 8:00 PM</p>
         <p class="footer-aviso">Pedidos en línea · Recoge en tienda o envío a domicilio (+$35) · Programa fecha y horario en el carrito</p>
+        <p class="footer-app-pronto" id="footerAppMovil">
+            <i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>
+            App móvil en desarrollo — enlace de descarga próximamente
+        </p>
+        <button type="button" class="footer-link-discreto" id="btnToggleQrRa" aria-expanded="false" aria-controls="panelQrRa">
+            <i class="fa-solid fa-qrcode" aria-hidden="true"></i> Códigos QR / RA
+        </button>
+        <div id="panelQrRa" class="panel-qr-ra" hidden>
+            <p class="panel-qr-titulo">Experiencia RA — CODIGORA</p>
+            <p class="panel-qr-desc">Escanea para ver cómo lucirá nuestra panadería en realidad aumentada.</p>
+            <img src="img/CODIGORA.webp" alt="Código QR CODIGORA para realidad aumentada" width="140" height="140" loading="lazy">
+            <a href="ra.html" class="panel-qr-enlace">Abrir experiencia RA</a>
+        </div>
         <p class="footer-copyright">&copy; 2026 DULCE AROMA DEL BUEN HORNO. Todos los derechos reservados.</p>
     </footer>
 
