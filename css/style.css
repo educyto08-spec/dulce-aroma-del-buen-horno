@@ -1526,3 +1526,12 @@ footer .redes-sociales a:hover { color: var(--dorado); }
     .btn-whatsapp-flotante { bottom: 88px; }
     .sticky-cart-bar.visible ~ .btn-whatsapp-flotante { bottom: 72px; }
 }
+
+#gridProductos {
+    display: grid !important; /* Fuerza el layout */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+    gap: 25px !important;
+    min-height: 200px !important; /* Garantiza altura para que no colapse */
+    opacity: 1 !important;        /* Asegura que no sea transparente */
+    visibility: visible !important;
+}

@@ -263,7 +263,7 @@ function ordenarListaProductos(lista) {
 }
 
 function renderizarCatalogo(lista) {
-    const grid = document.getElementById("grid-productos");
+    const grid = document.getElementById("gridProductos");
     if (!grid) return;
     catalogoActual = lista;
     grid.innerHTML = "";
@@ -273,7 +273,7 @@ function renderizarCatalogo(lista) {
 }
 
 async function inicializarCatalogo() {
-    const grid = document.getElementById("grid-productos");
+    const grid = document.getElementById("gridProductos");
     if (!grid) return;
     grid.innerHTML = '<p class="catalogo-cargando">Cargando catálogo...</p>';
 
