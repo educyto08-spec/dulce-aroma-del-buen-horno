@@ -18,7 +18,29 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Dulce Aroma">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Bakery",
+      "name": "Dulce Aroma del Buen Horno",
+      "description": "Panadería artesanal con horneado diario en Zaragoza, México.",
+      "image": "img/Combo.webp",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "C Heroes Nacionales, Col. Marco Antonio Muñoz #4",
+        "addressLocality": "Zaragoza",
+        "addressCountry": "MX"
+      },
+      "openingHours": "Mo-Su 07:00-20:00",
+      "telephone": "+529223773794",
+      "servesCuisine": "Pan mexicano artesanal",
+      "priceRange": "$$"
+    }
+    </script>
 </head>
 <body>
 
@@ -26,9 +48,11 @@
 
     <div class="top-bar">
         <div class="top-bar-content">
+            <span class="top-bar-live"><span class="pulse-dot" aria-hidden="true"></span> Horno activo · <span id="hornoCountdownLabel">Próximo lote</span> en <strong id="hornoCountdown">--:--</strong></span>
+            <span class="top-bar-sep top-bar-sep-mid">|</span>
             <span><i class="fa-solid fa-wheat-awn" aria-hidden="true"></i> HORNEADO DIARIO</span>
             <span class="top-bar-sep">|</span>
-            <span><i class="fa-solid fa-truck" aria-hidden="true"></i> ENVÍO A DOMICILIO DISPONIBLE</span>
+            <span><i class="fa-solid fa-truck" aria-hidden="true"></i> ENVÍO A DOMICILIO</span>
         </div>
     </div>
 
@@ -174,6 +198,12 @@
             </div>
 
             <div id="vistaLecturaPerfil" class="perfil-secciones">
+                <div class="perfil-datos-card perfil-card-moderna perfil-lealtad-card">
+                    <h4><i class="fa-solid fa-star" aria-hidden="true"></i> Club Dulce Aroma</h4>
+                    <p class="perfil-lealtad-puntos"><span id="perfPuntosLealtad">0</span> panes acumulados</p>
+                    <div class="perfil-lealtad-barra"><div id="perfBarraLealtad" class="perfil-lealtad-fill"></div></div>
+                    <p class="perfil-lealtad-hint">Gana 1 punto por cada pieza en tus pedidos. A 100 puntos: sorpresa del horno.</p>
+                </div>
                 <div class="perfil-datos-card perfil-card-moderna">
                     <h4><i class="fa-solid fa-address-card" aria-hidden="true"></i> Contacto y entrega</h4>
                     <dl class="perfil-dl">
@@ -280,11 +310,12 @@
                 <a href="#inicio">NOSOTROS</a>
                 <a href="#productos">PANES</a>
                 <a href="#promociones">PROMOCIONES</a>
+                <a href="#ubicacion">UBICACIÓN</a>
                 <a href="#proximamente">PRÓXIMAMENTE</a>
                 <a href="#reseñas">OPINIONES</a>
             </nav>
             <div class="header-icons">
-                <button type="button" onclick="enfocarBuscador()" class="icon-link" aria-label="Buscar productos"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+                <button type="button" onclick="window.abrirBusquedaRapida?.()" class="icon-link" aria-label="Búsqueda rápida (Ctrl+K)" title="Ctrl+K"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
                 <div id="userSessionContainer"></div>
                 <button type="button" id="cartNavButton" onclick="openSide('cartSidebar')" class="icon-link cart-icon-wrapper" aria-label="Abrir carrito">
                     <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
@@ -302,10 +333,23 @@
             <p>Recetas tradicionales, ingredientes selectos y el aroma del horno cada mañana. Pide en línea, recoge en tienda o recibe en casa.</p>
             <div class="hero-actions">
                 <button type="button" class="btn-primario" onclick="scrollAlCatalogo()">Ver catálogo</button>
+                <a href="ra.html" class="btn-secundario-hero"><i class="fa-solid fa-cube" aria-hidden="true"></i> Ver en RA</a>
+                <button type="button" class="btn-secundario-hero btn-instalar-app" id="btnInstalarApp" hidden><i class="fa-solid fa-download" aria-hidden="true"></i> Instalar app</button>
                 <a href="https://wa.me/529223773794" class="btn-secundario-hero" target="_blank" rel="noopener noreferrer">WhatsApp</a>
             </div>
         </div>
     </section>
+
+    <div id="promoDelDia" class="promo-dia-banner reveal-on-scroll" role="status">
+        <div class="promo-dia-inner">
+            <span class="promo-dia-icon"><i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i></span>
+            <div>
+                <p class="promo-dia-titulo">Promo del día</p>
+                <p class="promo-dia-desc">Cargando...</p>
+            </div>
+            <a href="#promociones" class="promo-dia-link">Ver todas</a>
+        </div>
+    </div>
 
     <section class="trust-bar" aria-label="Ventajas">
         <div class="trust-bar-inner">
@@ -316,7 +360,15 @@
         </div>
     </section>
 
-    <section id="promociones" class="seccion-promociones">
+    <section class="destacados-seccion reveal-on-scroll" aria-label="Más pedidos">
+        <div class="destacados-header">
+            <h3><i class="fa-solid fa-fire" aria-hidden="true"></i> Lo más pedido hoy</h3>
+            <button type="button" class="btn-link-subtle" onclick="scrollAlCatalogo()">Ver todo</button>
+        </div>
+        <div id="destacadosTrack" class="destacados-track"></div>
+    </section>
+
+    <section id="promociones" class="seccion-promociones reveal-on-scroll">
         <header class="section-header">
             <span class="section-eyebrow">Ofertas</span>
             <h2>Promociones de la semana</h2>
@@ -356,7 +408,7 @@
         </div>
     </section>
 
-    <section id="productos" class="productos-seccion">
+    <section id="productos" class="productos-seccion reveal-on-scroll">
         <header class="section-header section-header-left">
             <span class="section-eyebrow">Catálogo</span>
             <h2>Nuestro pan</h2>
@@ -365,6 +417,29 @@
         <div class="contenedor-buscador-pan">
             <i class="fa-solid fa-magnifying-glass icono-busqueda" aria-hidden="true"></i>
             <input type="search" id="inputBuscador" placeholder="Buscar por nombre, descripción o categoría..." aria-label="Buscar productos">
+            <kbd class="busqueda-kbd" aria-hidden="true">Ctrl K</kbd>
+        </div>
+        <div class="catalogo-toolbar">
+            <label class="toolbar-toggle">
+                <input type="checkbox" id="toggleSoloDisponibles">
+                <span>Solo disponibles</span>
+            </label>
+            <label class="toolbar-toggle">
+                <input type="checkbox" id="toggleSoloFavoritos">
+                <span><i class="fa-solid fa-heart" aria-hidden="true"></i> Favoritos</span>
+            </label>
+            <label class="toolbar-orden">
+                <span>Ordenar</span>
+                <select id="selectOrdenCatalogo">
+                    <option value="default">Disponibles primero</option>
+                    <option value="precio-asc">Precio: menor a mayor</option>
+                    <option value="precio-desc">Precio: mayor a menor</option>
+                    <option value="nombre">Nombre A–Z</option>
+                </select>
+            </label>
+            <button type="button" class="btn-repetir-pedido" onclick="repetirUltimoPedido()">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Repetir último pedido
+            </button>
         </div>
         <div class="categorias-bar" role="tablist" aria-label="Categorías de productos">
             <button type="button" class="btn-categoria active" data-categoria="todos">TODOS</button>
@@ -381,7 +456,49 @@
         </div>
     </section>
 
-    <section id="proximamente" class="seccion-proximamente">
+    <section id="ubicacion" class="seccion-ubicacion reveal-on-scroll">
+        <header class="section-header">
+            <span class="section-eyebrow">Visítanos</span>
+            <h2>Encuéntranos en Zaragoza</h2>
+            <p class="section-desc">Recoge tu pedido o pide envío a domicilio en la zona</p>
+        </header>
+        <div class="ubicacion-grid">
+            <div class="ubicacion-info">
+                <div class="ubicacion-card">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <div>
+                        <strong>Dirección</strong>
+                        <p>C Heroes Nacionales, Col. Marco Antonio Muñoz #4, Zaragoza</p>
+                    </div>
+                </div>
+                <div class="ubicacion-card">
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <div>
+                        <strong>Horario</strong>
+                        <p>Lunes a domingo · 7:00 AM – 8:00 PM</p>
+                    </div>
+                </div>
+                <div class="ubicacion-card">
+                    <i class="fa-solid fa-motorcycle" aria-hidden="true"></i>
+                    <div>
+                        <strong>Envío</strong>
+                        <p>Disponible en Zaragoza · +$35 MXN</p>
+                    </div>
+                </div>
+                <a href="https://wa.me/529223773794" class="btn-primario ubicacion-cta" target="_blank" rel="noopener noreferrer">Pedir por WhatsApp</a>
+            </div>
+            <div class="ubicacion-mapa">
+                <iframe
+                    title="Mapa Dulce Aroma del Buen Horno"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    src="https://maps.google.com/maps?q=Zaragoza+Veracruz+Mexico+panaderia&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                    allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+
+    <section id="proximamente" class="seccion-proximamente reveal-on-scroll">
         <header class="section-header">
             <span class="section-eyebrow">En el horno</span>
             <h2>Próximamente</h2>
@@ -401,7 +518,7 @@
         </div>
     </section>
 
-    <section id="reseñas" class="seccion-reseñas">
+    <section id="reseñas" class="seccion-reseñas reveal-on-scroll">
         <header class="section-header">
             <span class="section-eyebrow">Comunidad</span>
             <h2>Lo que dicen nuestros clientes</h2>
@@ -443,8 +560,57 @@
             <img src="img/CODIGORA.webp" alt="Código QR CODIGORA para realidad aumentada" width="140" height="140" loading="lazy">
             <a href="ra.html" class="panel-qr-enlace">Abrir experiencia RA</a>
         </div>
+        <form id="formNewsletter" class="newsletter-footer">
+            <p class="newsletter-titulo">Recibe promos en tu correo</p>
+            <div class="newsletter-fila">
+                <input type="email" name="email" placeholder="tu@correo.com" required aria-label="Correo para newsletter">
+                <button type="submit">Suscribirme</button>
+            </div>
+        </form>
         <p class="footer-copyright">&copy; 2026 DULCE AROMA DEL BUEN HORNO. Todos los derechos reservados.</p>
     </footer>
+
+    <div id="stickyCartBar" class="sticky-cart-bar" aria-live="polite">
+        <div class="sticky-cart-info">
+            <span class="sticky-cart-count">0</span> en tu bolsa
+            <strong class="sticky-cart-total">$0.00</strong>
+        </div>
+        <button type="button" class="btn-primario sticky-cart-btn" onclick="openSide('cartSidebar')">Ver carrito</button>
+    </div>
+
+    <button type="button" id="btnBackTop" class="btn-back-top" aria-label="Volver arriba"><i class="fa-solid fa-chevron-up" aria-hidden="true"></i></button>
+
+    <div id="modalVistaRapida" class="modal-vista-rapida" hidden role="dialog" aria-modal="true" aria-labelledby="vrNombre">
+        <div class="modal-vr-content">
+            <button type="button" id="btnCerrarVistaRapida" class="close-side modal-vr-close" aria-label="Cerrar">&times;</button>
+            <div class="modal-vr-grid">
+                <div class="modal-vr-img-wrap">
+                    <img id="vrImg" src="" alt="" width="400" height="300">
+                </div>
+                <div class="modal-vr-body">
+                    <span id="vrCat" class="modal-vr-cat"></span>
+                    <h3 id="vrNombre"></h3>
+                    <p id="vrDesc" class="modal-vr-desc"></p>
+                    <p id="vrPrecio" class="modal-vr-precio"></p>
+                    <div class="modal-vr-actions">
+                        <button type="button" id="vrAgregar" class="btn-pedir btn-vr-agregar"></button>
+                        <button type="button" id="vrFavorito" class="btn-favorito-grande" aria-label="Agregar a favoritos"><i class="fa-regular fa-heart"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="commandPalette" class="command-palette" hidden role="dialog" aria-label="Búsqueda rápida">
+        <div class="command-palette-inner">
+            <div class="command-input-wrap">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" id="commandInput" placeholder="Buscar panes, donas, pasteles..." autocomplete="off">
+                <kbd>Esc</kbd>
+            </div>
+            <div id="commandResults" class="command-results"></div>
+        </div>
+    </div>
 
     <a href="https://wa.me/529223773794" class="btn-whatsapp-flotante" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
         <i class="fab fa-whatsapp" aria-hidden="true"></i>

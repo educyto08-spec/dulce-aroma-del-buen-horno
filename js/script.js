@@ -9,8 +9,10 @@ import {
     firebaseConfig, WHATSAPP_NUMERO, CARRITO_STORAGE_KEY, CARRITO_STORAGE_LEGACY, COSTO_ENVIO_DOMICILIO
 } from "./firebase-config.js";
 import { PRODUCTOS_CATALOGO, ETIQUETAS_CATEGORIA } from "./productos.js";
+import { alternarFavorito, esFavorito, iniciarExperiencia, sumarPuntos, obtenerPuntos } from "./experiencia.js";
 
 const app = initializeApp(firebaseConfig);
+const ULTIMO_PEDIDO_KEY = "dulce-aroma-ultimo-pedido";
 const db = getFirestore(app);
 const auth = getAuth(app);
 
@@ -23,6 +25,10 @@ let idDocumentoUsuarioFirestore = null;
 let cuponAplicado = null;
 let descuentoActual = 0;
 let metodoEntrega = "tienda";
+let catalogoActual = [];
+let soloDisponibles = false;
+let soloFavoritos = false;
+let ordenCatalogo = "default";
 
 function calcularResumenCarrito() {
     const subtotal = carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
@@ -185,26 +191,35 @@ function crearTarjetaProducto(p) {
     const desc = escapeHtml(p.descripcion);
     const img = escapeHtml(p.img);
     const cat = escapeHtml(p.categoria);
-    const precio = Number(p.precio).toFixed(2);
+    const precioNum = Number(p.precio);
+    const precio = precioNum.toFixed(2);
     const agotado = !productoDisponible(p);
     const etiquetaAgotado = escapeHtml(p.motivoAgotado || "AGOTADO");
+    const favActivo = esFavorito(p.id);
     const badge = p.badge
         ? `<span class="badge-producto ${escapeHtml(p.badge.tipo)}">${escapeHtml(p.badge.texto)}</span>`
         : "";
     const badgeAgotado = agotado ? `<span class="badge-agotado">${etiquetaAgotado}</span>` : "";
 
     const articulo = document.createElement("article");
-    articulo.className = agotado ? "item-producto item-producto--agotado" : "item-producto";
+    articulo.className = `item-producto reveal-on-scroll${agotado ? " item-producto--agotado" : ""}`;
+    articulo.dataset.id = p.id;
     articulo.dataset.categoria = cat;
     articulo.dataset.nombre = (p.nombre || "").toLowerCase();
     articulo.dataset.descripcion = (p.descripcion || "").toLowerCase();
     articulo.dataset.disponible = agotado ? "no" : "si";
+    articulo.dataset.precio = String(precioNum);
+    articulo.dataset.favorito = favActivo ? "si" : "no";
     articulo.innerHTML = `
-        <div class="img-wrapper">
+        <div class="img-wrapper producto-img-click">
             ${badge}
             ${badgeAgotado}
+            <button type="button" class="btn-favorito${favActivo ? " activo" : ""}" aria-label="Guardar en favoritos" aria-pressed="${favActivo ? "true" : "false"}">
+                <i class="fa-${favActivo ? "solid" : "regular"} fa-heart" aria-hidden="true"></i>
+            </button>
             <img src="${img}" alt="${nombre}" loading="lazy" decoding="async" width="260" height="180"
                  onerror="this.style.display='none';">
+            <span class="overlay-ver-detalle"><i class="fa-solid fa-expand" aria-hidden="true"></i> Ver detalle</span>
         </div>
         <h4>${nombre}</h4>
         <p class="descripcion">${desc}</p>
@@ -213,20 +228,48 @@ function crearTarjetaProducto(p) {
             <i class="fa-solid ${agotado ? "fa-ban" : "fa-plus"}" aria-hidden="true"></i> ${agotado ? "Agotado" : "Agregar"}
         </button>
     `;
+
+    articulo.querySelector(".btn-favorito").addEventListener("click", (e) => {
+        e.stopPropagation();
+        const on = alternarFavorito(p.id);
+        const btn = e.currentTarget;
+        btn.classList.toggle("activo", on);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.querySelector("i").className = `fa-${on ? "solid" : "regular"} fa-heart`;
+        articulo.dataset.favorito = on ? "si" : "no";
+        if (soloFavoritos) aplicarFiltrosVisuales();
+    });
+
+    articulo.querySelector(".producto-img-click").addEventListener("click", (e) => {
+        if (e.target.closest(".btn-favorito")) return;
+        window.abrirVistaRapida?.(p.id);
+    });
+
     if (!agotado) {
         articulo.querySelector(".btn-pedir").addEventListener("click", () => {
-            agregarAlCarrito(p.nombre, Number(p.precio), p.img);
+            agregarAlCarrito(p.nombre, precioNum, p.img);
         });
     }
     return articulo;
 }
 
+function ordenarListaProductos(lista) {
+    const copia = [...lista];
+    if (ordenCatalogo === "precio-asc") copia.sort((a, b) => Number(a.precio) - Number(b.precio));
+    else if (ordenCatalogo === "precio-desc") copia.sort((a, b) => Number(b.precio) - Number(a.precio));
+    else if (ordenCatalogo === "nombre") copia.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || "", "es"));
+    else copia.sort((a, b) => (productoDisponible(b) ? 1 : 0) - (productoDisponible(a) ? 1 : 0));
+    return copia;
+}
+
 function renderizarCatalogo(lista) {
     const grid = document.getElementById("grid-productos");
     if (!grid) return;
+    catalogoActual = lista;
     grid.innerHTML = "";
-    lista.forEach((p) => grid.appendChild(crearTarjetaProducto(p)));
+    ordenarListaProductos(lista).forEach((p) => grid.appendChild(crearTarjetaProducto(p)));
     aplicarFiltrosVisuales();
+    document.dispatchEvent(new CustomEvent("catalogo:listo", { detail: { catalogo: lista } }));
 }
 
 async function inicializarCatalogo() {
@@ -259,8 +302,10 @@ function aplicarFiltrosVisuales() {
 
         const coincideCategoria = categoriaActiva === "todos" || cat === categoriaActiva;
         const coincideTexto = !texto || nombre.includes(texto) || desc.includes(texto) || etiquetaCat.includes(texto) || cat.includes(texto);
+        const pasaDisponible = !soloDisponibles || producto.dataset.disponible === "si";
+        const pasaFavorito = !soloFavoritos || producto.dataset.favorito === "si";
 
-        const mostrar = coincideCategoria && coincideTexto;
+        const mostrar = coincideCategoria && coincideTexto && pasaDisponible && pasaFavorito;
         producto.style.display = mostrar ? "flex" : "none";
         if (mostrar) visibles++;
     });
@@ -534,6 +579,7 @@ async function cargarPerfilUsuario() {
                 setVal("editPerfNotas", ud.notas || "");
 
                 actualizarAvatarPerfil(ud.fotoPerfil || null);
+                actualizarTarjetaLealtad();
 
                 const miembro = document.getElementById("perfMiembroDesde");
                 if (miembro && ud.fechaRegistro) {
@@ -592,6 +638,35 @@ async function cargarPerfilUsuario() {
         document.getElementById("contenedorHistorialPedidos").innerHTML =
             '<p class="text-muted">Error al cargar el historial. Intenta más tarde.</p>';
     }
+}
+
+function actualizarTarjetaLealtad() {
+    const puntos = obtenerPuntos();
+    const el = document.getElementById("perfPuntosLealtad");
+    const bar = document.getElementById("perfBarraLealtad");
+    const meta = 100;
+    if (el) el.textContent = String(puntos);
+    if (bar) bar.style.width = `${Math.min(100, (puntos % meta) / meta * 100)}%`;
+}
+
+function repetirUltimoPedido() {
+    let ultimo;
+    try { ultimo = JSON.parse(localStorage.getItem(ULTIMO_PEDIDO_KEY)); } catch { ultimo = null; }
+    if (!ultimo?.productos?.length) {
+        Swal.fire({ title: "Sin pedido previo", text: "Aún no tienes un pedido guardado para repetir.", icon: "info", confirmButtonColor: "#7b5533" });
+        return;
+    }
+    ultimo.productos.forEach((item) => {
+        const existente = carrito.find((c) => c.nombre === item.nombre);
+        if (existente) existente.cantidad += item.cantidad || 1;
+        else carrito.push({ ...item, cantidad: item.cantidad || 1 });
+    });
+    guardarCarritoEnStorage();
+    actualidorContadorGlobal();
+    actualizarCarritoVisual();
+    document.dispatchEvent(new CustomEvent("carrito:actualizado", { detail: { carrito } }));
+    openSide("cartSidebar");
+    mostrarToast("Pedido anterior agregado al carrito");
 }
 
 function conmutarModoEdicionPerfil(activarFormulario) {
@@ -671,6 +746,7 @@ function agregarAlCarrito(nombre, precio, img) {
     guardarCarritoEnStorage();
     actualidorContadorGlobal();
     actualizarCarritoVisual();
+    document.dispatchEvent(new CustomEvent("carrito:actualizado", { detail: { carrito } }));
     mostrarToast(`¡${nombre} agregado a la bolsa! 🥐`);
 
     const badge = document.getElementById("cartCount");
@@ -746,6 +822,7 @@ function cambiarCantidad(index, cambio) {
     guardarCarritoEnStorage();
     actualidorContadorGlobal();
     actualizarCarritoVisual();
+    document.dispatchEvent(new CustomEvent("carrito:actualizado", { detail: { carrito } }));
 }
 
 function vaciarCarritoCompleto() {
@@ -767,6 +844,7 @@ function vaciarCarritoCompleto() {
         guardarCarritoEnStorage();
         actualidorContadorGlobal();
         actualizarCarritoVisual();
+        document.dispatchEvent(new CustomEvent("carrito:actualizado", { detail: { carrito } }));
         const inputFecha = document.getElementById("fechaEntrega");
         const selectHorario = document.getElementById("horarioEntrega");
         if (inputFecha) inputFecha.value = "";
@@ -781,6 +859,7 @@ function vaciarCarritoCompleto() {
 
 function guardarCarritoEnStorage() {
     localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(carrito));
+    window.carritoActual = carrito;
 }
 
 function configurarRestriccionFechas() {
@@ -902,10 +981,16 @@ ${esDomicilio ? `📍 ${direccionPedido}\n` : ""}💵 Total: ${totalTextoHtml}
 
 ¡Gracias por tu preferencia! ✨`;
 
+    const unidadesPedido = carrito.reduce((s, i) => s + i.cantidad, 0);
+    localStorage.setItem(ULTIMO_PEDIDO_KEY, JSON.stringify({ productos: [...carrito], fecha: Date.now() }));
+    sumarPuntos(unidadesPedido);
+    actualizarTarjetaLealtad();
+
     mostrarToast("🎉 ¡Pedido guardado! Redirigiendo a WhatsApp...");
     window.open(`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensajeWhatsApp)}`, "_blank");
 
     carrito = [];
+    document.dispatchEvent(new CustomEvent("carrito:actualizado", { detail: { carrito } }));
     cuponAplicado = null;
     descuentoActual = 0;
     guardarCarritoEnStorage();
@@ -1023,15 +1108,34 @@ function configuracionEventosFormularios() {
     });
 }
 
+function configurarToolbarCatalogo() {
+    document.getElementById("toggleSoloDisponibles")?.addEventListener("change", (e) => {
+        soloDisponibles = e.target.checked;
+        aplicarFiltrosVisuales();
+    });
+    document.getElementById("toggleSoloFavoritos")?.addEventListener("change", (e) => {
+        soloFavoritos = e.target.checked;
+        aplicarFiltrosVisuales();
+    });
+    document.getElementById("selectOrdenCatalogo")?.addEventListener("change", (e) => {
+        ordenCatalogo = e.target.value;
+        renderizarCatalogo(catalogoActual);
+    });
+}
+
 function init() {
     migrarCarritoStorage();
+    window.carritoActual = carrito;
     configuracionEventosFormularios();
+    configurarToolbarCatalogo();
     configurarRestriccionFechas();
     configurarMetodoEntrega();
     actualizarCarritoVisual();
     seleccionarEstrellasVoto(5);
     inicializarCatalogo();
     cargarReseñas();
+    iniciarExperiencia(() => catalogoActual);
+    actualizarTarjetaLealtad();
 
     const modalAuth = document.getElementById("modalAuth");
     modalAuth?.addEventListener("click", (e) => { if (e.target === modalAuth) closeAuth(); });
@@ -1045,5 +1149,5 @@ Object.assign(window, {
     cerrarSesionUsuario, agregarAlCarrito, cambiarCantidad, vaciarCarritoCompleto,
     finalizarCompraServidor, filtrarCategoria, seleccionarEstrellasVoto, enviarReseña,
     cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
-    guardarDatosPerfilActualizados, aplicarCupon
+    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast
 });

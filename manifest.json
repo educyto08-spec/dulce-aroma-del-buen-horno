@@ -1,0 +1,32 @@
+{
+  "name": "Dulce Aroma del Buen Horno",
+  "short_name": "Dulce Aroma",
+  "description": "Pan artesanal horneado diario en Zaragoza. Pide en línea.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8f3ea",
+  "theme_color": "#7b5533",
+  "lang": "es-MX",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "img/Combo.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["food", "shopping"],
+  "shortcuts": [
+    {
+      "name": "Ver catálogo",
+      "url": "/index.html#productos",
+      "description": "Explorar panes disponibles"
+    },
+    {
+      "name": "Realidad Aumentada",
+      "url": "/ra.html",
+      "description": "Experiencia CODIGORA"
+    }
+  ]
+}
