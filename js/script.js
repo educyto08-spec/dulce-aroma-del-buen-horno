@@ -1151,7 +1151,7 @@ init();
 
 // --- Integración Nativa: Manejo del botón "Atrás" ---
 document.addEventListener("deviceready", () => {
-    document.addEventListener("bac	kbutton", (e) => {
+    document.addEventListener("backbutton", (e) => {
         const cart = document.getElementById("cartSidebar");
         const account = document.getElementById("sideCuenta");
         const auth = document.getElementById("modalAuth");
