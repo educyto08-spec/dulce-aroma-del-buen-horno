@@ -8,7 +8,7 @@ import {
 import {
     firebaseConfig, WHATSAPP_NUMERO, CARRITO_STORAGE_KEY, CARRITO_STORAGE_LEGACY, COSTO_ENVIO_DOMICILIO
 } from "./firebase-config.js";
-import { PRODUCTOS_CATALOGO, ETIQUETAS_CATEGORIA } from "js/productos.js";
+import { PRODUCTOS_CATALOGO, ETIQUETAS_CATEGORIA } from "./productos.js";
 import { alternarFavorito, esFavorito, iniciarExperiencia, sumarPuntos, obtenerPuntos } from "./experiencia.js";
 
 const app = initializeApp(firebaseConfig);
@@ -1123,31 +1123,58 @@ function configurarToolbarCatalogo() {
     });
 }
 
-function init() {
-    // Esto asegura que la App no inicie hasta que el celular esté listo
-    document.addEventListener("deviceready", () => {
-        migrarCarritoStorage();
-        window.carritoActual = carrito;
-        configuracionEventosFormularios();
-        configurarToolbarCatalogo();
-        configurarRestriccionFechas();
-        configurarMetodoEntrega();
-        actualizarCarritoVisual();
-        seleccionarEstrellasVoto(5);
-        inicializarCatalogo();
-        cargarReseñas();
-        iniciarExperiencia(() => catalogoActual);
-        actualizarTarjetaLealtad();
+function arrancarApp() {
+    console.log("Iniciando App Dulce Aroma...");
+    migrarCarritoStorage();
+    window.carritoActual = carrito;
+    configuracionEventosFormularios();
+    configurarToolbarCatalogo();
+    configurarRestriccionFechas();
+    configurarMetodoEntrega();
+    actualizarCarritoVisual();
+    seleccionarEstrellasVoto(5);
+    inicializarCatalogo();
+    cargarReseñas();
+    iniciarExperiencia(() => catalogoActual);
+    actualizarTarjetaLealtad();
 
-        const modalAuth = document.getElementById("modalAuth");
-        modalAuth?.addEventListener("click", (e) => { if (e.target === modalAuth) closeAuth(); });
-        
-        console.log("App Dulce Aroma: Lista para operar.");
+    const modalAuth = document.getElementById("modalAuth");
+    modalAuth?.addEventListener("click", (e) => { if (e.target === modalAuth) closeAuth(); });
+    
+    console.log("App Dulce Aroma: Lista para operar.");
+}
+
+// Inicializamos la app detectando el entorno
+if (window.cordova !== undefined) {
+    document.addEventListener("deviceready", arrancarApp, false);
+} else {
+    // Si no es móvil, arranca al cargar el HTML
+    document.addEventListener("DOMContentLoaded", arrancarApp);
+}
+
+// --- Integración Nativa: Manejo del botón "Atrás" (Solo si es móvil) ---
+if (window.cordova !== undefined) {
+    document.addEventListener("deviceready", () => {
+        document.addEventListener("backbutton", (e) => {
+            const cart = document.getElementById("cartSidebar");
+            const account = document.getElementById("sideCuenta");
+            const auth = document.getElementById("modalAuth");
+
+            if (cart?.classList.contains("active")) closeSide("cartSidebar");
+            else if (account?.classList.contains("active")) closeSide("sideCuenta");
+            else if (auth?.style.display === "flex") closeAuth();
+        }, false);
     }, false);
 }
 
-// Inicializamos la app
-init();
+Object.assign(window, {
+    scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,
+    openAuth, closeAuth, switchTab, togglePasswordVisibility,
+    cerrarSesionUsuario, agregarAlCarrito, cambiarCantidad, vaciarCarritoCompleto,
+    finalizarCompraServidor, filtrarCategoria, seleccionarEstrellasVoto, enviarReseña,
+    cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
+    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast
+});
 
 // --- Integración Nativa: Manejo del botón "Atrás" ---
 document.addEventListener("deviceready", () => {
