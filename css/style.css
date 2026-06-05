@@ -1050,7 +1050,29 @@ footer p { margin: 6px 0; font-size: 0.85rem; }
     .metodo-entrega-grid { grid-template-columns: 1fr; }
     .cart-items-list { max-height: 28vh; }
     .hero { min-height: 440px; padding: 80px 20px 70px; }
+    
+   /* Nueva corrección para el header */
+    .header-icons {
+        gap: 5px !important; /* Más estrecho */
+    }
+
+    #userSessionContainer {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Forzamos que el botón de sesión no tenga márgenes que empujen */
+    .icon-link {
+        margin: 0 !important;
+        padding: 5px !important;
+    }
+
+    /* Ocultamos el texto de forma más agresiva */
+    #userSessionContainer .link-sesion-texto {
+        display: none !important;
+    }
 }
+
 
 /* --- Tienda premium: header, secciones, productos --- */
 .top-bar-content { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }

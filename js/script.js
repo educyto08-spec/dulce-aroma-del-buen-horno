@@ -502,11 +502,13 @@ function actualizarInterfazUsuario() {
             <button type="button" class="icon-link btn-link-danger link-sesion-texto" onclick="cerrarSesionUsuario()">SALIR</button>
         `;
     } else {
-        container.innerHTML = `
-            <button type="button" onclick="openAuth()" class="icon-link link-sesion-texto" aria-label="Iniciar sesión">
-                <i class="fa-regular fa-user" aria-hidden="true"></i> <span class="link-sesion-texto">INICIAR SESIÓN</span>
-            </button>
-        `;
+        // MODIFICACIÓN:
+container.innerHTML = `
+    <button type="button" onclick="openAuth()" class="icon-link" aria-label="Iniciar sesión">
+        <i class="fa-regular fa-user" aria-hidden="true"></i> 
+        <span class="link-sesion-texto">INICIAR SESIÓN</span>
+    </button>
+`;
     }
 }
 
