@@ -8,7 +8,7 @@ import {
 import {
     firebaseConfig, WHATSAPP_NUMERO, CARRITO_STORAGE_KEY, CARRITO_STORAGE_LEGACY, COSTO_ENVIO_DOMICILIO
 } from "./firebase-config.js";
-import { PRODUCTOS_CATALOGO, ETIQUETAS_CATEGORIA } from "./productos.js";
+import { PRODUCTOS_CATALOGO, ETIQUETAS_CATEGORIA } from "js/productos.js";
 import { alternarFavorito, esFavorito, iniciarExperiencia, sumarPuntos, obtenerPuntos } from "./experiencia.js";
 
 const app = initializeApp(firebaseConfig);
@@ -272,20 +272,21 @@ function renderizarCatalogo(lista) {
     document.dispatchEvent(new CustomEvent("catalogo:listo", { detail: { catalogo: lista } }));
 }
 
-function inicializarCatalogo() {
+async function inicializarCatalogo() {
     const grid = document.getElementById("grid-productos");
     if (!grid) return;
+    grid.innerHTML = '<p class="catalogo-cargando">Cargando catálogo...</p>';
 
-    // Usamos el catálogo local directamente, sin esperar a Firebase
-    console.log("Cargando catálogo local...");
-    const productos = [...PRODUCTOS_CATALOGO];
-    
-    // Renderizamos de inmediato
+    let productos = [...PRODUCTOS_CATALOGO];
+    try {
+        const snap = await getDocs(collection(db, "productos"));
+        if (!snap.empty) {
+            productos = fusionarConCatalogoLocal(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        }
+    } catch (e) {
+        console.warn("Catálogo desde Firestore no disponible, usando lista local.", e);
+    }
     renderizarCatalogo(productos);
-    
-    // Quitamos el mensaje de cargando
-    const mensajeCarga = grid.querySelector('.catalogo-cargando');
-    if (mensajeCarga) mensajeCarga.remove();
 }
 
 function aplicarFiltrosVisuales() {
@@ -1150,7 +1151,7 @@ init();
 
 // --- Integración Nativa: Manejo del botón "Atrás" ---
 document.addEventListener("deviceready", () => {
-    document.addEventListener("backbutton", (e) => {
+    document.addEventListener("bac	kbutton", (e) => {
         const cart = document.getElementById("cartSidebar");
         const account = document.getElementById("sideCuenta");
         const auth = document.getElementById("modalAuth");
