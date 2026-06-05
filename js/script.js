@@ -263,7 +263,7 @@ function ordenarListaProductos(lista) {
 }
 
 function renderizarCatalogo(lista) {
-    const grid = document.getElementById("gridProductos");
+    const grid = document.getElementById("grid-productos");
     if (!grid) return;
     catalogoActual = lista;
     grid.innerHTML = "";
@@ -273,7 +273,7 @@ function renderizarCatalogo(lista) {
 }
 
 async function inicializarCatalogo() {
-    const grid = document.getElementById("gridProductos");
+    const grid = document.getElementById("grid-productos");
     if (!grid) return;
     grid.innerHTML = '<p class="catalogo-cargando">Cargando catálogo...</p>';
 
@@ -1124,24 +1124,50 @@ function configurarToolbarCatalogo() {
 }
 
 function init() {
-    migrarCarritoStorage();
-    window.carritoActual = carrito;
-    configuracionEventosFormularios();
-    configurarToolbarCatalogo();
-    configurarRestriccionFechas();
-    configurarMetodoEntrega();
-    actualizarCarritoVisual();
-    seleccionarEstrellasVoto(5);
-    inicializarCatalogo();
-    cargarReseñas();
-    iniciarExperiencia(() => catalogoActual);
-    actualizarTarjetaLealtad();
+    // Esto asegura que la App no inicie hasta que el celular esté listo
+    document.addEventListener("deviceready", () => {
+        migrarCarritoStorage();
+        window.carritoActual = carrito;
+        configuracionEventosFormularios();
+        configurarToolbarCatalogo();
+        configurarRestriccionFechas();
+        configurarMetodoEntrega();
+        actualizarCarritoVisual();
+        seleccionarEstrellasVoto(5);
+        inicializarCatalogo();
+        cargarReseñas();
+        iniciarExperiencia(() => catalogoActual);
+        actualizarTarjetaLealtad();
 
-    const modalAuth = document.getElementById("modalAuth");
-    modalAuth?.addEventListener("click", (e) => { if (e.target === modalAuth) closeAuth(); });
+        const modalAuth = document.getElementById("modalAuth");
+        modalAuth?.addEventListener("click", (e) => { if (e.target === modalAuth) closeAuth(); });
+        
+        console.log("App Dulce Aroma: Lista para operar.");
+    }, false);
 }
 
+// Inicializamos la app
 init();
+
+// --- Integración Nativa: Manejo del botón "Atrás" ---
+document.addEventListener("deviceready", () => {
+    document.addEventListener("bac	kbutton", (e) => {
+        const cart = document.getElementById("cartSidebar");
+        const account = document.getElementById("sideCuenta");
+        const auth = document.getElementById("modalAuth");
+
+        if (cart?.classList.contains("active")) {
+            closeSide("cartSidebar");
+        } else if (account?.classList.contains("active")) {
+            closeSide("sideCuenta");
+        } else if (auth?.style.display === "flex") {
+            closeAuth();
+        } else {
+            // Si no hay nada abierto, el sistema cierra la app por defecto
+            console.log("Cerrando app...");
+        }
+    }, false);
+}, false);
 
 Object.assign(window, {
     scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,

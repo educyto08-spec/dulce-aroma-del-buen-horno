@@ -26,6 +26,12 @@ body {
     margin: 0;
     overflow-x: hidden;
     line-height: 1.55;
+    
+    /* --- CAMBIOS PARA COMPORTAMIENTO DE APP --- */
+    min-height: 100vh;
+    height: auto;
+    overscroll-behavior-y: auto; /* Elimina el rebote web al hacer scroll */
+    -webkit-text-size-adjust: 100%; /* Evita que el texto cambie de tamaño al girar el cel */
 }
 
 h1, h2, h3, .logo-largo, .section-header h2, .hero h1 {
@@ -1366,7 +1372,7 @@ footer .redes-sociales a:hover { color: var(--dorado); }
 .producto-img-click:hover .overlay-ver-detalle { opacity: 1; }
 
 .reveal-on-scroll {
-    opacity: 0; transform: translateY(24px);
+    opacity: 1; transform: translateY(24px);
     transition: opacity 0.55s ease, transform 0.55s ease;
 }
 .reveal-on-scroll.revealed { opacity: 1; transform: none; }
@@ -1527,11 +1533,3 @@ footer .redes-sociales a:hover { color: var(--dorado); }
     .sticky-cart-bar.visible ~ .btn-whatsapp-flotante { bottom: 72px; }
 }
 
-#gridProductos {
-    display: grid !important; /* Fuerza el layout */
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-    gap: 25px !important;
-    min-height: 200px !important; /* Garantiza altura para que no colapse */
-    opacity: 1 !important;        /* Asegura que no sea transparente */
-    visibility: visible !important;
-}

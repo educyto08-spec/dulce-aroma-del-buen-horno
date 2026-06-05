@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            overscroll-behavior-y: none;
+        }
+    </style>
     <title>DULCE AROMA DEL BUEN HORNO - Panadería Artesanal en Zaragoza</title>
     <meta name="description" content="Pan artesanal horneado diario en Zaragoza. Pan dulce, donas, pasteles y combos. Pide en línea y recoge en tienda.">
     <meta name="theme-color" content="#7b5533">
@@ -451,7 +465,7 @@
             <button type="button" class="btn-categoria" data-categoria="tradicional">TRADICIONAL</button>
         </div>
         <p id="mensajeSinResultados" class="mensaje-sin-resultados" hidden>No encontramos ese pan. Prueba otro nombre o categoría.</p>
-        <div id="gridProductos" class="grid-productos">
+        <div id="grid-productos" class="grid-productos">
     <p class="catalogo-cargando">Cargando catálogo...</p>
 </div>
     </section>
