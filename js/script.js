@@ -275,18 +275,22 @@ function renderizarCatalogo(lista) {
 async function inicializarCatalogo() {
     const grid = document.getElementById("grid-productos");
     if (!grid) return;
-    grid.innerHTML = '<p class="catalogo-cargando">Cargando catálogo...</p>';
 
+    // 1. Renderizamos lo local de inmediato para que el usuario no vea "Cargando..."
     let productos = [...PRODUCTOS_CATALOGO];
+    renderizarCatalogo(productos);
+
+    // 2. Intentamos actualizar con Firestore en segundo plano (sin bloquear)
     try {
         const snap = await getDocs(collection(db, "productos"));
         if (!snap.empty) {
-            productos = fusionarConCatalogoLocal(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+            const productosRemotos = fusionarConCatalogoLocal(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+            // Si hay cambios, volvemos a renderizar
+            renderizarCatalogo(productosRemotos);
         }
     } catch (e) {
-        console.warn("Catálogo desde Firestore no disponible, usando lista local.", e);
+        console.warn("Firestore offline o inaccesible, usando catálogo local.", e);
     }
-    renderizarCatalogo(productos);
 }
 
 function aplicarFiltrosVisuales() {
