@@ -1742,7 +1742,7 @@ html, body {
         top: 100% !important;
         left: 0 !important;
         width: 100% !important;
-        background: #fffdfa !important; /* Fondo cálido de panadería */
+        background: #f5f5f5 !important; /* Fondo cálido de panadería */
         box-shadow: 0 4px 12px rgba(123, 85, 51, 0.15) !important; /* Sombra suave café */
         flex-direction: column !important;
         padding: 10px 0 !important;
