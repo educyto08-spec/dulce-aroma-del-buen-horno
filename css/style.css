@@ -1592,28 +1592,6 @@ footer .redes-sociales a:hover { color: var(--dorado); }
         font-size: 1rem;
     }
 }
-
-/* --- DISEÑO EXCLUSIVO PARA LA APK EN CELULAR (CAPACITOR) --- */
-html, body {
-  max-width: 100% !important;
-  overflow-x: hidden !important; /* Mantiene la pantalla fija sin barra blanca */
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-@media (max-width: 768px) {
-  body {
-    background-color: #fcf8f2 !important;
-  }
-  
-  #btnInstalarApp, 
-  .btn-instalar-app, 
-  .hero-actions a[href="ra.html"] {
-    display: none !important;
-  }
-}
-
-
 /* ==========================================================================
    🍞 PARCHE DE INTERACCIÓN, MENÚ MÓVIL Y ELIMINACIÓN DE BARRA BLANCA 
    ========================================================================== */
@@ -1625,6 +1603,15 @@ html, body {
     margin: 0 !important;
     padding: 0 !important;
 }
+
+/* Ocultar la barra inferior por defecto en pantallas grandes (Computadora) */
+.mobile-bottom-nav {
+    display: none;
+}
+
+/* ==========================================================================
+   📱 MEDIA QUERIES DE ADAPTACIÓN (ESCRITORIO A MÓVIL)
+   ========================================================================== */
 
 @media (max-width: 900px) {
     /* Elevamos la cabecera completa por encima de los paneles colapsados */
@@ -1743,12 +1730,13 @@ html, body {
     }
 }
 
-/* --- CONFIGURACIONES EXCLUSIVAS PARA LA APP MÓVIL (PANTALLAS CHICAS) --- */
+/* ==========================================================================
+   📱 CONFIGURACIONES EXCLUSIVAS PARA LA APP MÓVIL (PANTALLAS CHICAS / APK)
+   ========================================================================== */
+
 @media (max-width: 768px) {
 
-
-    
-    /* CAMBIO RADICAL Y COMPLETO DE COLORES PARA LA APP (ESTILO REPOSTERÍA VIBRANTE / CHIC) */
+    /* --- CAMBIO RADICAL Y COMPLETO DE COLORES PARA LA APP (ESTILO REPOSTERÍA VIBRANTE / CHIC) --- */
     :root {
         --cafe: #d44c77;                /* Rosa Pastel Encendido / Fresa Intenso */
         --cafe-oscuro: #851c3e;         /* Arándano Profundo */
@@ -1782,6 +1770,7 @@ html, body {
         color: var(--blanco) !important;
     }
 
+    /* Rediseño completo de los botones de pedir en la app */
     .btn-pedir {
         background-color: var(--cafe) !important;
         color: var(--blanco) !important;
@@ -1794,12 +1783,20 @@ html, body {
         background-color: var(--cafe-oscuro) !important;
     }
 
+    /* El banner Hero del inicio de la app ahora se adaptará a los nuevos tonos */
     .hero-overlay {
         background: linear-gradient(180deg, rgba(58, 15, 29, 0.6) 0%, rgba(214, 76, 119, 0.4) 60%, var(--crema-principal) 100%) !important;
     }
 
     /* 🚫 FUMIGAMOS EL MENÚ LATERAL VIEJO Y EL BOTÓN DE RAYITAS EN LA APP */
     .nav-links, .menu-toggle {
+        display: none !important;
+    }
+
+    /* Ocultar instaladores Web redundantes dentro de la APK */
+    #btnInstalarApp, 
+    .btn-instalar-app, 
+    .hero-actions a[href="ra.html"] {
         display: none !important;
     }
 
@@ -1845,16 +1842,6 @@ html, body {
         color: var(--cafe) !important;
     }
 
-    /* --- MANTENER OCULTOS LOS ELEMENTOS ANTERIORES --- */
-    .footer-app-pronto,
-    .panel-qr-ra,
-    .panel-qr-titulo,
-    .footer-link-discreto,
-    .btn-whatsapp-flotante,
-    #stickyCartBar {
-        display: none !important;
-    }
-    
     /* ==========================================================================
        🔄 PASO 2: SCROLL HORIZONTAL DE PRODUCTOS (ESTILO REPOSTERÍA CHIC)
        ========================================================================== */
@@ -1941,7 +1928,7 @@ html, body {
         align-items: center !important;
     }
     
-   /* ==========================================================================
+    /* ==========================================================================
        📱 PASO 4: FEEDBACK TÁCTIL (EFECTOS ELÁSTICOS AL TOCAR)
        ========================================================================== */
     
@@ -2043,9 +2030,14 @@ html, body {
         font-size: 1.2rem !important;
         box-shadow: 0 3px 8px rgba(214, 76, 119, 0.25) !important;
     }
-}
 
-/* Ocultar la barra inferior por defecto en pantallas grandes (Computadora) */
-.mobile-bottom-nav {
-    display: none;
+    /* --- MANTENER OCULTOS LOS ELEMENTOS ANTERIORES --- */
+    .footer-app-pronto,
+    .panel-qr-ra,
+    .panel-qr-titulo,
+    .footer-link-discreto,
+    .btn-whatsapp-flotante,
+    #stickyCartBar {
+        display: none !important;
+    }
 }
