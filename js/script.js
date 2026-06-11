@@ -1,7 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+
+// 🔹 AGREGAMOS 'arrayUnion' Y 'onSnapshot' AL FINAL DE ESTE BLOQUE:
 import {
-    getFirestore, collection, addDoc, getDocs, query, orderBy, where, doc, updateDoc
+    getFirestore, collection, addDoc, getDocs, query, orderBy, where, doc, updateDoc, arrayUnion, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
