@@ -519,10 +519,10 @@ function renderizarAppExclusiva() {
     const seccionExclusiva = document.getElementById("appExclusivaSeccion");
     if (!seccionExclusiva) return;
 
-    // DETECTOR OFICIAL PARA CAPACITOR y Móviles
-    const esCapacitor = window.Capacitor || window.webkit?.messageHandlers || window.matchMedia("(max-width: 768px)").matches;
+    // DETECTOR PARA APK: Revisamos si se ejecuta localmente (file://), si existe Cordova, o si la pantalla es de celular
+    const esAppMovil = window.location.protocol === 'file:' || window.cordova || window.matchMedia("(max-width: 768px)").matches;
 
-    if (esCapacitor && usuarioLogueado) {
+    if (esAppMovil && usuarioLogueado) {
         seccionExclusiva.hidden = false;
         generarQrUsuario();
         setupRaspaGana();
@@ -569,9 +569,9 @@ function setupRaspaGana() {
 
     puntosDisplay.textContent = obtenerPuntos();
 
-    const canPlay = obtenerPuntos() >= 100;
+    const canPlay = obtenerPuntos() >= 10;
     canvas.style.pointerEvents = canPlay ? "auto" : "none";
-    overlay.textContent = canPlay ? "¡Raspa aquí!" : "Necesitas 100 puntos para jugar";
+    overlay.textContent = canPlay ? "¡Raspa aquí!" : "Necesitas 10 puntos para jugar";
     overlay.style.backgroundColor = canPlay ? "rgba(123, 85, 51, 0.8)" : "rgba(123, 85, 51, 0.4)";
     btnNuevo.hidden = true;
     mensaje.hidden = true;
@@ -659,7 +659,7 @@ function checkScratchProgress(canvas, ctx, overlay, mensaje, btnNuevo, puntosDis
 
 function triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay) {
     const puntosActuales = obtenerPuntos();
-    if (puntosActuales >= 100) {
+    if (puntosActuales >= 10) {
         // Restar puntos y aplicar cupón
         canjearCuponSorpresa(); // Esta función debería manejar la lógica del cupón y restar los puntos
         puntosDisplay.textContent = obtenerPuntos(); // Actualizar puntos después del canje
