@@ -1666,7 +1666,7 @@ html, body {
         display: flex !important; /* Activamos la caja para la transición */
         position: fixed !important;
         top: 0 !important;
-        right: -280px;
+        right: -320px;
         width: 260px !important;
         height: 100% !important;
         height: 100dvh !important;
