@@ -672,7 +672,7 @@ async function triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay) {
 
         // Mandamos a restar los puntos y crear el cupón en Firebase
         // Usamos 'await' para que no avance hasta que Firebase confirme que ya restó los puntos
-        const exito = await canjearCuponSorpresa(); 
+        const exito = await canjearCuponSorpresa(db, idDocumentoUsuarioFirestore); 
 
         if (exito) {
             puntosDisplay.textContent = obtenerPuntos(); // Ahora sí mostrará el puntaje restado
@@ -1453,23 +1453,21 @@ Object.assign(window, {
 // Función para escuchar y pintar los cupones en el perfil en tiempo real
 async function renderizarCuponesPerfil() {
     const contenedor = document.getElementById("contenedorCuponesPerfil");
-    // Detener la función si no existe el contenedor o si no hay un ID de usuario válido
     if (!contenedor || !idDocumentoUsuarioFirestore) return;
 
     try {
-        // Importamos dinámicamente 'doc' y 'onSnapshot' de Firestore Modular (v9+)
+        // Importamos dinámicamente SOLO el onSnapshot de la librería, pero usamos tu 'db' global de la línea 3
         const { doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
         
+        // Usamos el 'db' global de script.js, que está 100% verificado en este archivo
         const usuarioRef = doc(db, "usuarios", idDocumentoUsuarioFirestore);
 
-        // Escuchamos el documento del usuario en tiempo real
         onSnapshot(usuarioRef, (docSnap) => {
             if (!docSnap.exists()) return;
 
             const datosUsuario = docSnap.data();
-            const cupones = datosUsuario.cupones; // Obtenemos el arreglo 'cupones'
+            const cupones = datosUsuario.cupones;
 
-            // Caso A: Si el usuario no tiene cupones guardados aún o el array está vacío
             if (!cupones || cupones.length === 0) {
                 contenedor.innerHTML = `
                     <p style="color: #999; text-align: center; font-size: 13px; margin: 15px 0;">
@@ -1478,10 +1476,8 @@ async function renderizarCuponesPerfil() {
                 return;
             }
 
-            // Caso B: Si hay cupones, limpiamos el contenedor y los pintamos
             contenedor.innerHTML = ""; 
 
-            // Al ser un array de Firestore, lo recorremos con un forEach ordinario
             cupones.forEach((cupon) => {
                 contenedor.innerHTML += `
                     <div class="cupon-item" style="border: 1px dashed #7b5533; background: #fffdfa; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">

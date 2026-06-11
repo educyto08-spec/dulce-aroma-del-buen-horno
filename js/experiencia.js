@@ -35,12 +35,16 @@ export function obtenerPuntos() {
   return parseInt(localStorage.getItem(PUNTOS_KEY) || "0", 10);
 }
 
-export async function canjearCuponSorpresa() {
-  // 1. Jalamos el ID del usuario de la ventana global
-  const idDoc = window.idDocumentoUsuarioFirestore;
+// Añadimos 'db' e 'idDoc' como parámetros de la función
+export async function canjearCuponSorpresa(db, idDoc) {
 
   if (!idDoc) {
-    console.error("No hay un ID de documento de Firestore guardado en window.idDocumentoUsuarioFirestore.");
+    console.error("No se recibió un ID de documento de Firestore válido en la experiencia.");
+    return false;
+  }
+
+  if (!db) {
+    console.error("No se recibió la instancia de Firestore 'db' en la experiencia.");
     return false;
   }
 
@@ -57,37 +61,19 @@ export async function canjearCuponSorpresa() {
     };
 
     try {
-      // 2. Importamos las herramientas nativas y la inicialización de Firebase directamente aquí
-      const { initializeApp, getApp } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js");
-      const { doc, updateDoc, arrayUnion, getFirestore } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
+      // Importamos estrictamente solo las funciones operativas
+      const { doc, updateDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
+      
+      // Usamos el 'db' que nos pasaron limpiamente
+      const usuarioRef = doc(db, "usuarios", idDoc);
 
-      // 3. Obtenemos la instancia activa de Firebase que ya inicializaste en tu app
-      let appActiva;
-      try {
-        appActiva = getApp(); // Jala la app que ya está corriendo en script.js
-      } catch {
-        // Por si acaso no se hubiera iniciado, usamos tus llaves (firebaseConfig ya debe estar visible en tu entorno)
-        if (typeof firebaseConfig !== 'undefined') {
-          appActiva = initializeApp(firebaseConfig);
-        } else {
-          throw new Error("No se encontró la configuración de Firebase 'firebaseConfig'.");
-        }
-      }
-
-      // 4. Creamos una referencia de base de datos local súper sólida y certificada por Firebase
-      const localDB = getFirestore(appActiva);
-      const usuarioRef = doc(localDB, "usuarios", idDoc);
-
-      // 5. Guardamos en Firestore de forma segura
       await updateDoc(usuarioRef, {
         puntos: nuevosPuntos,
         cupones: arrayUnion(nuevoCupon)
       });
 
-      // Actualizamos localStorage para la interfaz de la app
       localStorage.setItem("dulce-aroma-puntos", String(nuevosPuntos));
 
-      // Tu alerta de éxito favorita con SweetAlert
       Swal.fire({
         title: "¡Puntos Canjeados! 🥳🥐",
         html: `Has canjeado 10 puntos en el Raspa y Gana por un premio:<br><br><strong style="font-size: 1.5rem; color: #8B4513;">${codigoTicket}</strong><br><br>¡Felicidades! Tu cupón de Pan Gratis ya aparece en la sección "Mis Cupones" dentro de tu perfil.`,
@@ -95,7 +81,6 @@ export async function canjearCuponSorpresa() {
         confirmButtonColor: "#7b5533"
       });
 
-      // Notificamos el cambio de puntos a la interfaz
       document.dispatchEvent(new CustomEvent("puntos:cambio", { detail: { puntos: nuevosPuntos } }));
 
       return true; 
