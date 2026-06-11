@@ -1499,33 +1499,3 @@ function renderizarCuponesPerfil() {
         contenedor.innerHTML = `<p style="color: red; font-size: 12px; text-align: center;">Error al cargar cupones.</p>`;
     }
 }
-
-// ==========================================================================
-// 🧼 OCULTAR SECCIÓN DE APP/QR EXCLUSIVAMENTE EN LA APP MÓVIL (CAPACITOR)
-// ==========================================================================
-(() => {
-    // Detectamos si la app se está ejecutando de forma nativa en Android (Capacitor)
-    const esAppMovil = window.hasOwnProperty('Capacitor') || 
-                       window.location.protocol === 'android-app:' || 
-                       navigator.userAgent.includes('Capacitor');
-
-    if (esAppMovil) {
-        // Esperamos un momento a que el DOM esté listo
-        const ocultarSeccionApp = () => {
-            const elementosAOcultar = document.querySelectorAll('.footer-app-pronto, .footer-link-discreto, .panel-qr-ra');
-            
-            elementosAOcultar.forEach(elemento => {
-                if (elemento) {
-                    elemento.style.setProperty('display', 'none', 'important');
-                }
-            });
-            console.log("🚀 Dulce Aroma Móvil: Se ocultó la sección de descarga y QR.");
-        };
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', ocultarSeccionApp);
-        } else {
-            ocultarSeccionApp();
-        }
-    }
-})();

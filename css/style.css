@@ -1742,3 +1742,9 @@ html, body {
         padding: 4px !important;
     }
 }
+
+/* --- OCULTAR ELEMENTOS SOLICITADOS --- */
+.footer-app-pronto,
+.panel-qr-ra {
+    display: none !important;
+}
