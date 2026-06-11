@@ -1652,17 +1652,16 @@ footer .redes-sociales a:hover { color: var(--dorado); }
 /* --- DISEÑO EXCLUSIVO PARA LA APK EN CELULAR (CAPACITOR) --- */
 html, body {
   max-width: 100% !important;
-  overflow-x: hidden !important; /* ✂️ Corta de raíz la franja blanca y el movimiento de lado */
+  overflow-x: hidden !important; /* Mantiene la pantalla fija sin barra blanca */
   margin: 0 !important;
   padding: 0 !important;
 }
 
 @media (max-width: 768px) {
   body {
-    background-color: #fcf8f2 !important; /* Tu paleta cálida de panadería */
+    background-color: #fcf8f2 !important;
   }
   
-  /* Ocultamos el botón de instalar app y el enlace de Realidad Aumentada */
   #btnInstalarApp, 
   .btn-instalar-app, 
   .hero-actions a[href="ra.html"] {
@@ -1674,15 +1673,15 @@ html, body {
    🍞 OPTIMIZACIÓN DE CABECERA PARA MÓVILES (DULCE AROMA)
    ========================================================================== */
 @media (max-width: 768px) {
-    /* Forzamos a que la barra mida exactamente la pantalla sin salirse */
     .main-header {
         width: 100% !important;
         max-width: 100vw !important;
         box-sizing: border-box !important;
-        overflow: hidden !important;
+        /* Quitamos el 'overflow: hidden' de aquí para permitir que el menú despliegue sus opciones */
+        position: relative !important;
+        z-index: 1000 !important;
     }
 
-    /* 1. Forzamos a que el contenedor principal distribuya el espacio correctamente */
     .header-container {
         display: flex !important;
         align-items: center !important;
@@ -1692,33 +1691,41 @@ html, body {
         box-sizing: border-box !important;
     }
 
-    /* 2. Reordenamos los bloques principales usando 'order' */
     .logo {
-        order: 1 !important; /* El logo se queda al extremo izquierdo */
+        order: 1 !important;
     }
 
     .header-icons {
-        order: 2 !important; /* Los iconos (buscar, usuario, carrito) van en medio/derecha */
+        order: 2 !important;
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important; /* Espacio uniforme entre iconos */
-        margin-left: auto !important; /* Empuja los iconos hacia la derecha */
+        gap: 12px !important;
+        margin-left: auto !important;
         margin-right: 8px !important;
     }
 
     .menu-toggle {
-        order: 3 !important; /* ☰ ¡Mandamos las 3 rayitas al extremo derecho definitivo! */
+        order: 3 !important;
         margin: 0 !important;
         padding: 6px 10px !important;
+        z-index: 1010 !important;
     }
 
-    /* 3. 🚫 OCULTAMOS EL SALUDO EN MÓVIL: Esto le da todo el espacio al carrito 
-       para que no se amontone con el texto y se vea perfecto en el celular. */
+    /* ✅ SOLUCIÓN AL INICIO DE SESIÓN: 
+       No ocultamos el contenedor (para que se vean los iconos de login/perfil),
+       pero si Cline le mete etiquetas de texto adentro, las encogemos para que no estorben. */
     #userSessionContainer {
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    /* Si hay texto suelto o un span con el nombre adentro de la sesión, lo ocultamos 
+       para dejar solo el icono de perfil/login y que quepa perfectamente */
+    #userSessionContainer span, 
+    #userSessionContainer .user-name-text { 
         display: none !important; 
-    } 
+    }
 
-    /* 4. Aseguramos que el carrito no se corte y mantenga su tamaño */
     #cartNavButton {
         display: flex !important;
         align-items: center !important;
@@ -1727,8 +1734,31 @@ html, body {
         position: relative !important;
     }
 
-    /* Forzamos que los paneles laterales no midan más que la pantalla */
-    #cartSidebar, .sidebar, .cart-sidebar {
-        max-width: 100vw !important;
+    /* ✅ SOLUCIÓN AL MENÚ HAMBURGUESA DESPLEGABLE (#navPrincipal):
+       Al cambiar los 'order', el menú desplegable móvil puede perder su posición flotante.
+       Con esto aseguramos que aparezca abajo de la barra ocupando todo el ancho. */
+    .nav-links {
+        display: none; /* Se controla con tu JS (.active / .show) */
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        width: 100% !important;
+        background: #fffdfa !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+        flex-direction: column !important;
+        padding: 15px 0 !important;
+        z-index: 999 !important;
+    }
+
+    /* Si tu JS le añade la clase 'active' o 'show' al abrir, forzamos el flex vertical */
+    .nav-links.active, .nav-links.show {
+        display: flex !important;
+    }
+
+    .nav-links a {
+        padding: 12px 20px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        border-bottom: 1px solid #f5ebd3 !important;
     }
 }
