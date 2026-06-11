@@ -514,11 +514,6 @@ container.innerHTML = `
 }
 
 // --- Secciones exclusivas para PWA (standalone) ---
-import("https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js").then((module) => {
-    if (module && window.QRCode) {
-        // QRCode.js ya está disponible globalmente, no hay necesidad de usar module
-    }
-}).catch(err => console.error("Error cargando qrcode.min.js", err));
 
 function renderizarAppExclusiva() {
     const seccionExclusiva = document.getElementById("appExclusivaSeccion");
