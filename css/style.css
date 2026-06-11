@@ -1748,7 +1748,8 @@ html, body {
     .footer-app-pronto,
     .panel-qr-ra,
     .panel-qr-titulo,
-    .footer-link-discreto {
+    .footer-link-discreto,
+    .btn-whatsapp-flotante {
         display: none !important;
     }
 }
