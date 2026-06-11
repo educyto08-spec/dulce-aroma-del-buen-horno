@@ -1655,9 +1655,7 @@ footer .redes-sociales a:hover { color: var(--dorado); }
     background-color: #fcf8f2 !important; /* Tu paleta cálida de panadería */
   }
   
-  /* OCULTAR ELEMENTOS EN EL CELULAR:
-     Ocultamos el botón de instalar app y seleccionamos específicamente 
-     el enlace que va a ra.html para ocultar la Realidad Aumentada */
+  /* Ocultamos el botón de instalar app y el enlace de Realidad Aumentada */
   #btnInstalarApp, 
   .btn-instalar-app, 
   .hero-actions a[href="ra.html"] {
