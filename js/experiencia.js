@@ -35,6 +35,29 @@ export function obtenerPuntos() {
   return parseInt(localStorage.getItem(PUNTOS_KEY) || "0", 10);
 }
 
+export function canjearCuponSorpresa() {
+  const puntos = obtenerPuntos();
+  if (puntos >= 100) {
+    localStorage.setItem(PUNTOS_KEY, String(puntos - 100));
+    // Guardar un cupón sorpresa en localStorage para que el usuario pueda usarlo en el carrito
+    const cupones = JSON.parse(localStorage.getItem("dulce-aroma-cupones-disponibles") || "[]");
+    const nuevoCupon = "SORPRESA" + Math.floor(1000 + Math.random() * 9000);
+    cupones.push(nuevoCupon);
+    localStorage.setItem("dulce-aroma-cupones-disponibles", JSON.stringify(cupones));
+    
+    // Alerta dulce
+    Swal.fire({
+      title: "¡Puntos Canjeados! 🥳🥐",
+      html: `Has canjeado 100 puntos por el cupón sorpresa de pan gratis:<br><br><strong style="font-size: 1.5rem; color: #8B4513;">${nuevoCupon}</strong><br><br>Usa este código en tu carrito para reclamar tu pan dulce gratis.`,
+      icon: "success",
+      confirmButtonColor: "#7b5533"
+    });
+    
+    // Despachar evento para actualizar interfaz
+    document.dispatchEvent(new CustomEvent("puntos:cambio", { detail: { puntos: puntos - 100 } }));
+  }
+}
+
 const LOTES_HORNO = [
   { h: 7, m: 0, label: "Lote matutino" },
   { h: 11, m: 0, label: "Media mañana" },

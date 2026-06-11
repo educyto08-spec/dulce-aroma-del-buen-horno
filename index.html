@@ -347,9 +347,27 @@
             <p>Recetas tradicionales, ingredientes selectos y el aroma del horno cada mañana. Pide en línea, recoge en tienda o recibe en casa.</p>
             <div class="hero-actions">
                 <button type="button" class="btn-primario" onclick="scrollAlCatalogo()">Ver catálogo</button>
-                <a href="ra.html" class="btn-secundario-hero"><i class="fa-solid fa-cube" aria-hidden="true"></i> Ver en RA</a>
-                <button type="button" class="btn-secundario-hero btn-instalar-app" id="btnInstalarApp" hidden><i class="fa-solid fa-download" aria-hidden="true"></i> Instalar app</button>
-                <a href="https://wa.me/529223773794" class="btn-secundario-hero" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a href="ra.html" class="btn-secundario-hero"><i class="fa-solid fa-cube" aria-hidden="true"></i> Ver en RA</a>
+            <button type="button" class="btn-secundario-hero btn-instalar-app" id="btnInstalarApp" hidden><i class="fa-solid fa-download" aria-hidden="true"></i> Instalar app</button>
+            <a href="https://wa.me/529223773794" class="btn-secundario-hero" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <div id="appExclusivaSeccion" class="app-exclusiva-seccion" hidden>
+                <div class="qr-usuario-card">
+                    <h4>Tu Código de Cliente</h4>
+                    <p>Muestra este QR en caja para identificarte y acumular puntos.</p>
+                    <div id="qrcodeContainer"></div>
+                    <p class="qr-info-id">ID: <span id="qrUserId"></span></p>
+                </div>
+                <div class="raspa-gana-card">
+                    <h4>Raspa y Gana un Pan Gratis!</h4>
+                    <p>Tienes <span id="puntosUsuarioRaspaGana">0</span> puntos. Raspa para ver si ganas!</p>
+                    <div id="scratchCardContainer" class="scratch-card-container">
+                        <canvas id="scratchCardCanvas" width="300" height="150"></canvas>
+                        <div class="scratch-card-overlay">¡Raspa aquí!</div>
+                    </div>
+                    <p id="raspaGanaMensaje" class="raspa-gana-mensaje" hidden></p>
+                    <button id="btnNuevoRaspaGana" class="btn-primario" hidden>Jugar de nuevo</button>
+                </div>
+            </div>
             </div>
         </div>
     </section>

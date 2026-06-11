@@ -9,7 +9,7 @@ import {
     firebaseConfig, WHATSAPP_NUMERO, CARRITO_STORAGE_KEY, CARRITO_STORAGE_LEGACY, COSTO_ENVIO_DOMICILIO
 } from "./firebase-config.js";
 import { PRODUCTOS_CATALOGO, ETIQUETAS_CATEGORIA } from "./productos.js";
-import { alternarFavorito, esFavorito, iniciarExperiencia, sumarPuntos, obtenerPuntos } from "./experiencia.js";
+import { alternarFavorito, esFavorito, iniciarExperiencia, sumarPuntos, obtenerPuntos, canjearCuponSorpresa } from "./experiencia.js";
 
 const app = initializeApp(firebaseConfig);
 const ULTIMO_PEDIDO_KEY = "dulce-aroma-ultimo-pedido";
@@ -491,6 +491,7 @@ onAuthStateChanged(auth, async (user) => {
         idDocumentoUsuarioFirestore = null;
     }
     actualizarInterfazUsuario();
+    renderizarAppExclusiva();
 });
 
 function actualizarInterfazUsuario() {
@@ -498,7 +499,7 @@ function actualizarInterfazUsuario() {
     if (!container) return;
     if (usuarioLogueado) {
         container.innerHTML = `
-            <button type="button" class="btn-saludo-usuario" onclick="openSide('sideCuenta')">HOLA, ${escapeHtml(usuarioLogueado)}</button>
+            <button type="button" class="btn-saludo-usuario" onclick="openSide(\'sideCuenta\')">HOLA, ${escapeHtml(usuarioLogueado)}</button>
             <button type="button" class="icon-link btn-link-danger link-sesion-texto" onclick="cerrarSesionUsuario()">SALIR</button>
         `;
     } else {
@@ -510,6 +511,231 @@ container.innerHTML = `
     </button>
 `;
     }
+}
+
+// --- Secciones exclusivas para PWA (standalone) ---
+import("https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js").then((module) => {
+    if (module && window.QRCode) {
+        // QRCode.js ya está disponible globalmente, no hay necesidad de usar module
+    }
+}).catch(err => console.error("Error cargando qrcode.min.js", err));
+
+function renderizarAppExclusiva() {
+    const seccionExclusiva = document.getElementById("appExclusivaSeccion");
+    if (!seccionExclusiva) return;
+
+    if (window.matchMedia("(display-mode: standalone)").matches && usuarioLogueado) {
+        seccionExclusiva.hidden = false;
+        generarQrUsuario();
+        setupRaspaGana();
+    } else {
+        seccionExclusiva.hidden = true;
+    }
+}
+
+function generarQrUsuario() {
+    const qrContainer = document.getElementById("qrcodeContainer");
+    const qrUserId = document.getElementById("qrUserId");
+
+    if (!qrContainer || !qrUserId || !auth.currentUser) return;
+
+    qrContainer.innerHTML = "";
+    const userId = auth.currentUser.uid;
+    qrUserId.textContent = userId.substring(0, 8);
+
+    new QRCode(qrContainer, {
+        text: userId,
+        width: 128,
+        height: 128,
+        colorDark: "#6b4423",
+        colorLight: "#f8f3ea",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+// --- Lógica del Raspa y Gana ---
+let isScratching = false;
+let lastPoint = null;
+let scratchThreshold = 0.5; // 50% raspado
+let scratchCount = 0; // Contador para saber cuánto se ha raspado
+let ctx;
+
+function setupRaspaGana() {
+    const canvas = document.getElementById("scratchCardCanvas");
+    const overlay = document.querySelector(".scratch-card-overlay");
+    const mensaje = document.getElementById("raspaGanaMensaje");
+    const btnNuevo = document.getElementById("btnNuevoRaspaGana");
+    const puntosDisplay = document.getElementById("puntosUsuarioRaspaGana");
+
+    if (!canvas || !overlay || !mensaje || !btnNuevo || !puntosDisplay) return;
+
+    puntosDisplay.textContent = obtenerPuntos();
+
+    const canPlay = obtenerPuntos() >= 100;
+    canvas.style.pointerEvents = canPlay ? "auto" : "none";
+    overlay.textContent = canPlay ? "¡Raspa aquí!" : "Necesitas 100 puntos para jugar";
+    overlay.style.backgroundColor = canPlay ? "rgba(123, 85, 51, 0.8)" : "rgba(123, 85, 51, 0.4)";
+    btnNuevo.hidden = true;
+    mensaje.hidden = true;
+
+    if (!canPlay) return;
+
+    ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const imgCover = new Image();
+    imgCover.src = "img/raspa-cover.png"; // Una imagen que simula la capa a raspar
+    imgCover.onload = () => {
+        ctx.drawImage(imgCover, 0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.strokeStyle = "rgba(0,0,0,1)";
+        ctx.lineWidth = 30;
+        ctx.lineCap = "round";
+    };
+
+    const getClientPoint = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    };
+
+    const startScratch = (e) => {
+        e.preventDefault();
+        isScratching = true;
+        lastPoint = getClientPoint(e);
+    };
+
+    const scratch = (e) => {
+        if (!isScratching) return;
+        e.preventDefault();
+        const currentPoint = getClientPoint(e);
+        if (lastPoint) {
+            ctx.beginPath();
+            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.lineTo(currentPoint.x, currentPoint.y);
+            ctx.stroke();
+        }
+        lastPoint = currentPoint;
+        checkScratchProgress(canvas, ctx, overlay, mensaje, btnNuevo, puntosDisplay);
+    };
+
+    const endScratch = () => {
+        isScratching = false;
+        lastPoint = null;
+    };
+
+    canvas.addEventListener("mousedown", startScratch);
+    canvas.addEventListener("mousemove", scratch);
+    canvas.addEventListener("mouseup", endScratch);
+    canvas.addEventListener("mouseleave", endScratch);
+
+    canvas.addEventListener("touchstart", startScratch, { passive: false });
+    canvas.addEventListener("touchmove", scratch, { passive: false });
+    canvas.addEventListener("touchend", endScratch);
+
+    btnNuevo.addEventListener("click", resetRaspaGana);
+}
+
+function checkScratchProgress(canvas, ctx, overlay, mensaje, btnNuevo, puntosDisplay) {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    let transparentPixels = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+        if (pixels[i + 3] === 0) transparentPixels++;
+    }
+    scratchCount = transparentPixels / (canvas.width * canvas.height);
+
+    if (scratchCount >= scratchThreshold) {
+        canvas.style.pointerEvents = "none";
+        overlay.style.display = "none";
+        triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay);
+    }
+}
+
+function triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay) {
+    const puntosActuales = obtenerPuntos();
+    if (puntosActuales >= 100) {
+        // Restar puntos y aplicar cupón
+        canjearCuponSorpresa(); // Esta función debería manejar la lógica del cupón y restar los puntos
+        puntosDisplay.textContent = obtenerPuntos(); // Actualizar puntos después del canje
+        mensaje.textContent = "¡Felicidades! Has ganado un pan gratis con tu cupón. ¡Revisa tu perfil!";
+        mensaje.hidden = false;
+        btnNuevo.hidden = false;
+    } else {
+        mensaje.textContent = "No tienes suficientes puntos para reclamar una recompensa.";
+        mensaje.hidden = false;
+        btnNuevo.hidden = false;
+    }
+}
+
+function resetRaspaGana() {
+    const canvas = document.getElementById("scratchCardCanvas");
+    const overlay = document.querySelector(".scratch-card-overlay");
+    const mensaje = document.getElementById("raspaGanaMensaje");
+    const btnNuevo = document.getElementById("btnNuevoRaspaGana");
+    const puntosDisplay = document.getElementById("puntosUsuarioRaspaGana");
+
+    if (!canvas || !overlay || !mensaje || !btnNuevo || !puntosDisplay) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setupRaspaGana(); // Volver a configurar el estado inicial
+
+    overlay.style.display = "flex"; // Mostrar el overlay de nuevo
+    btnNuevo.hidden = true;
+    mensaje.hidden = true;
+}
+
+Object.assign(window, {
+    scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,
+    openAuth, closeAuth, switchTab, togglePasswordVisibility,
+    cerrarSesionUsuario, agregarAlCarrito, cambiarCantidad, vaciarCarritoCompleto,
+    finalizarCompraServidor, filtrarCategoria, seleccionarEstrellasVoto, enviarReseña,
+    cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
+    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast,
+    renderizarAppExclusiva // Exportar para uso externo si es necesario
+});
+
+// --- Integración Nativa: Manejo del botón "Atrás" ---
+document.addEventListener("deviceready", () => {
+    document.addEventListener("bac	kbutton", (e) => {
+        const cart = document.getElementById("cartSidebar");
+        const account = document.getElementById("sideCuenta");
+        const auth = document.getElementById("modalAuth");
+
+        if (cart?.classList.contains("active")) {
+            closeSide("cartSidebar");
+        } else if (account?.classList.contains("active")) {
+            closeSide("sideCuenta");
+        } else if (auth?.style.display === "flex") {
+            closeAuth();
+        } else {
+            // Si no hay nada abierto, el sistema cierra la app por defecto
+            console.log("Cerrando app...");
+        }
+    }, false);
+}, false);
+
+Object.assign(window, {
+    scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,
+    openAuth, closeAuth, switchTab, togglePasswordVisibility,
+    cerrarSesionUsuario, agregarAlCarrito, cambiarCantidad, vaciarCarritoCompleto,
+    finalizarCompraServidor, filtrarCategoria, seleccionarEstrellasVoto, enviarReseña,
+    cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
+    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast
+});
+
+</final_file_content>
+
+IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
+
+
 }
 
 function actualizarAvatarPerfil(fotoUrl) {
