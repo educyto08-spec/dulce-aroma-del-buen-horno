@@ -1777,3 +1777,131 @@ html, body {
     .nav-links a:active {
         background-color: #f5ebd3 !important;
     }
+/* ==========================================================================
+   🍞 PARCHE DE INTERACCIÓN, MENÚ MÓVIL Y ELIMINACIÓN DE BARRA BLANCA 
+   ========================================================================== */
+
+/* 1. Muro de contención para erradicar la franja blanca de la derecha */
+html, body {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+@media (max-width: 900px) {
+    /* Elevamos la cabecera completa por encima de los paneles colapsados */
+    .main-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 9999 !important; /* Capa superior base */
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .header-container {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+    }
+
+    /* Reordenamiento estricto de elementos en barra móvil */
+    .logo { order: 1 !important; }
+    
+    .header-icons { 
+        order: 2 !important; 
+        margin-left: auto !important; 
+        margin-right: 12px !important; 
+        gap: 12px !important; 
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    .menu-toggle { 
+        order: 3 !important; 
+        display: block !important; 
+        z-index: 100001 !important; /* Más arriba que el fondo del menú */
+    }
+
+    /* 🔥 RESTAURACIÓN TÁCTIL DEL MENÚ LATERAL ORIGINARIO */
+    .nav-links {
+        display: flex !important; /* Activamos la caja para la transición */
+        position: fixed !important;
+        top: 0 !important;
+        right: -280px;
+        width: 260px !important;
+        height: 100% !important;
+        height: 100dvh !important;
+        background: var(--crema-suave) !important;
+        flex-direction: column !important;
+        padding: 90px 24px 24px !important;
+        gap: 20px !important;
+        box-shadow: -6px 0 25px rgba(44, 26, 14, 0.15) !important;
+        border-left: 1px solid var(--borde) !important;
+        transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        
+        /* Con esto rompemos la barrera invisible y forzamos al cel a admitir los toques */
+        z-index: 100000 !important; 
+        pointer-events: auto !important; 
+    }
+
+    /* Cuando se le añade la clase activadora, entra en pantalla */
+    .nav-links.open {
+        right: 0 !important;
+        pointer-events: auto !important;
+    }
+
+    /* Botones del menú ultra-visibles, gruesos y clickeables */
+    .nav-links a {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 1.05rem !important;
+        color: #3e2714 !important; /* Chocolate oscuro de alta legibilidad */
+        font-weight: 800 !important; /* Letras bien negritas */
+        margin: 0 !important;
+        padding: 12px 6px !important;
+        text-decoration: none !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        pointer-events: auto !important; /* Clic garantizado en cada opción */
+    }
+
+    /* Feedback visual al presionar la opción */
+    .nav-links a:active {
+        background-color: rgba(107, 68, 35, 0.1) !important;
+        border-radius: 6px;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Si el carrito está inactivo, bajamos su prioridad para que no robe clics */
+    .side-panel {
+        z-index: 2000 !important; /* Menor que .nav-links (100000) */
+    }
+    
+    /* Si el carrito o perfil se abren (.active), ganan prioridad para poder usarse */
+    .side-panel.active {
+        z-index: 100005 !important; 
+    }
+
+    /* Control riguroso de espacios del usuario para proteger el icono del carrito */
+    #userSessionContainer {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Eliminamos tajantemente los saludos de texto largos en celular */
+    #userSessionContainer .link-sesion-texto,
+    #userSessionContainer .btn-saludo-usuario,
+    #userSessionContainer span {
+        display: none !important;
+    }
+
+    /* Evitamos márgenes parásitos en el enlace del icono de usuario */
+    #userSessionContainer .icon-link {
+        margin: 0 !important;
+        padding: 4px !important;
+    }
+}
