@@ -1663,3 +1663,62 @@ footer .redes-sociales a:hover { color: var(--dorado); }
   }
 }
 
+/* ==========================================================================
+   🍞 OPTIMIZACIÓN DE CABECERA PARA MÓVILES (DULCE AROMA)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Forzamos a que el contenedor principal distribuya el espacio correctamente */
+    .header-container {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0 10px !important;
+        width: 100% !important;
+    }
+
+    /* 2. Reordenamos los bloques principales usando 'order' */
+    .logo {
+        order: 1 !important; /* El logo se queda al extremo izquierdo */
+    }
+
+    .header-icons {
+        order: 2 !important; /* Los iconos (buscar, usuario, carrito) van en medio/derecha */
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important; /* Espacio uniforme entre iconos */
+        margin-left: auto !important; /* Empuja los iconos hacia la derecha */
+        margin-right: 10px !important;
+    }
+
+    .menu-toggle {
+        order: 3 !important; /* ☰ ¡Mandamos las 3 rayitas al extremo derecho definitivo! */
+        margin: 0 !important;
+        padding: 6px 10px !important;
+    }
+
+    /* 3. Evitamos que el texto "HOLA, CARLOS..." rompa el diseño o empuje el carrito */
+    #userSessionContainer {
+        max-width: 90px !important; /* Limitamos el ancho del texto en móvil */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Si el nombre es largo, añade "..." de forma elegante */
+        font-size: 11px !important;
+        text-align: center !important;
+        line-height: 1.1 !important;
+    }
+
+    /* Opcional: Si prefieres ocultar el saludo en barra móvil para que quede aún más limpio,
+       puedes cambiar las líneas de arriba de #userSessionContainer por:
+       #userSessionContainer { display: none !important; } 
+    */
+
+    /* 4. Aseguramos que el carrito no se corte y mantenga su tamaño */
+    #cartNavButton {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 35px !important;
+        position: relative !important;
+    }
+}
+
