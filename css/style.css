@@ -1973,6 +1973,76 @@ html, body {
         background-color: var(--pastel-rosa) !important;
         transform: scale(0.99) !important;
     }
+    
+    /* ==========================================================================
+       🏷️ PASO 5: DISEÑO DE TARJETAS HORIZONTALES COMPACTAS (ESTILO DELI-APP)
+       ========================================================================== */
+    
+    /* Si tienes una sección de "Más vendidos" o lista secundaria, la transformamos */
+    .lista-productos-secundaria {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        padding: 10px !important;
+    }
+
+    /* Transformación de la tarjeta tradicional a formato horizontal tipo App de Delivery */
+    .item-producto-compacto {
+        display: flex !important;
+        flex-direction: row !important; /* Alineación horizontal */
+        align-items: center !important;
+        background-color: var(--crema-suave) !important;
+        border: 1px solid var(--borde) !important;
+        border-radius: var(--radio-sm) !important;
+        padding: 10px !important;
+        gap: 14px !important;
+        box-shadow: var(--sombra-card) !important;
+    }
+
+    /* Ajustamos la foto para que quede como un avatar cuadrado a la izquierda */
+    .item-producto-compacto .img-wrapper {
+        width: 75px !important;
+        height: 75px !important;
+        flex-shrink: 0 !important; /* Evita que la foto se deforme o se encoja */
+        border-radius: var(--radio-sm) !important;
+        overflow: hidden !important;
+    }
+
+    /* Contenedor de textos al centro */
+    .item-producto-compacto .info-producto {
+        flex-grow: 1 !important; /* Toma todo el espacio del centro */
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        text-align: left !important;
+    }
+
+    .item-producto-compacto h4 {
+        font-size: 0.95rem !important;
+        margin: 0 0 4px 0 !important;
+        color: var(--texto-oscuro) !important;
+    }
+
+    .item-producto-compacto .precio {
+        font-size: 0.9rem !important;
+        font-weight: 800 !important;
+        color: var(--cafe) !important;
+        margin: 0 !important;
+    }
+
+    /* Rediseño del botón a un estilo flotante redondo "+" de acción rápida */
+    .item-producto-compacto .btn-pedir {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important; /* Botón completamente circular */
+        font-size: 1.2rem !important;
+        box-shadow: 0 3px 8px rgba(214, 76, 119, 0.25) !important;
+    }
 }
 
 /* Ocultar la barra inferior por defecto en pantallas grandes (Computadora) */
