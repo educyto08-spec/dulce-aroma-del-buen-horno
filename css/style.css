@@ -1749,42 +1749,37 @@ html, body {
     /* CAMBIO RADICAL Y COMPLETO DE COLORES PARA LA APP (ESTILO REPOSTERÍA VIBRANTE / CHIC) */
     :root {
         --cafe: #d44c77;                /* Rosa Pastel Encendido / Fresa Intenso */
-        --cafe-oscuro: #851c3e;         /* Arándano Profundo (para botones principales al presionar) */
+        --cafe-oscuro: #851c3e;         /* Arándano Profundo */
         --cafe-claro: #e59bb1;          /* Rosa Suave / Algodón de azúcar */
-        --dorado: #b07ee6;              /* Lila Eléctrico / Dulce de violeta (reemplaza al dorado) */
+        --dorado: #b07ee6;              /* Lila Eléctrico / Dulce de violeta */
         
-        /* Fondos totalmente cambiados */
         --crema-principal: #fff0f3;     /* Fondo Fresa con Crema muy claro */
-        --crema-suave: #ffffff;         /* Tarjetas y Header en blanco puro para que resalten */
-        --pastel-rosa: #ffe3e8;         /* Bloques secundarios y alertas en rosa tierno */
-        --pastel-albaricoque: #f0e3ff;  /* Bloques especiales en un tono lila pastel */
+        --crema-suave: #ffffff;         /* Tarjetas y Header en blanco */
+        --pastel-rosa: #ffe3e8;         /* Bloques secundarios */
+        --pastel-albaricoque: #f0e3ff;  /* Bloques especiales */
         
-        /* Textos */
-        --texto-oscuro: #3a0f1d;        /* Marrón Arándano ultra oscuro (máxima legibilidad) */
-        --texto-mutado: #a67c89;        /* Gris rosáceo para textos secundarios */
-        --borde: #ffd0da;               /* Bordes rosados muy finos */
+        --texto-oscuro: #3a0f1d;        /* Marrón Arándano ultra oscuro */
+        --texto-mutado: #a67c89;        /* Gris rosáceo */
+        --borde: #ffd0da;               /* Bordes rosados */
         
-        /* Interfaz de App Móvil Moderna */
         --sombra: 0 12px 30px rgba(212, 76, 119, 0.15);
         --sombra-card: 0 6px 20px rgba(212, 76, 119, 0.08);
-        --radio: 24px;                  /* Tarjetas súper redondeadas estilo iOS/Android moderno */
+        --radio: 24px;                  /* Estilo iOS/Android moderno */
         --radio-sm: 14px;
     }
 
-    /* Quitamos los degradados cafés de la web y ponemos un fondo dulce */
     body {
         background-image: none !important;
         background-color: var(--crema-principal) !important;
         color: var(--texto-oscuro) !important;
+        padding-bottom: 70px !important; /* Espacio extra abajo para que la barra fija no tape el contenido */
     }
     
-    /* Cambiamos la barra superior delgada a juego con la nueva identidad */
     .top-bar {
         background-color: var(--cafe) !important;
         color: var(--blanco) !important;
     }
 
-    /* Rediseño completo de los botones de pedir en la app */
     .btn-pedir {
         background-color: var(--cafe) !important;
         color: var(--blanco) !important;
@@ -1797,9 +1792,55 @@ html, body {
         background-color: var(--cafe-oscuro) !important;
     }
 
-    /* El banner Hero del inicio de la app ahora se adaptará a los nuevos tonos */
     .hero-overlay {
         background: linear-gradient(180deg, rgba(58, 15, 29, 0.6) 0%, rgba(214, 76, 119, 0.4) 60%, var(--crema-principal) 100%) !important;
+    }
+
+    /* 🚫 FUMIGAMOS EL MENÚ LATERAL VIEJO Y EL BOTÓN DE RAYITAS EN LA APP */
+    .nav-links, .menu-toggle {
+        display: none !important;
+    }
+
+    /* 📱 ACTIVACIÓN DE LA BARRA DE NAVEGACIÓN INFERIOR ESTILO APP */
+    .mobile-bottom-nav {
+        display: flex !important; /* Aparece solo en celular */
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 65px !important;
+        background-color: var(--crema-suave) !important;
+        border-top: 1px solid var(--borde) !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        z-index: 99999 !important; /* Por encima de todo */
+        box-shadow: 0 -4px 15px rgba(58, 15, 29, 0.06) !important;
+    }
+
+    /* Elementos individuales de la barra inferior */
+    .bottom-nav-item {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: var(--texto-mutado) !important;
+        text-decoration: none !important;
+        font-size: 0.7rem !important;
+        font-weight: 700 !important;
+        width: 20% !important;
+        height: 100% !important;
+        gap: 4px !important;
+        transition: color 0.2s ease !important;
+    }
+
+    /* Iconos dentro de la barra */
+    .bottom-nav-item i {
+        font-size: 1.2rem !important;
+    }
+
+    /* Pestaña activa o presionada (Color Fresa e iluminada) */
+    .bottom-nav-item.active, .bottom-nav-item:active {
+        color: var(--cafe) !important;
     }
 
     /* --- MANTENER OCULTOS LOS ELEMENTOS ANTERIORES --- */
@@ -1811,4 +1852,9 @@ html, body {
     #stickyCartBar {
         display: none !important;
     }
+}
+
+/* Ocultar la barra inferior por defecto en pantallas grandes (Computadora) */
+.mobile-bottom-nav {
+    display: none;
 }
