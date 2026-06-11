@@ -710,46 +710,8 @@ function resetRaspaGana() {
     mensaje.hidden = true;
 }
 
-Object.assign(window, {
-    scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,
-    openAuth, closeAuth, switchTab, togglePasswordVisibility,
-    cerrarSesionUsuario, agregarAlCarrito, cambiarCantidad, vaciarCarritoCompleto,
-    finalizarCompraServidor, filtrarCategoria, seleccionarEstrellasVoto, enviarReseña,
-    cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
-    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast,
-    renderizarAppExclusiva // Exportar para uso externo si es necesario
-});
 
 // --- Integración Nativa: Manejo del botón "Atrás" ---
-document.addEventListener("deviceready", () => {
-    document.addEventListener("backbutton", (e) => {
-        const cart = document.getElementById("cartSidebar");
-        const account = document.getElementById("sideCuenta");
-        const auth = document.getElementById("modalAuth");
-
-        if (cart?.classList.contains("active")) {
-            closeSide("cartSidebar");
-        } else if (account?.classList.contains("active")) {
-            closeSide("sideCuenta");
-        } else if (auth?.style.display === "flex") {
-            closeAuth();
-        } else {
-            // Si no hay nada abierto, el sistema cierra la app por defecto
-            console.log("Cerrando app...");
-        }
-    }, false);
-}, false);
-
-
-Object.assign(window, {
-    scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,
-    openAuth, closeAuth, switchTab, togglePasswordVisibility,
-    cerrarSesionUsuario, agregarAlCarrito, cambiarCantidad, vaciarCarritoCompleto,
-    finalizarCompraServidor, filtrarCategoria, seleccionarEstrellasVoto, enviarReseña,
-    cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
-    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast
-});
-
 function actualizarAvatarPerfil(fotoUrl) {
     const img = document.getElementById("perfilAvatarImg");
     const placeholder = document.getElementById("perfilAvatarPlaceholder");
@@ -1414,35 +1376,7 @@ if (window.cordova !== undefined) {
     }, false);
 }
 
-Object.assign(window, {
-    scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,
-    openAuth, closeAuth, switchTab, togglePasswordVisibility,
-    cerrarSesionUsuario, agregarAlCarrito, cambiarCantidad, vaciarCarritoCompleto,
-    finalizarCompraServidor, filtrarCategoria, seleccionarEstrellasVoto, enviarReseña,
-    cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
-    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast
-});
-
 // --- Integración Nativa: Manejo del botón "Atrás" ---
-document.addEventListener("deviceready", () => {
-    document.addEventListener("bac	kbutton", (e) => {
-        const cart = document.getElementById("cartSidebar");
-        const account = document.getElementById("sideCuenta");
-        const auth = document.getElementById("modalAuth");
-
-        if (cart?.classList.contains("active")) {
-            closeSide("cartSidebar");
-        } else if (account?.classList.contains("active")) {
-            closeSide("sideCuenta");
-        } else if (auth?.style.display === "flex") {
-            closeAuth();
-        } else {
-            // Si no hay nada abierto, el sistema cierra la app por defecto
-            console.log("Cerrando app...");
-        }
-    }, false);
-}, false);
-
 Object.assign(window, {
     scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,
     openAuth, closeAuth, switchTab, togglePasswordVisibility,

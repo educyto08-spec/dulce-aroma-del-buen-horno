@@ -1489,7 +1489,7 @@ footer .redes-sociales a:hover { color: var(--dorado); }
 .hero-actions { flex-wrap: wrap; justify-content: center; }
 .btn-instalar-app { border-style: dashed; }
 
-@media (display-mode: 	) {
+@media (display-mode: standalone) {
     :root {
         --cafe: #8B4513; /* SaddleBrown */
         --cafe-oscuro: #5A2D0C; /* Más oscuro */
@@ -2186,7 +2186,7 @@ html, body {
         left: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        background: rgba(3a, 15, 29, 0.4) !important; /* Sombra con el tono de tu texto arándano */
+        background: rgba(58, 15, 29, 0.4) !important; /* Sombra con el tono de tu texto arándano */
         opacity: 0 !important;
         pointer-events: none !important;
         transition: opacity 0.3s ease !important;
