@@ -1736,26 +1736,18 @@ html, body {
 
   /* ✅ SOLUCIÓN AL MENÚ HAMBURGUESA DESPLEGABLE (#navPrincipal):
        Mantenemos su diseño flotante debajo de la cabecera en móviles */
-   /* Estilizamos los enlaces para que tengan un contraste brutal y se lean a la primera */
-    .nav-links a {
-        display: block !important;
-        padding: 16px 24px !important; /* Un poco más grandes para que sea fácil picarles con el dedo */
+    .nav-links {
+        display: none !important; /* Por defecto oculto en móvil */
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
         width: 100% !important;
-        box-sizing: border-box !important;
-        color: #3e2714 !important; /* 🍫 Un color chocolate oscuro intenso que resalta al 100% */
-        font-weight: 800 !important; /* Letras bien negritas/gruesas */
-        font-size: 15px !important; /* Un punto más grandes */
-        letter-spacing: 1.5px !important; /* Espaciado premium entre letras */
-        text-decoration: none !important;
-        border-bottom: 1px solid #ebdccf !important; /* Línea divisoria entre opciones */
-        text-align: left !important;
-        text-transform: uppercase !important; /* Forzamos mayúsculas para que se lea mejor */
-    }
-
-    /* Efecto cuando el usuario mantiene presionado el botón en el celular */
-    .nav-links a:active {
-        background-color: #ebdccf !important; /* Fondo café claro al tocar */
-        color: #211206 !important; /* Letra aún más oscura al presionar */
+        background: #fffdfa !important; /* Fondo cálido de panadería */
+        box-shadow: 0 4px 12px rgba(123, 85, 51, 0.15) !important; /* Sombra suave café */
+        flex-direction: column !important;
+        padding: 10px 0 !important;
+        margin: 0 !important;
+        z-index: 9999 !important;
     }
 
     /* 🔥 SOPORTE MULTI-CLASE: 
