@@ -36,15 +36,26 @@ export function obtenerPuntos() {
 }
 
 export async function canjearCuponSorpresa() {
+  // Aseguramos que el módulo lea las variables de la base de datos de la ventana global
+  const idDoc = window.idDocumentoUsuarioFirestore;
+  const database = window.db;
+
+  if (!idDoc) {
+    console.error("No hay un ID de documento de Firestore guardado en window.idDocumentoUsuarioFirestore.");
+    // Si la variable no se guardó en window, intentamos usar el localStorage por si acaso
+    return false;
+  }
+
+  if (!database) {
+    console.error("La instancia de Firestore 'db' no está disponible en window.db.");
+    return false;
+  }
+
   const puntosActuales = obtenerPuntos();
-  
-  // Modificamos a 10 puntos como lo acordamos para el Raspa y Gana
   if (puntosActuales >= 10) {
     const nuevosPuntos = puntosActuales - 10;
     
-    // Generamos el código del ticket
     const codigoTicket = "DULCE-" + Math.floor(1000 + Math.random() * 9000);
-    
     const nuevoCupon = {
       codigo: codigoTicket,
       descripcion: "1 Pan Dulce Tradicional Gratis",
@@ -52,30 +63,20 @@ export async function canjearCuponSorpresa() {
       estado: "disponible"
     };
 
-    // Tomamos las variables globales de la ventana de tu app
-    const idDoc = window.idDocumentoUsuarioFirestore || idDocumentoUsuarioFirestore;
-    const database = window.db || db;
-
-    if (!idDoc) {
-      console.error("No hay un ID de documento de Firestore para este usuario.");
-      return false;
-    }
-
     try {
-      // Importamos las funciones de Firestore necesarias para los módulos
       const { doc, updateDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
       const usuarioRef = doc(database, "usuarios", idDoc);
 
-      // 1. Guardamos de verdad en la base de datos de Firebase
+      // Guardamos en Firestore
       await updateDoc(usuarioRef, {
         puntos: nuevosPuntos,
         cupones: arrayUnion(nuevoCupon)
       });
 
-      // 2. Por si las dudas, actualizamos también el localStorage viejo para que tu app local no se confunda
+      // Actualizamos localStorage para la interfaz local
       localStorage.setItem("dulce-aroma-puntos", String(nuevosPuntos));
 
-      // 3. Tu alerta bonita de SweetAlert (¡Personalizada con el nuevo código!)
+      // Alerta de éxito bonita
       Swal.fire({
         title: "¡Puntos Canjeados! 🥳🥐",
         html: `Has canjeado 10 puntos en el Raspa y Gana por un premio:<br><br><strong style="font-size: 1.5rem; color: #8B4513;">${codigoTicket}</strong><br><br>¡Felicidades! Tu cupón de Pan Gratis ya aparece en la sección "Mis Cupones" dentro de tu perfil.`,
@@ -83,10 +84,10 @@ export async function canjearCuponSorpresa() {
         confirmButtonColor: "#7b5533"
       });
 
-      // 4. Despachamos el evento para avisarle a toda la app que los puntos cambiaron
+      // Notificamos el cambio de puntos a la app
       document.dispatchEvent(new CustomEvent("puntos:cambio", { detail: { puntos: nuevosPuntos } }));
 
-      return true; // Éxito total
+      return true; 
     } catch (error) {
       console.error("Error al conectar con Firestore desde experiencia.js:", error);
       return false;

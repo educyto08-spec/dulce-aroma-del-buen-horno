@@ -14,6 +14,7 @@ import { alternarFavorito, esFavorito, iniciarExperiencia, sumarPuntos, obtenerP
 const app = initializeApp(firebaseConfig);
 const ULTIMO_PEDIDO_KEY = "dulce-aroma-ultimo-pedido";
 const db = getFirestore(app);
+window.db = db; // 👈 AGREGA ESTA LÍNEA
 const auth = getAuth(app);
 
 let carrito = [];
@@ -484,8 +485,8 @@ onAuthStateChanged(auth, async (user) => {
             
             snap.forEach((d) => { 
                 usuarioLogueado = d.data().nombre; 
-                // 🔹 AGREGAMOS ESTA LÍNEA AQUÍ PARA ASEGURAR EL ID AL INICIAR
                 idDocumentoUsuarioFirestore = d.id; 
+                window.idDocumentoUsuarioFirestore = d.id; // 👈 AGREGA ESTA LÍNEA
             });
         } catch {
             usuarioLogueado = user.email.split("@")[0].toUpperCase();
