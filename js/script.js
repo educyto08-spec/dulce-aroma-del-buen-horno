@@ -481,7 +481,12 @@ onAuthStateChanged(auth, async (user) => {
             const qUsuarios = query(collection(db, "usuarios"), where("uid", "==", user.uid));
             const snap = await getDocs(qUsuarios);
             usuarioLogueado = user.email.split("@")[0].toUpperCase();
-            snap.forEach((d) => { usuarioLogueado = d.data().nombre; });
+            
+            snap.forEach((d) => { 
+                usuarioLogueado = d.data().nombre; 
+                // 🔹 AGREGAMOS ESTA LÍNEA AQUÍ PARA ASEGURAR EL ID AL INICIAR
+                idDocumentoUsuarioFirestore = d.id; 
+            });
         } catch {
             usuarioLogueado = user.email.split("@")[0].toUpperCase();
         }
@@ -657,14 +662,23 @@ function checkScratchProgress(canvas, ctx, overlay, mensaje, btnNuevo, puntosDis
     }
 }
 
-function triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay) {
+// 1. MODIFICAMOS ESTA FUNCIÓN PARA QUE SEA ASÍNCRONA (async)
+async function triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay) {
     const puntosActuales = obtenerPuntos();
     if (puntosActuales >= 10) {
-        // Restar puntos y aplicar cupón
-        canjearCuponSorpresa(); // Esta función debería manejar la lógica del cupón y restar los puntos
-        puntosDisplay.textContent = obtenerPuntos(); // Actualizar puntos después del canje
-        mensaje.textContent = "¡Felicidades! Has ganado un pan gratis con tu cupón. ¡Revisa tu perfil!";
+        mensaje.textContent = "Procesando tu premio...";
         mensaje.hidden = false;
+
+        // Mandamos a restar los puntos y crear el cupón en Firebase
+        // Usamos 'await' para que no avance hasta que Firebase confirme que ya restó los puntos
+        const exito = await canjearCuponSorpresa(); 
+
+        if (exito) {
+            puntosDisplay.textContent = obtenerPuntos(); // Ahora sí mostrará el puntaje restado
+            mensaje.textContent = "¡Felicidades! Has ganado un pan gratis con tu cupón. ¡Revisa tu perfil!";
+        } else {
+            mensaje.textContent = "Hubo un error al procesar tus puntos. Inténtalo de nuevo.";
+        }
         btnNuevo.hidden = false;
     } else {
         mensaje.textContent = "No tienes suficientes puntos para reclamar una recompensa.";
@@ -673,6 +687,53 @@ function triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay) {
     }
 }
 
+// 2. ESTA ES LA FUNCIÓN NUEVA QUE DEBES PONER ABAJO PARA QUE REALMENTE RESTE EN FIREBASE
+async function canjearCuponSorpresa() {
+    // Verificamos que tengamos el ID del documento de Firestore del usuario
+    if (!idDocumentoUsuarioFirestore) {
+        console.error("No hay un ID de documento de Firestore para este usuario.");
+        return false;
+    }
+
+    const puntosActuales = obtenerPuntos();
+    const nuevosPuntos = puntosActuales - 10; // Restamos los 10 puntos del costo del juego
+
+    // Generamos un código de ticket aleatorio para el pan gratis (ej: DULCE-4829)
+    const codigoTicket = "DULCE-" + Math.floor(1000 + Math.random() * 9000);
+    
+    const nuevoCupon = {
+        codigo: codigoTicket,
+        descripcion: "1 Pan Dulce Tradicional Gratis",
+        fecha: new Date().toLocaleDateString(),
+        estado: "disponible"
+    };
+
+    try {
+        // Usamos la sintaxis modular de Firestore (versión 9+) que ya maneja tu app.
+        // Si en la parte superior de tu script tienes importadas las funciones globales:
+        // doc, updateDoc, arrayUnion de firebase-firestore
+        const { doc, updateDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
+
+        // Hacemos referencia al documento del usuario dentro de la colección 'usuarios'
+        const usuarioRef = doc(db, "usuarios", idDocumentoUsuarioFirestore);
+
+        // Actualizamos los puntos y añadimos el cupón al arreglo 'cupones' en Firestore
+        await updateDoc(usuarioRef, {
+            puntos: nuevosPuntos,
+            cupones: arrayUnion(nuevoCupon)
+        });
+
+        // NOTA: Si usas otra función para sincronizar los puntos locales, 
+        // asegúrate de actualizar tu variable local aquí si es necesario.
+
+        return true; // Todo salió perfecto en Firestore
+    } catch (error) {
+        console.error("Error al conectar con Firestore:", error);
+        return false; // Algo falló (ej. sin internet o error de permisos)
+    }
+}
+
+// 3. TU FUNCIÓN RESET QUEDA EXACTAMENTE IGUAL
 function resetRaspaGana() {
     const canvas = document.getElementById("scratchCardCanvas");
     const overlay = document.querySelector(".scratch-card-overlay");
@@ -799,6 +860,9 @@ async function cargarPerfilUsuario() {
 
                 actualizarAvatarPerfil(ud.fotoPerfil || null);
                 actualizarTarjetaLealtad();
+                
+                // ¡Perfecto! Aquí se activa la carga de cupones
+                renderizarCuponesPerfil();
 
                 const miembro = document.getElementById("perfMiembroDesde");
                 if (miembro && ud.fechaRegistro) {
@@ -813,52 +877,56 @@ async function cargarPerfilUsuario() {
             if (notasEl) notasEl.innerText = "Sin notas.";
             actualizarAvatarPerfil(null);
             idDocumentoUsuarioFirestore = null;
-        }
+        } // 🔹 Aquí se cierra correctamente el bloque 'if/else' de los usuarios
 
+        // --- APARTADO DEL HISTORIAL DE PEDIDOS ---
         const contenedorHistorial = document.getElementById("contenedorHistorialPedidos");
-        contenedorHistorial.innerHTML = '<p class="text-muted">🔄 Consultando historial...</p>';
+        if (contenedorHistorial) {
+            contenedorHistorial.innerHTML = '<p class="text-muted">🔄 Consultando historial...</p>';
 
-        const qPedidos = query(collection(db, "pedidos"), where("uidCliente", "==", user.uid), orderBy("fechaCreacion", "desc"));
-        const pedidosSnapshot = await getDocs(qPedidos);
+            const qPedidos = query(collection(db, "pedidos"), where("uidCliente", "==", user.uid), orderBy("fechaCreacion", "desc"));
+            const pedidosSnapshot = await getDocs(qPedidos);
 
-        if (pedidosSnapshot.empty) {
-            contenedorHistorial.innerHTML = '<p class="text-muted">Aún no has realizado pedidos en nuestra web. ¡Tu pancito te espera! 🥐</p>';
-            return;
-        }
-
-        contenedorHistorial.innerHTML = "";
-        pedidosSnapshot.forEach((docSnap) => {
-            const pedido = docSnap.data();
-            const estado = pedido.estado || "Recibido 🥖";
-            const clase = claseBadgeEstado(estado);
-            let productosHTML = "";
-            if (Array.isArray(pedido.productos)) {
-                pedido.productos.forEach((prod) => {
-                    productosHTML += `<li>${prod.cantidad}x ${escapeHtml(prod.nombre)} - $${(prod.precio * prod.cantidad).toFixed(2)}</li>`;
-                });
+            if (pedidosSnapshot.empty) {
+                contenedorHistorial.innerHTML = '<p class="text-muted">Aún no has realizado pedidos en nuestra web. ¡Tu pancito te espera! 🥐</p>';
+                return;
             }
-            const card = document.createElement("div");
-            card.className = "card-pedido-historial";
-            card.innerHTML = `
-                <div class="pedido-historial-header">
-                    <span class="pedido-id">Ref: ${escapeHtml(pedido.codigoPedido || "#WEB-XXXX")}</span>
-                    <span class="pedido-fecha">${pedido.fechaCreacion ? new Date(pedido.fechaCreacion).toLocaleDateString() : "Reciente"}</span>
-                </div>
-                <ul class="pedido-productos-list pedido-productos-list-compact">${productosHTML}</ul>
-                <div class="pedido-historial-footer">
-                    <div><strong>Total: ${escapeHtml(String(pedido.total))}</strong></div>
-                    <span class="badge-estado ${clase}">${escapeHtml(estado)}</span>
-                </div>
-            `;
-            contenedorHistorial.appendChild(card);
-        });
+
+            contenedorHistorial.innerHTML = "";
+            pedidosSnapshot.forEach((docSnap) => {
+                const pedido = docSnap.data();
+                const estado = pedido.estado || "Recibido 🥖";
+                const clase = claseBadgeEstado(estado);
+                let productosHTML = "";
+                if (Array.isArray(pedido.productos)) {
+                    pedido.productos.forEach((prod) => {
+                        productosHTML += `<li>${prod.cantidad}x ${escapeHtml(prod.nombre)} - $${(prod.precio * prod.cantidad).toFixed(2)}</li>`;
+                    });
+                }
+                const card = document.createElement("div");
+                card.className = "card-pedido-historial";
+                card.innerHTML = `
+                    <div class="pedido-historial-header">
+                        <span class="pedido-id">Ref: ${escapeHtml(pedido.codigoPedido || "#WEB-XXXX")}</span>
+                        <span class="pedido-fecha">${pedido.fechaCreacion ? new Date(pedido.fechaCreacion).toLocaleDateString() : "Reciente"}</span>
+                    </div>
+                    <ul class="pedido-productos-list pedido-productos-list-compact">${productosHTML}</ul>
+                    <div class="pedido-historial-footer">
+                        <div><strong>Total: ${escapeHtml(String(pedido.total))}</strong></div>
+                        <span class="badge-estado ${clase}">${escapeHtml(estado)}</span>
+                    </div>
+                `;
+                contenedorHistorial.appendChild(card);
+            });
+        }
     } catch (error) {
-        console.error(error);
-        document.getElementById("contenedorHistorialPedidos").innerHTML =
-            '<p class="text-muted">Error al cargar el historial. Intenta más tarde.</p>';
+        console.error("Error en cargarPerfilUsuario:", error);
+        const contenedorHistorial = document.getElementById("contenedorHistorialPedidos");
+        if (contenedorHistorial) {
+            contenedorHistorial.innerHTML = '<p class="text-muted">Error al cargar el historial. Intenta más tarde.</p>';
+        }
     }
 }
-
 function actualizarTarjetaLealtad() {
     const puntos = obtenerPuntos();
     const el = document.getElementById("perfPuntosLealtad");
@@ -1423,3 +1491,57 @@ Object.assign(window, {
     cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
     guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast
 });
+
+
+// Función para escuchar y pintar los cupones en el perfil en tiempo real
+async function renderizarCuponesPerfil() {
+    const contenedor = document.getElementById("contenedorCuponesPerfil");
+    // Detener la función si no existe el contenedor o si no hay un ID de usuario válido
+    if (!contenedor || !idDocumentoUsuarioFirestore) return;
+
+    try {
+        // Importamos dinámicamente 'doc' y 'onSnapshot' de Firestore Modular (v9+)
+        const { doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
+        
+        const usuarioRef = doc(db, "usuarios", idDocumentoUsuarioFirestore);
+
+        // Escuchamos el documento del usuario en tiempo real
+        onSnapshot(usuarioRef, (docSnap) => {
+            if (!docSnap.exists()) return;
+
+            const datosUsuario = docSnap.data();
+            const cupones = datosUsuario.cupones; // Obtenemos el arreglo 'cupones'
+
+            // Caso A: Si el usuario no tiene cupones guardados aún o el array está vacío
+            if (!cupones || cupones.length === 0) {
+                contenedor.innerHTML = `
+                    <p style="color: #999; text-align: center; font-size: 13px; margin: 15px 0;">
+                        ¡Aún no tienes cupones!<br>Prueba tu suerte en el Raspa y Gana.
+                    </p>`;
+                return;
+            }
+
+            // Caso B: Si hay cupones, limpiamos el contenedor y los pintamos
+            contenedor.innerHTML = ""; 
+
+            // Al ser un array de Firestore, lo recorremos con un forEach ordinario
+            cupones.forEach((cupon) => {
+                contenedor.innerHTML += `
+                    <div class="cupon-item" style="border: 1px dashed #7b5533; background: #fffdfa; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="text-align: left;">
+                            <h5 style="margin: 0; color: #333; font-size: 14px;">${cupon.descripcion}</h5>
+                            <small style="color: #888; font-size: 11px;">Obtenido: ${cupon.fecha}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-family: monospace; background: #ebdccf; padding: 3px 6px; border-radius: 4px; font-weight: bold; color: #7b5533; font-size: 12px;">${cupon.codigo}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+    } catch (error) {
+        console.error("Error al escuchar los cupones desde Firestore:", error);
+        contenedor.innerHTML = `<p style="color: red; font-size: 12px; text-align: center;">Error al cargar cupones.</p>`;
+    }
+}

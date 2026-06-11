@@ -187,11 +187,11 @@
         <div class="side-header">
             <div>
                 <h2 id="perfilTitle">Mi cuenta</h2>
-                <button type="button" id="btnCerrarSesion" class="btn-link-danger" onclick="cerrarSesionUsuario()">Cerrar sesión</button>
+          <button type="button" id="btnCerrarSesion" class="btn-link-danger" onclick="cerrarSesionUsuario()">Cerrar sesión</button>
             </div>
-            
-             type="button" class="close-side" onclick="closeSide('sideCuenta')" aria-label="Cerrar perfil">&times;</button>
+             <button type="button" class="close-side" onclick="closeSide('sideCuenta')" aria-label="Cerrar perfil">&times;</button>
         </div>
+        
         <div class="side-body perfil-body">
             <div class="perfil-hero-card">
                 <div class="perfil-avatar-wrap">
@@ -218,7 +218,7 @@
                     <h4><i class="fa-solid fa-star" aria-hidden="true"></i> Club Dulce Aroma</h4>
                     <p class="perfil-lealtad-puntos"><span id="perfPuntosLealtad">0</span> panes acumulados</p>
                     <div class="perfil-lealtad-barra"><div id="perfBarraLealtad" class="perfil-lealtad-fill"></div></div>
-                    <p class="perfil-lealtad-hint">Gana 1 punto por cada pieza en tus pedidos. A 100 puntos: sorpresa del horno.</p>
+                    <p class="perfil-lealtad-hint">Gana 1 punto por cada pieza en tus pedidos. A 10 puntos: sorpresa del horno.</p>
                 </div>
                 <div class="perfil-datos-card perfil-card-moderna">
                     <h4><i class="fa-solid fa-address-card" aria-hidden="true"></i> Contacto y entrega</h4>
@@ -227,15 +227,23 @@
                         <div><dt>Dirección</dt><dd id="perfDireccion">—</dd></div>
                     </dl>
                 </div>
-                <div class="perfil-datos-card perfil-card-moderna perfil-notas-card">
+                <div class="perfil-datos-card perfil-card-moderna perfil-notes-card">
                     <h4><i class="fa-solid fa-note-sticky" aria-hidden="true"></i> Notas personales</h4>
                     <p class="perfil-notas-texto" id="perfNotas">Sin notas.</p>
+                </div>
+
+                <div class="perfil-datos-card perfil-card-moderna" style="border-left: 4px solid #7b5533;">
+                    <h4><i class="fa-solid fa-ticket" aria-hidden="true"></i> Mis Cupones Ganados</h4>
+                    <div id="contenedorCuponesPerfil" style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                        <p style="color: #888; font-size: 13px; text-align: center;">Cargando tus cupones...</p>
+                    </div>
                 </div>
                 <button type="button" class="btn-pedir btn-perfil-editar" id="btnActivarEdicionPerf" onclick="conmutarModoEdicionPerfil(true)">
                     <i class="fa-solid fa-pen" aria-hidden="true"></i> Editar perfil
                 </button>
             </div>
-
+            
+            
             <div id="vistaFormularioPerfil" class="perfil-formulario perfil-form-moderno">
                 <div class="perfil-datos-card perfil-card-moderna">
                     <h4>Editar información</h4>
