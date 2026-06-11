@@ -519,7 +519,10 @@ function renderizarAppExclusiva() {
     const seccionExclusiva = document.getElementById("appExclusivaSeccion");
     if (!seccionExclusiva) return;
 
-    if (window.matchMedia("(display-mode: standalone)").matches && usuarioLogueado) {
+    // DETECTOR OFICIAL PARA CAPACITOR y Móviles
+    const esCapacitor = window.Capacitor || window.webkit?.messageHandlers || window.matchMedia("(max-width: 768px)").matches;
+
+    if (esCapacitor && usuarioLogueado) {
         seccionExclusiva.hidden = false;
         generarQrUsuario();
         setupRaspaGana();

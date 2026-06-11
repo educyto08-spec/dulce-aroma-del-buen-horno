@@ -1545,7 +1545,7 @@ footer .redes-sociales a:hover { color: var(--dorado); }
 .hero-actions { flex-wrap: wrap; justify-content: center; }
 .btn-instalar-app { border-style: dashed; }
 
-@media (display-mode: standalone) {
+@media (display-mode: 	) {
     :root {
         --cafe: #8B4513; /* SaddleBrown */
         --cafe-oscuro: #5A2D0C; /* Más oscuro */
@@ -1649,13 +1649,19 @@ footer .redes-sociales a:hover { color: var(--dorado); }
     }
 }
 
+/* --- DISEÑO EXCLUSIVO PARA LA APK EN CELULAR (CAPACITOR) --- */
 @media (max-width: 768px) {
-    .catalogo-toolbar { flex-direction: column; align-items: stretch; }
-    .toolbar-orden { margin-left: 0; }
-    .ubicacion-grid { grid-template-columns: 1fr; }
-    .modal-vr-grid { grid-template-columns: 1fr; }
-    .btn-back-top { bottom: 100px; }
-    .btn-whatsapp-flotante { bottom: 88px; }
-    .sticky-cart-bar.visible ~ .btn-whatsapp-flotante { bottom: 72px; }
+  body {
+    background-color: #fcf8f2 !important; /* Tu paleta cálida de panadería */
+  }
+  
+  /* OCULTAR ELEMENTOS EN EL CELULAR:
+     Ocultamos el botón de instalar app y seleccionamos específicamente 
+     el enlace que va a ra.html para ocultar la Realidad Aumentada */
+  #btnInstalarApp, 
+  .btn-instalar-app, 
+  .hero-actions a[href="ra.html"] {
+    display: none !important;
+  }
 }
 
