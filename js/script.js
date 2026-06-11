@@ -671,9 +671,8 @@ async function triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay) {
         mensaje.hidden = false;
 
         // Mandamos a restar los puntos y crear el cupón en Firebase
-        // Usamos 'await' para que no avance hasta que Firebase confirme que ya restó los puntos
-        const exito = await canjearCuponSorpresa(db, idDocumentoUsuarioFirestore); 
-
+       // 🔹 Le pasamos db, el id, y un objeto con las funciones nativas de este archivo
+        const exito = await canjearCuponSorpresa(db, idDocumentoUsuarioFirestore, { doc, updateDoc, arrayUnion });
         if (exito) {
             puntosDisplay.textContent = obtenerPuntos(); // Ahora sí mostrará el puntaje restado
             mensaje.textContent = "¡Felicidades! Has ganado un pan gratis con tu cupón. ¡Revisa tu perfil!";
@@ -1451,15 +1450,13 @@ Object.assign(window, {
 
 
 // Función para escuchar y pintar los cupones en el perfil en tiempo real
-async function renderizarCuponesPerfil() {
+function renderizarCuponesPerfil() {
     const contenedor = document.getElementById("contenedorCuponesPerfil");
     if (!contenedor || !idDocumentoUsuarioFirestore) return;
 
     try {
-        // Importamos dinámicamente SOLO el onSnapshot de la librería, pero usamos tu 'db' global de la línea 3
-        const { doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
-        
-        // Usamos el 'db' global de script.js, que está 100% verificado en este archivo
+        // 🔹 Quitamos el import dinámico. Usamos directamente 'doc' y 'onSnapshot' 
+        // que ya deben estar importados al inicio de tu script.js por Cline.
         const usuarioRef = doc(db, "usuarios", idDocumentoUsuarioFirestore);
 
         onSnapshot(usuarioRef, (docSnap) => {

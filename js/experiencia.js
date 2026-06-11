@@ -36,15 +36,9 @@ export function obtenerPuntos() {
 }
 
 // Añadimos 'db' e 'idDoc' como parámetros de la función
-export async function canjearCuponSorpresa(db, idDoc) {
-
-  if (!idDoc) {
-    console.error("No se recibió un ID de documento de Firestore válido en la experiencia.");
-    return false;
-  }
-
-  if (!db) {
-    console.error("No se recibió la instancia de Firestore 'db' en la experiencia.");
+export async function canjearCuponSorpresa(db, idDoc, firestoreUtils) {
+  if (!idDoc || !db) {
+    console.error("Faltan parámetros críticos (db o idDoc) en la experiencia.");
     return false;
   }
 
@@ -61,10 +55,9 @@ export async function canjearCuponSorpresa(db, idDoc) {
     };
 
     try {
-      // Importamos estrictamente solo las funciones operativas
-      const { doc, updateDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
+      // 🔹 Usamos las utilidades nativas que nos manda script.js para evitar el conflicto de instancias
+      const { doc, updateDoc, arrayUnion } = firestoreUtils;
       
-      // Usamos el 'db' que nos pasaron limpiamente
       const usuarioRef = doc(db, "usuarios", idDoc);
 
       await updateDoc(usuarioRef, {
