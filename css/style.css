@@ -1611,6 +1611,7 @@ input, textarea, [contenteditable="true"] {
     -ms-user-select: text !important;
     user-select: text !important;
 }
+
 /* ==========================================================================
    ⚡ DETALLE NATIVO 2: ELIMINAR EL PARPADEO GRIS (TAP HIGHLIGHT)
    ========================================================================== */
@@ -1620,7 +1621,7 @@ a, button, div, span, img, i, input {
 }
 
 /* ==========================================================================
-   🍞 PARCHE DE INTERACCIÓN, MENÚ MÓVIL Y ELIMINACIÓN DE BARRA BLANCA 
+   🍞 PARCHE DE INTERACCIÓN, MENÚ MÓVIL Y ELIMINACIÓN DE BARRA BLANCA
    ========================================================================== */
 
 /* 1. Muro de contención para erradicar la franja blanca de la derecha */
@@ -1642,17 +1643,18 @@ html, body {
 
 @media (max-width: 900px) {
 
-/* Colócalo dentro de tu @media (max-width: 768px) */
-.skeleton {
-    background: linear-gradient(90deg, #ffe3e8 25%, #fff0f3 50%, #ffe3e8 75%) !important;
-    background-size: 200% 100% !important;
-    animation: loadingSkeleton 1.5s infinite ease-in-out !important;
-}
+    /* Skeleton loader adaptado al breakpoint de 900px */
+    .skeleton {
+        background: linear-gradient(90deg, #ffe3e8 25%, #fff0f3 50%, #ffe3e8 75%) !important;
+        background-size: 200% 100% !important;
+        animation: loadingSkeleton 1.5s infinite ease-in-out !important;
+    }
 
-@keyframes loadingSkeleton {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
+    @keyframes loadingSkeleton {
+        0%   { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
     /* Elevamos la cabecera completa por encima de los paneles colapsados */
     .main-header {
         position: sticky !important;
@@ -1671,19 +1673,19 @@ html, body {
 
     /* Reordenamiento estricto de elementos en barra móvil */
     .logo { order: 1 !important; }
-    
-    .header-icons { 
-        order: 2 !important; 
-        margin-left: auto !important; 
-        margin-right: 12px !important; 
-        gap: 12px !important; 
+
+    .header-icons {
+        order: 2 !important;
+        margin-left: auto !important;
+        margin-right: 12px !important;
+        gap: 12px !important;
         display: flex !important;
         align-items: center !important;
     }
-    
-    .menu-toggle { 
-        order: 3 !important; 
-        display: block !important; 
+
+    .menu-toggle {
+        order: 3 !important;
+        display: block !important;
         z-index: 100001 !important; /* Más arriba que el fondo del menú */
     }
 
@@ -1703,10 +1705,10 @@ html, body {
         box-shadow: -6px 0 25px rgba(44, 26, 14, 0.15) !important;
         border-left: 1px solid var(--borde) !important;
         transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        
+
         /* Con esto rompemos la barrera invisible y forzamos al cel a admitir los toques */
-        z-index: 100000 !important; 
-        pointer-events: auto !important; 
+        z-index: 100000 !important;
+        pointer-events: auto !important;
     }
 
     /* Cuando se le añade la clase activadora, entra en pantalla */
@@ -1736,17 +1738,23 @@ html, body {
         background-color: rgba(107, 68, 35, 0.1) !important;
         border-radius: 6px;
     }
-}
+
+} /* Fin @media (max-width: 900px) */
+
+/* ==========================================================================
+   📱 AJUSTES ESPECÍFICOS PARA PANTALLAS MUY PEQUEÑAS (max-width: 600px)
+   ========================================================================== */
 
 @media (max-width: 600px) {
+
     /* Si el carrito está inactivo, bajamos su prioridad para que no robe clics */
     .side-panel {
         z-index: 2000 !important; /* Menor que .nav-links (100000) */
     }
-    
+
     /* Si el carrito o perfil se abren (.active), ganan prioridad para poder usarse */
     .side-panel.active {
-        z-index: 100005 !important; 
+        z-index: 100005 !important;
     }
 
     /* Control riguroso de espacios del usuario para proteger el icono del carrito */
@@ -1767,7 +1775,8 @@ html, body {
         margin: 0 !important;
         padding: 4px !important;
     }
-}
+
+} /* Fin @media (max-width: 600px) */
 
 /* ==========================================================================
    📱 CONFIGURACIONES EXCLUSIVAS PARA LA APP MÓVIL (PANTALLAS CHICAS / APK)
@@ -1781,35 +1790,42 @@ html, body {
         --cafe-oscuro: #851c3e;         /* Arándano Profundo */
         --cafe-claro: #e59bb1;          /* Rosa Suave / Algodón de azúcar */
         --dorado: #b07ee6;              /* Lila Eléctrico / Dulce de violeta */
-        
+
         --crema-principal: #fff0f3;     /* Fondo Fresa con Crema muy claro */
         --crema-suave: #ffffff;         /* Tarjetas y Header en blanco */
         --pastel-rosa: #ffe3e8;         /* Bloques secundarios */
         --pastel-albaricoque: #f0e3ff;  /* Bloques especiales */
-        
+
         --texto-oscuro: #3a0f1d;        /* Marrón Arándano ultra oscuro */
         --texto-mutado: #a67c89;        /* Gris rosáceo */
         --borde: #ffd0da;               /* Bordes rosados */
-        
+
         --sombra: 0 12px 30px rgba(212, 76, 119, 0.15);
         --sombra-card: 0 6px 20px rgba(212, 76, 119, 0.08);
         --radio: 24px;                  /* Estilo iOS/Android moderno */
         --radio-sm: 14px;
     }
 
-   /* Agrégalo al body en la sección de la app móvil */
-body {
+    /* ==========================================================================
+       🌐 BASE DE LA APP: BODY Y BARRA SUPERIOR
+       ========================================================================== */
+
+    body {
         background-image: none !important;
         background-color: var(--crema-principal) !important;
         color: var(--texto-oscuro) !important;
-        padding-bottom: 70px !important; 
+        padding-bottom: 70px !important;
         overscroll-behavior-y: contain !important; /* 🧊 Bloquea el estiramiento o rebote blanco del navegador */
     }
-   
+
     .top-bar {
         background-color: var(--cafe) !important;
         color: var(--blanco) !important;
     }
+
+    /* ==========================================================================
+       🔘 BOTONES PRINCIPALES DE LA APP
+       ========================================================================== */
 
     /* Rediseño completo de los botones de pedir en la app */
     .btn-pedir {
@@ -1820,26 +1836,83 @@ body {
         font-weight: 800 !important;
         box-shadow: 0 4px 12px rgba(214, 76, 119, 0.2) !important;
     }
-    .btn-pedir:hover, .btn-pedir:active {
+
+    .btn-pedir:hover,
+    .btn-pedir:active {
         background-color: var(--cafe-oscuro) !important;
     }
+
+    /* ==========================================================================
+       🖼️ HERO: BANNER DE BIENVENIDA
+       ========================================================================== */
 
     /* El banner Hero del inicio de la app ahora se adaptará a los nuevos tonos */
     .hero-overlay {
         background: linear-gradient(180deg, rgba(58, 15, 29, 0.6) 0%, rgba(214, 76, 119, 0.4) 60%, var(--crema-principal) 100%) !important;
     }
 
+    /* ✨ PASO 3: REDISEÑO COMPACTO DEL HERO */
+    .hero {
+        min-height: 180px !important;       /* Reducimos drásticamente la altura */
+        height: 180px !important;
+        padding: 20px !important;
+        margin-bottom: 20px !important;
+        border-radius: 0 0 var(--radio) var(--radio) !important; /* Curva sutil abajo del banner */
+    }
+
+    /* Ocultamos el texto largo y los botones estorbosos en la app */
+    .hero p,
+    .hero-actions,
+    .hero-badge {
+        display: none !important;
+    }
+
+    /* Ajustamos el título principal para que quede perfecto en el celular */
+    .hero h1 {
+        font-size: 1.6rem !important;        /* Letra más pequeña y fina para celular */
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        text-shadow: 0 2px 10px rgba(58, 15, 29, 0.4) !important; /* Sombra sutil con el tono arándano */
+    }
+
+    /* Ajustamos el contenedor interno para que centre el título en el nuevo espacio */
+    .hero-content {
+        max-width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    /* ==========================================================================
+       🚫 FUMIGACIÓN: OCULTAR ELEMENTOS NO DESEADOS EN LA APK
+       ========================================================================== */
+
     /* 🚫 FUMIGAMOS EL MENÚ LATERAL VIEJO Y EL BOTÓN DE RAYITAS EN LA APP */
-    .nav-links, .menu-toggle {
+    .nav-links,
+    .menu-toggle {
         display: none !important;
     }
 
     /* Ocultar instaladores Web redundantes dentro de la APK */
-    #btnInstalarApp, 
-    .btn-instalar-app, 
+    #btnInstalarApp,
+    .btn-instalar-app,
     .hero-actions a[href="ra.html"] {
         display: none !important;
     }
+
+    /* --- MANTENER OCULTOS LOS ELEMENTOS ANTERIORES --- */
+    .footer-app-pronto,
+    .panel-qr-ra,
+    .panel-qr-titulo,
+    .footer-link-discreto,
+    .btn-whatsapp-flotante,
+    #stickyCartBar {
+        display: none !important;
+    }
+
+    /* ==========================================================================
+       📱 BARRA DE NAVEGACIÓN INFERIOR ESTILO APP
+       ========================================================================== */
 
     /* 📱 ACTIVACIÓN DE LA BARRA DE NAVEGACIÓN INFERIOR ESTILO APP */
     .mobile-bottom-nav {
@@ -1879,14 +1952,15 @@ body {
     }
 
     /* Pestaña activa o presionada (Color Fresa e iluminada) */
-    .bottom-nav-item.active, .bottom-nav-item:active {
+    .bottom-nav-item.active,
+    .bottom-nav-item:active {
         color: var(--cafe) !important;
     }
 
     /* ==========================================================================
        🔄 PASO 2: SCROLL HORIZONTAL DE PRODUCTOS (ESTILO REPOSTERÍA CHIC)
        ========================================================================== */
-    
+
     /* Forzamos a la cuadrícula de productos a convertirse en una fila deslizable */
     .grid-productos {
         display: flex !important;
@@ -1894,16 +1968,15 @@ body {
         overflow-y: hidden !important;        /* Evita rebotes verticales extraños */
         gap: 16px !important;                 /* Espaciado elegante entre panes */
         padding: 12px 4px 24px 4px !important;/* Margen inferior para que respire la sombra */
-        
+
         /* Propiedades nativas para que el scroll se sienta suave con el dedo */
         scroll-snap-type: x mandatory !important;
         -webkit-overflow-scrolling: touch !important;
-        -webkit-overflow-scrolling: touch !important; /* Forzar el deslizamiento con inercia nativa en iOS/WebView */
-    scroll-behavior: smooth !important;
-    
-    /* 🚀 Truco de hardware: Forzar la renderización directa en la GPU del celular */
-    transform: translateZ(0) !important;
-    will-change: transform, scroll-position !important;
+        scroll-behavior: smooth !important;
+
+        /* 🚀 Truco de hardware: Forzar la renderización directa en la GPU del celular */
+        transform: translateZ(0) !important;
+        will-change: transform, scroll-position !important;
     }
 
     /* Ocultamos la barra de scroll horizontal para mantener la interfaz limpia (Chrome/Safari/App) */
@@ -1939,46 +2012,11 @@ body {
         height: auto !important;             /* Que se adapte al tamaño móvil */
         margin-bottom: 10px !important;
     }
-    
-    /* ==========================================================================
-       ✨ PASO 3: REDISEÑO COMPACTO DEL HERO (BANNER DE BIENVENIDA)
-       ========================================================================== */
-    
-    .hero {
-        min-height: 180px !important;       /* Reducimos drásticamente la altura */
-        height: 180px !important;
-        padding: 20px !important;
-        margin-bottom: 20px !important;
-        border-radius: 0 0 var(--radio) var(--radio) !important; /* Curva sutil abajo del banner */
-    }
 
-    /* Ocultamos el texto largo y los botones estorbosos en la app */
-    .hero p, 
-    .hero-actions,
-    .hero-badge {
-        display: none !important;
-    }
-
-    /* Ajustamos el título principal para que quede perfecto en el celular */
-    .hero h1 {
-        font-size: 1.6rem !important;        /* Letra más pequeña y fina para celular */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        text-shadow: 0 2px 10px rgba(58, 15, 29, 0.4) !important; /* Sombra sutil con el tono arándano */
-    }
-
-    /* Ajustamos el contenedor interno para que centre el título en el nuevo espacio */
-    .hero-content {
-        max-width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-    
     /* ==========================================================================
        📱 PASO 4: FEEDBACK TÁCTIL (EFECTOS ELÁSTICOS AL TOCAR)
        ========================================================================== */
-    
+
     /* Efecto de compresión elástica para las tarjetas de panes y botones principales */
     .item-producto:active,
     .btn-pedir:active,
@@ -2007,11 +2045,11 @@ body {
         background-color: var(--pastel-rosa) !important;
         transform: scale(0.99) !important;
     }
-    
+
     /* ==========================================================================
        🏷️ PASO 5: DISEÑO DE TARJETAS HORIZONTALES COMPACTAS (ESTILO DELI-APP)
        ========================================================================== */
-    
+
     /* Si tienes una sección de "Más vendidos" o lista secundaria, la transformamos */
     .lista-productos-secundaria {
         display: flex !important;
@@ -2078,18 +2116,10 @@ body {
         box-shadow: 0 3px 8px rgba(214, 76, 119, 0.25) !important;
     }
 
-    /* --- MANTENER OCULTOS LOS ELEMENTOS ANTERIORES --- */
-    .footer-app-pronto,
-    .panel-qr-ra,
-    .panel-qr-titulo,
-    .footer-link-discreto,
-    .btn-whatsapp-flotante,
-    #stickyCartBar {
-        display: none !important;
-    }
     /* ==========================================================================
        🧼 DETALLE NATIVO 4: SKELETON LOADER (EFECTO DE CARGA ELEGANTE)
        ========================================================================== */
+
     .skeleton-loading {
         background: linear-gradient(90deg, #ffe3e8 25%, #fff0f3 50%, #ffe3e8 75%) !important;
         background-size: 200% 100% !important;
@@ -2099,103 +2129,105 @@ body {
     }
 
     /* Evita que se vean las imágenes reales mientras carga */
-    .skeleton-loading img, 
-    .skeleton-loading button, 
+    .skeleton-loading img,
+    .skeleton-loading button,
     .skeleton-loading span {
         visibility: hidden !important;
     }
 
     @keyframes pulsoSkeleton {
-        0% { background-position: 200% 0; }
+        0%   { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
-    
+
     /* ==========================================================================
-   🧁 MEJORA 1: MODAL ESTILO BOTTOM-SHEET NATIVO
-   ========================================================================== */
-.modal-bottom-sheet {
-    position: fixed !important;
-    bottom: -100% !important; /* Escondido abajo del todo por defecto */
-    left: 0 !important;
-    right: 0 !important;
-    background-color: var(--crema-suave) !important;
-    
-    /* Bordes redondeados solo arriba, plano abajo estilo iOS/Android */
-    border-radius: var(--radio) var(--radio) 0 0 !important; 
-    box-shadow: 0 -10px 30px rgba(58, 15, 29, 0.12) !important;
-    
-    /* Deslizamiento súper suave usando curvas cúbicas nativas */
-    transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important; 
-    z-index: 100006 !important; /* Por encima de la barra inferior */
-    padding: 20px 24px 34px 24px !important; /* Espacio extra abajo para no chocar con sistemas gestuales */
-    max-height: 80vh !important;
-    overflow-y: auto !important;
-}
+       🧁 MEJORA 1: MODAL ESTILO BOTTOM-SHEET NATIVO
+       ========================================================================== */
 
-/* Esta clase se añade con JavaScript para abrirlo */
-.modal-bottom-sheet.open {
-    bottom: 0 !important;
-}
+    .modal-bottom-sheet {
+        position: fixed !important;
+        bottom: -100% !important; /* Escondido abajo del todo por defecto */
+        left: 0 !important;
+        right: 0 !important;
+        background-color: var(--crema-suave) !important;
 
-/* La tradicional "pestaña o rayita" visual para indicarle al usuario que se puede deslizar */
-.modal-bottom-sheet::before {
-    content: "" !important;
-    display: block !important;
-    width: 44px !important;
-    height: 5px !important;
-    background-color: var(--borde) !important;
-    border-radius: 3px !important;
-    margin: 0 auto 20px auto !important;
-}
+        /* Bordes redondeados solo arriba, plano abajo estilo iOS/Android */
+        border-radius: var(--radio) var(--radio) 0 0 !important;
+        box-shadow: 0 -10px 30px rgba(58, 15, 29, 0.12) !important;
 
-/* El fondo oscuro translúcido que bloquea el resto de la app */
-.sheet-overlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: rgba(3a, 15, 29, 0.4) !important; /* Sombra con el tono de tu texto arándano */
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: opacity 0.3s ease !important;
-    z-index: 100005 !important;
-}
+        /* Deslizamiento súper suave usando curvas cúbicas nativas */
+        transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 100006 !important; /* Por encima de la barra inferior */
+        padding: 20px 24px 34px 24px !important; /* Espacio extra abajo para no chocar con sistemas gestuales */
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+    }
 
-.sheet-overlay.visible {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
+    /* Esta clase se añade con JavaScript para abrirlo */
+    .modal-bottom-sheet.open {
+        bottom: 0 !important;
+    }
 
-/* ==========================================================================
-   🏷️ MEJORA 2: PESTAÑAS DE CATEGORÍA CON INDICADOR LÍQUIDO
-   ========================================================================== */
-.btn-categoria {
-    position: relative !important;
-    background: transparent !important; /* Quitamos fondos toscos */
-    color: var(--texto-mutado) !important;
-    font-weight: 700 !important;
-    padding: 12px 16px !important;
-    border: none !important;
-    transition: color 0.2s ease !important;
-}
+    /* La tradicional "pestaña o rayita" visual para indicarle al usuario que se puede deslizar */
+    .modal-bottom-sheet::before {
+        content: "" !important;
+        display: block !important;
+        width: 44px !important;
+        height: 5px !important;
+        background-color: var(--borde) !important;
+        border-radius: 3px !important;
+        margin: 0 auto 20px auto !important;
+    }
 
-/* Estilo para la categoría seleccionada */
-.btn-categoria.active {
-    color: var(--cafe) !important; /* Cambia a tu tono fresa */
-    background: transparent !important;
-}
+    /* El fondo oscuro translúcido que bloquea el resto de la app */
+    .sheet-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(3a, 15, 29, 0.4) !important; /* Sombra con el tono de tu texto arándano */
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: opacity 0.3s ease !important;
+        z-index: 100005 !important;
+    }
 
-/* La pequeña barrita elástica debajo del texto */
-.btn-categoria.active::after {
-    content: "" !important;
-    position: absolute !important;
-    bottom: 2px !important;
-    left: 25% !important;
-    right: 25% !important;
-    height: 3.5px !important;
-    background-color: var(--cafe) !important;
-    border-radius: 2px !important;
-}
+    .sheet-overlay.visible {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
 
-}
+    /* ==========================================================================
+       🏷️ MEJORA 2: PESTAÑAS DE CATEGORÍA CON INDICADOR LÍQUIDO
+       ========================================================================== */
+
+    .btn-categoria {
+        position: relative !important;
+        background: transparent !important; /* Quitamos fondos toscos */
+        color: var(--texto-mutado) !important;
+        font-weight: 700 !important;
+        padding: 12px 16px !important;
+        border: none !important;
+        transition: color 0.2s ease !important;
+    }
+
+    /* Estilo para la categoría seleccionada */
+    .btn-categoria.active {
+        color: var(--cafe) !important; /* Cambia a tu tono fresa */
+        background: transparent !important;
+    }
+
+    /* La pequeña barrita elástica debajo del texto */
+    .btn-categoria.active::after {
+        content: "" !important;
+        position: absolute !important;
+        bottom: 2px !important;
+        left: 25% !important;
+        right: 25% !important;
+        height: 3.5px !important;
+        background-color: var(--cafe) !important;
+        border-radius: 2px !important;
+    }
+
+} /* Fin @media (max-width: 768px) */
