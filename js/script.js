@@ -709,9 +709,8 @@ async function canjearCuponSorpresa() {
     };
 
     try {
-        // Usamos la sintaxis modular de Firestore (versión 9+) que ya maneja tu app.
-        // Si en la parte superior de tu script tienes importadas las funciones globales:
-        // doc, updateDoc, arrayUnion de firebase-firestore
+        // En lugar de usar 'import', accedemos directamente a las funciones de Firebase
+        // utilizando el módulo que ya está cargado en tu ventana global.
         const { doc, updateDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
 
         // Hacemos referencia al documento del usuario dentro de la colección 'usuarios'
@@ -723,13 +722,10 @@ async function canjearCuponSorpresa() {
             cupones: arrayUnion(nuevoCupon)
         });
 
-        // NOTA: Si usas otra función para sincronizar los puntos locales, 
-        // asegúrate de actualizar tu variable local aquí si es necesario.
-
         return true; // Todo salió perfecto en Firestore
     } catch (error) {
         console.error("Error al conectar con Firestore:", error);
-        return false; // Algo falló (ej. sin internet o error de permisos)
+        return false;
     }
 }
 
