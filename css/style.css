@@ -1743,10 +1743,12 @@ html, body {
     }
 }
 
-/* --- OCULTAR ELEMENTOS SOLICITADOS --- */
-.footer-app-pronto,
-.panel-qr-ra,
-.panel-qr-titulo,
-.footer-link-discreto {
-    display: none !important;
+/* --- ACCIONES EXCLUSIVAS PARA PANTALLAS MÓVILES (APP) --- */
+@media (max-width: 768px) {
+    .footer-app-pronto,
+    .panel-qr-ra,
+    .panel-qr-titulo,
+    .footer-link-discreto {
+        display: none !important;
+    }
 }
