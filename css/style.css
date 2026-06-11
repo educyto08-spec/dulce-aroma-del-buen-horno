@@ -1750,8 +1750,7 @@ html, body {
     .panel-qr-titulo,
     .footer-link-discreto,
     .btn-whatsapp-flotante,
-    .cart-resumen,
-    .cart-footer {
+    #stickyCartBar {
         display: none !important;
     }
 }
