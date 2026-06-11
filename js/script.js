@@ -1499,3 +1499,16 @@ function renderizarCuponesPerfil() {
         contenedor.innerHTML = `<p style="color: red; font-size: 12px; text-align: center;">Error al cargar cupones.</p>`;
     }
 }
+// Ocultar teclado nativo limpiamente al hacer scroll en las listas
+document.addEventListener('DOMContentLoaded', () => {
+    const contenedorProductos = document.querySelector('.grid-productos');
+    
+    if (contenedorProductos) {
+        contenedorProductos.addEventListener('scroll', () => {
+            // Si el usuario arrastra la lista, le quitamos el foco al buscador para bajar el teclado
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                document.activeElement.blur();
+            }
+        });
+    }
+});
