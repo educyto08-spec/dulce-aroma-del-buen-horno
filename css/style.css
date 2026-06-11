@@ -1593,6 +1593,33 @@ footer .redes-sociales a:hover { color: var(--dorado); }
     }
 }
 /* ==========================================================================
+   🚫 DETALLE NATIVO 1: ERRADICAR COMPORTAMIENTO DE SELECCIÓN WEB
+   ========================================================================== */
+* {
+    -webkit-touch-callout: none !important; /* Elimina el menú de guardar imagen en iOS/Safari */
+    -webkit-user-select: none !important;   /* Bloquea la selección de texto en navegadores webkit */
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;           /* Estándar global para congelar textos */
+}
+
+/* Permitimos la interacción obligatoria en los campos de entrada de datos */
+input, textarea, [contenteditable="true"] {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+/* ==========================================================================
+   ⚡ DETALLE NATIVO 2: ELIMINAR EL PARPADEO GRIS (TAP HIGHLIGHT)
+   ========================================================================== */
+a, button, div, span, img, i, input {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important; /* Doble seguridad para WebView antiguos */
+}
+
+/* ==========================================================================
    🍞 PARCHE DE INTERACCIÓN, MENÚ MÓVIL Y ELIMINACIÓN DE BARRA BLANCA 
    ========================================================================== */
 
@@ -1614,6 +1641,18 @@ html, body {
    ========================================================================== */
 
 @media (max-width: 900px) {
+
+/* Colócalo dentro de tu @media (max-width: 768px) */
+.skeleton {
+    background: linear-gradient(90deg, #ffe3e8 25%, #fff0f3 50%, #ffe3e8 75%) !important;
+    background-size: 200% 100% !important;
+    animation: loadingSkeleton 1.5s infinite ease-in-out !important;
+}
+
+@keyframes loadingSkeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
     /* Elevamos la cabecera completa por encima de los paneles colapsados */
     .main-header {
         position: sticky !important;
@@ -1758,13 +1797,15 @@ html, body {
         --radio-sm: 14px;
     }
 
-    body {
+   /* Agrégalo al body en la sección de la app móvil */
+body {
         background-image: none !important;
         background-color: var(--crema-principal) !important;
         color: var(--texto-oscuro) !important;
-        padding-bottom: 70px !important; /* Espacio extra abajo para que la barra fija no tape el contenido */
+        padding-bottom: 70px !important; 
+        overscroll-behavior-y: contain !important; /* 🧊 Bloquea el estiramiento o rebote blanco del navegador */
     }
-    
+   
     .top-bar {
         background-color: var(--cafe) !important;
         color: var(--blanco) !important;
@@ -2039,5 +2080,27 @@ html, body {
     .btn-whatsapp-flotante,
     #stickyCartBar {
         display: none !important;
+    }
+    /* ==========================================================================
+       🧼 DETALLE NATIVO 4: SKELETON LOADER (EFECTO DE CARGA ELEGANTE)
+       ========================================================================== */
+    .skeleton-loading {
+        background: linear-gradient(90deg, #ffe3e8 25%, #fff0f3 50%, #ffe3e8 75%) !important;
+        background-size: 200% 100% !important;
+        animation: pulsoSkeleton 1.5s infinite ease-in-out !important;
+        border: none !important;
+        color: transparent !important; /* Esconde textos temporales */
+    }
+
+    /* Evita que se vean las imágenes reales mientras carga */
+    .skeleton-loading img, 
+    .skeleton-loading button, 
+    .skeleton-loading span {
+        visibility: hidden !important;
+    }
+
+    @keyframes pulsoSkeleton {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
     }
 }
