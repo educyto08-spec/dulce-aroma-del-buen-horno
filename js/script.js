@@ -688,46 +688,6 @@ async function triggerRaspaGanaReward(mensaje, btnNuevo, puntosDisplay) {
 }
 
 // 2. ESTA ES LA FUNCIÓN NUEVA QUE DEBES PONER ABAJO PARA QUE REALMENTE RESTE EN FIREBASE
-async function canjearCuponSorpresa() {
-    // Verificamos que tengamos el ID del documento de Firestore del usuario
-    if (!idDocumentoUsuarioFirestore) {
-        console.error("No hay un ID de documento de Firestore para este usuario.");
-        return false;
-    }
-
-    const puntosActuales = obtenerPuntos();
-    const nuevosPuntos = puntosActuales - 10; // Restamos los 10 puntos del costo del juego
-
-    // Generamos un código de ticket aleatorio para el pan gratis (ej: DULCE-4829)
-    const codigoTicket = "DULCE-" + Math.floor(1000 + Math.random() * 9000);
-    
-    const nuevoCupon = {
-        codigo: codigoTicket,
-        descripcion: "1 Pan Dulce Tradicional Gratis",
-        fecha: new Date().toLocaleDateString(),
-        estado: "disponible"
-    };
-
-    try {
-        // En lugar de usar 'import', accedemos directamente a las funciones de Firebase
-        // utilizando el módulo que ya está cargado en tu ventana global.
-        const { doc, updateDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
-
-        // Hacemos referencia al documento del usuario dentro de la colección 'usuarios'
-        const usuarioRef = doc(db, "usuarios", idDocumentoUsuarioFirestore);
-
-        // Actualizamos los puntos y añadimos el cupón al arreglo 'cupones' en Firestore
-        await updateDoc(usuarioRef, {
-            puntos: nuevosPuntos,
-            cupones: arrayUnion(nuevoCupon)
-        });
-
-        return true; // Todo salió perfecto en Firestore
-    } catch (error) {
-        console.error("Error al conectar con Firestore:", error);
-        return false;
-    }
-}
 
 // 3. TU FUNCIÓN RESET QUEDA EXACTAMENTE IGUAL
 function resetRaspaGana() {

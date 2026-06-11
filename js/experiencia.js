@@ -35,29 +35,66 @@ export function obtenerPuntos() {
   return parseInt(localStorage.getItem(PUNTOS_KEY) || "0", 10);
 }
 
-export function canjearCuponSorpresa() {
-  const puntos = obtenerPuntos();
-  if (puntos >= 100) {
-    localStorage.setItem(PUNTOS_KEY, String(puntos - 100));
-    // Guardar un cupón sorpresa en localStorage para que el usuario pueda usarlo en el carrito
-    const cupones = JSON.parse(localStorage.getItem("dulce-aroma-cupones-disponibles") || "[]");
-    const nuevoCupon = "SORPRESA" + Math.floor(1000 + Math.random() * 9000);
-    cupones.push(nuevoCupon);
-    localStorage.setItem("dulce-aroma-cupones-disponibles", JSON.stringify(cupones));
+export async function canjearCuponSorpresa() {
+  const puntosActuales = obtenerPuntos();
+  
+  // Modificamos a 10 puntos como lo acordamos para el Raspa y Gana
+  if (puntosActuales >= 10) {
+    const nuevosPuntos = puntosActuales - 10;
     
-    // Alerta dulce
-    Swal.fire({
-      title: "¡Puntos Canjeados! 🥳🥐",
-      html: `Has canjeado 100 puntos por el cupón sorpresa de pan gratis:<br><br><strong style="font-size: 1.5rem; color: #8B4513;">${nuevoCupon}</strong><br><br>Usa este código en tu carrito para reclamar tu pan dulce gratis.`,
-      icon: "success",
-      confirmButtonColor: "#7b5533"
-    });
+    // Generamos el código del ticket
+    const codigoTicket = "DULCE-" + Math.floor(1000 + Math.random() * 9000);
     
-    // Despachar evento para actualizar interfaz
-    document.dispatchEvent(new CustomEvent("puntos:cambio", { detail: { puntos: puntos - 100 } }));
+    const nuevoCupon = {
+      codigo: codigoTicket,
+      descripcion: "1 Pan Dulce Tradicional Gratis",
+      fecha: new Date().toLocaleDateString("es-MX"),
+      estado: "disponible"
+    };
+
+    // Tomamos las variables globales de la ventana de tu app
+    const idDoc = window.idDocumentoUsuarioFirestore || idDocumentoUsuarioFirestore;
+    const database = window.db || db;
+
+    if (!idDoc) {
+      console.error("No hay un ID de documento de Firestore para este usuario.");
+      return false;
+    }
+
+    try {
+      // Importamos las funciones de Firestore necesarias para los módulos
+      const { doc, updateDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js");
+      const usuarioRef = doc(database, "usuarios", idDoc);
+
+      // 1. Guardamos de verdad en la base de datos de Firebase
+      await updateDoc(usuarioRef, {
+        puntos: nuevosPuntos,
+        cupones: arrayUnion(nuevoCupon)
+      });
+
+      // 2. Por si las dudas, actualizamos también el localStorage viejo para que tu app local no se confunda
+      localStorage.setItem("dulce-aroma-puntos", String(nuevosPuntos));
+
+      // 3. Tu alerta bonita de SweetAlert (¡Personalizada con el nuevo código!)
+      Swal.fire({
+        title: "¡Puntos Canjeados! 🥳🥐",
+        html: `Has canjeado 10 puntos en el Raspa y Gana por un premio:<br><br><strong style="font-size: 1.5rem; color: #8B4513;">${codigoTicket}</strong><br><br>¡Felicidades! Tu cupón de Pan Gratis ya aparece en la sección "Mis Cupones" dentro de tu perfil.`,
+        icon: "success",
+        confirmButtonColor: "#7b5533"
+      });
+
+      // 4. Despachamos el evento para avisarle a toda la app que los puntos cambiaron
+      document.dispatchEvent(new CustomEvent("puntos:cambio", { detail: { puntos: nuevosPuntos } }));
+
+      return true; // Éxito total
+    } catch (error) {
+      console.error("Error al conectar con Firestore desde experiencia.js:", error);
+      return false;
+    }
+  } else {
+    return false;
   }
 }
-
 const LOTES_HORNO = [
   { h: 7, m: 0, label: "Lote matutino" },
   { h: 11, m: 0, label: "Media mañana" },
