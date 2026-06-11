@@ -1746,46 +1746,60 @@ html, body {
 /* --- CONFIGURACIONES EXCLUSIVAS PARA LA APP MÓVIL (PANTALLAS CHICAS) --- */
 @media (max-width: 768px) {
     
-    /* CAMBIO RADICAL DE COLORES PARA LA APP */
+    /* CAMBIO RADICAL Y COMPLETO DE COLORES PARA LA APP (ESTILO REPOSTERÍA VIBRANTE / CHIC) */
     :root {
-        --cafe: #4a2c11;                /* Café Espresso Profundo */
-        --cafe-oscuro: #1f1005;         /* Negro Chocolate */
-        --cafe-claro: #bc8f6f;          /* Tono Capuchino / Canela */
-        --dorado: #dfb15b;              /* Oro viejo brillante */
+        --cafe: #d44c77;                /* Rosa Pastel Encendido / Fresa Intenso */
+        --cafe-oscuro: #851c3e;         /* Arándano Profundo (para botones principales al presionar) */
+        --cafe-claro: #e59bb1;          /* Rosa Suave / Algodón de azúcar */
+        --dorado: #b07ee6;              /* Lila Eléctrico / Dulce de violeta (reemplaza al dorado) */
         
-        /* Fondos invertidos: Ahora el fondo es más limpio y los bloques contrastan */
-        --crema-principal: #ffffff;     /* Fondo totalmente blanco para look de App limpia */
-        --crema-suave: #fcf9f5;         /* Un tono vainilla sutil para Headers/Tarjetas */
-        --pastel-rosa: #f4ece1;         /* Bloques de alerta o formularios */
-        --pastel-albaricoque: #eae0d2;
+        /* Fondos totalmente cambiados */
+        --crema-principal: #fff0f3;     /* Fondo Fresa con Crema muy claro */
+        --crema-suave: #ffffff;         /* Tarjetas y Header en blanco puro para que resalten */
+        --pastel-rosa: #ffe3e8;         /* Bloques secundarios y alertas en rosa tierno */
+        --pastel-albaricoque: #f0e3ff;  /* Bloques especiales en un tono lila pastel */
         
-        /* Textos e interfaces */
-        --texto-oscuro: #1c1107;        /* Texto de alta legibilidad */
-        --texto-mutado: #8c7662;        /* Textos secundarios */
-        --borde: #e8ded1;               /* Bordes más finos */
+        /* Textos */
+        --texto-oscuro: #3a0f1d;        /* Marrón Arándano ultra oscuro (máxima legibilidad) */
+        --texto-mutado: #a67c89;        /* Gris rosáceo para textos secundarios */
+        --borde: #ffd0da;               /* Bordes rosados muy finos */
         
-        /* Sombras más marcadas estilo interfaz de celular (Material/iOS) */
-        --sombra: 0 10px 30px rgba(31, 16, 5, 0.12);
-        --sombra-card: 0 4px 20px rgba(31, 16, 5, 0.05);
-        --radio: 20px;                  /* Esquinas mucho más redondeadas en la App */
-        --radio-sm: 12px;
+        /* Interfaz de App Móvil Moderna */
+        --sombra: 0 12px 30px rgba(212, 76, 119, 0.15);
+        --sombra-card: 0 6px 20px rgba(212, 76, 119, 0.08);
+        --radio: 24px;                  /* Tarjetas súper redondeadas estilo iOS/Android moderno */
+        --radio-sm: 14px;
     }
 
-    /* Modificaciones extra de estructura para que se note el cambio */
+    /* Quitamos los degradados cafés de la web y ponemos un fondo dulce */
     body {
-        background-image: none; /* Quitamos el degradado web para un rendimiento más rápido en el cel */
-        background-color: var(--crema-principal);
+        background-image: none !important;
+        background-color: var(--crema-principal) !important;
+        color: var(--texto-oscuro) !important;
     }
     
-    /* Hacemos que los botones de pedir pan resalten mucho más en la app */
-    .btn-pedir {
-        background-color: var(--cafe);
-        color: var(--blanco);
-        border: none;
-        border-radius: var(--radio-sm);
+    /* Cambiamos la barra superior delgada a juego con la nueva identidad */
+    .top-bar {
+        background-color: var(--cafe) !important;
+        color: var(--blanco) !important;
     }
-    .btn-pedir:hover {
-        background-color: var(--cafe-oscuro);
+
+    /* Rediseño completo de los botones de pedir en la app */
+    .btn-pedir {
+        background-color: var(--cafe) !important;
+        color: var(--blanco) !important;
+        border: none !important;
+        border-radius: var(--radio-sm) !important;
+        font-weight: 800 !important;
+        box-shadow: 0 4px 12px rgba(214, 76, 119, 0.2) !important;
+    }
+    .btn-pedir:hover, .btn-pedir:active {
+        background-color: var(--cafe-oscuro) !important;
+    }
+
+    /* El banner Hero del inicio de la app ahora se adaptará a los nuevos tonos */
+    .hero-overlay {
+        background: linear-gradient(180deg, rgba(58, 15, 29, 0.6) 0%, rgba(214, 76, 119, 0.4) 60%, var(--crema-principal) 100%) !important;
     }
 
     /* --- MANTENER OCULTOS LOS ELEMENTOS ANTERIORES --- */
