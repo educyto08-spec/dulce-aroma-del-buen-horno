@@ -1745,6 +1745,8 @@ html, body {
 
 /* --- CONFIGURACIONES EXCLUSIVAS PARA LA APP MÓVIL (PANTALLAS CHICAS) --- */
 @media (max-width: 768px) {
+
+
     
     /* CAMBIO RADICAL Y COMPLETO DE COLORES PARA LA APP (ESTILO REPOSTERÍA VIBRANTE / CHIC) */
     :root {
@@ -1851,6 +1853,57 @@ html, body {
     .btn-whatsapp-flotante,
     #stickyCartBar {
         display: none !important;
+    }
+    
+    /* ==========================================================================
+       🔄 PASO 2: SCROLL HORIZONTAL DE PRODUCTOS (ESTILO REPOSTERÍA CHIC)
+       ========================================================================== */
+    
+    /* Forzamos a la cuadrícula de productos a convertirse en una fila deslizable */
+    .grid-productos {
+        display: flex !important;
+        overflow-x: auto !important;          /* Permite el deslizamiento lateral */
+        overflow-y: hidden !important;        /* Evita rebotes verticales extraños */
+        gap: 16px !important;                 /* Espaciado elegante entre panes */
+        padding: 12px 4px 24px 4px !important;/* Margen inferior para que respire la sombra */
+        
+        /* Propiedades nativas para que el scroll se sienta suave con el dedo */
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    /* Ocultamos la barra de scroll horizontal para mantener la interfaz limpia (Chrome/Safari/App) */
+    .grid-productos::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    /* Reconfiguramos las tarjetas de los panes para la vista horizontal */
+    .item-producto {
+        flex: 0 0 72% !important;             /* Cada pan toma el 72% del ancho, dejando ver un pedazo del siguiente */
+        max-width: 280px !important;          /* Evitamos que se estiren de más en pantallas medianas */
+        scroll-snap-align: start !important;  /* Al deslizar, la tarjeta se frena automáticamente al inicio */
+        background: var(--crema-suave) !important;
+        border: 1px solid var(--borde) !important;
+        border-radius: var(--radio) !important; /* Esquinas redonditas aesthetic */
+        box-shadow: var(--sombra-card) !important;
+    }
+
+    /* Hacemos la imagen un poco más compacta para que no se coma toda la pantalla */
+    .item-producto .img-wrapper {
+        height: 150px !important;
+        border-radius: var(--radio-sm) !important;
+    }
+
+    /* Centramos el contenido interno y ajustamos textos */
+    .item-producto h4 {
+        font-size: 1rem !important;
+        margin: 8px 0 4px 0 !important;
+    }
+
+    .item-producto .descripcion {
+        font-size: 0.8rem !important;
+        height: auto !important;             /* Que se adapte al tamaño móvil */
+        margin-bottom: 10px !important;
     }
 }
 
