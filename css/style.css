@@ -1940,6 +1940,39 @@ html, body {
         justify-content: center !important;
         align-items: center !important;
     }
+    
+   /* ==========================================================================
+       📱 PASO 4: FEEDBACK TÁCTIL (EFECTOS ELÁSTICOS AL TOCAR)
+       ========================================================================== */
+    
+    /* Efecto de compresión elástica para las tarjetas de panes y botones principales */
+    .item-producto:active,
+    .btn-pedir:active,
+    .btn-categoria:active,
+    .bottom-nav-item:active i {
+        transform: scale(0.96) !important; /* Se encoge un 4% simulando un "clic" físico */
+        transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* Animación de rebote rápido */
+    }
+
+    /* Suavizado global de transiciones para que no cambie de golpe al soltar el dedo */
+    .item-producto,
+    .btn-pedir,
+    .btn-categoria {
+        transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    /* Cambio de color inmediato en las categorías web/móvil al pulsarlas */
+    .btn-categoria:active {
+        background-color: var(--cafe-oscuro) !important;
+        color: var(--blanco) !important;
+    }
+
+    /* Destello sutil en las tarjetas del carrito o historial para confirmar el toque */
+    .cart-item-card:active,
+    .card-pedido-historial:active {
+        background-color: var(--pastel-rosa) !important;
+        transform: scale(0.99) !important;
+    }
 }
 
 /* Ocultar la barra inferior por defecto en pantallas grandes (Computadora) */
