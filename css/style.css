@@ -1743,8 +1743,52 @@ html, body {
     }
 }
 
-/* --- ACCIONES EXCLUSIVAS PARA PANTALLAS MÓVILES (APP) --- */
+/* --- CONFIGURACIONES EXCLUSIVAS PARA LA APP MÓVIL (PANTALLAS CHICAS) --- */
 @media (max-width: 768px) {
+    
+    /* CAMBIO RADICAL DE COLORES PARA LA APP */
+    :root {
+        --cafe: #4a2c11;                /* Café Espresso Profundo */
+        --cafe-oscuro: #1f1005;         /* Negro Chocolate */
+        --cafe-claro: #bc8f6f;          /* Tono Capuchino / Canela */
+        --dorado: #dfb15b;              /* Oro viejo brillante */
+        
+        /* Fondos invertidos: Ahora el fondo es más limpio y los bloques contrastan */
+        --crema-principal: #ffffff;     /* Fondo totalmente blanco para look de App limpia */
+        --crema-suave: #fcf9f5;         /* Un tono vainilla sutil para Headers/Tarjetas */
+        --pastel-rosa: #f4ece1;         /* Bloques de alerta o formularios */
+        --pastel-albaricoque: #eae0d2;
+        
+        /* Textos e interfaces */
+        --texto-oscuro: #1c1107;        /* Texto de alta legibilidad */
+        --texto-mutado: #8c7662;        /* Textos secundarios */
+        --borde: #e8ded1;               /* Bordes más finos */
+        
+        /* Sombras más marcadas estilo interfaz de celular (Material/iOS) */
+        --sombra: 0 10px 30px rgba(31, 16, 5, 0.12);
+        --sombra-card: 0 4px 20px rgba(31, 16, 5, 0.05);
+        --radio: 20px;                  /* Esquinas mucho más redondeadas en la App */
+        --radio-sm: 12px;
+    }
+
+    /* Modificaciones extra de estructura para que se note el cambio */
+    body {
+        background-image: none; /* Quitamos el degradado web para un rendimiento más rápido en el cel */
+        background-color: var(--crema-principal);
+    }
+    
+    /* Hacemos que los botones de pedir pan resalten mucho más en la app */
+    .btn-pedir {
+        background-color: var(--cafe);
+        color: var(--blanco);
+        border: none;
+        border-radius: var(--radio-sm);
+    }
+    .btn-pedir:hover {
+        background-color: var(--cafe-oscuro);
+    }
+
+    /* --- MANTENER OCULTOS LOS ELEMENTOS ANTERIORES --- */
     .footer-app-pronto,
     .panel-qr-ra,
     .panel-qr-titulo,
