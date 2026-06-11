@@ -1745,6 +1745,8 @@ html, body {
 
 /* --- OCULTAR ELEMENTOS SOLICITADOS --- */
 .footer-app-pronto,
-.panel-qr-ra {
+.panel-qr-ra,
+.panel-qr-titulo,
+.footer-link-discreto {
     display: none !important;
 }
