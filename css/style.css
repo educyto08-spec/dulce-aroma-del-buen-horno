@@ -2266,7 +2266,6 @@ html, body {
 .panel-premios:not([hidden]) {
     display: block;
 }
-}
 .panel-premios-header {
     display: flex;
     justify-content: space-between;

@@ -666,27 +666,26 @@
     <script type="module" src="js/script.js"></script>
     
   <nav class="mobile-bottom-nav">
-    <a href="#inicio" class="bottom-nav-item active">
+    <a href="#inicio" class="bottom-nav-item active" id="navInicio">
         <i class="fas fa-home"></i>
         <span>Inicio</span>
     </a>
-    <a href="#productos" class="bottom-nav-item">
+    <a href="#productos" class="bottom-nav-item" id="navPanes">
         <i class="fas fa-bread-slice"></i>
         <span>Panes</span>
     </a>
-    <a href="#" class="bottom-nav-item" onclick="openSide('cartSidebar'); return false;">
+    <button type="button" class="bottom-nav-item" id="navBolsa">
         <i class="fas fa-shopping-basket"></i>
         <span>Bolsa</span>
-    </a>
-    <!-- NUEVO: pestaña Premios -->
-    <a href="#" class="bottom-nav-item" id="btnNavPremios" onclick="abrirPanelPremios(); return false;">
+    </button>
+    <button type="button" class="bottom-nav-item" id="btnNavPremios">
         <i class="fas fa-gift"></i>
         <span>Premios</span>
-    </a>
-    <a href="#" class="bottom-nav-item" onclick="openSide('sideCuenta'); return false;">
+    </button>
+    <button type="button" class="bottom-nav-item" id="navPerfil">
         <i class="fas fa-user"></i>
         <span>Perfil</span>
-    </a>
+    </button>
 </nav>
 <!-- ===== PANEL PREMIOS (QR + RASPA Y GANA) ===== -->
 <div id="panelPremios" class="panel-premios" hidden>

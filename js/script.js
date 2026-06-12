@@ -1350,6 +1350,11 @@ function arrancarApp() {
     const modalAuth = document.getElementById("modalAuth");
     modalAuth?.addEventListener("click", (e) => { if (e.target === modalAuth) closeAuth(); });
     
+    // Conectar botones de la barra inferior de forma segura
+document.getElementById("navBolsa")?.addEventListener("click", () => openSide("cartSidebar"));
+document.getElementById("btnNavPremios")?.addEventListener("click", () => abrirPanelPremios());
+document.getElementById("navPerfil")?.addEventListener("click", () => openSide("sideCuenta"));
+    
     console.log("App Dulce Aroma: Lista para operar.");
 }
 
