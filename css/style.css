@@ -1785,7 +1785,7 @@ html, body {
 @media (max-width: 768px) {
 
     /* --- CAMBIO RADICAL Y COMPLETO DE COLORES PARA LA APP (ESTILO REPOSTERÍA VIBRANTE / CHIC) --- */
-   @media (max-width: 768px) {
+  
 
     /* --- PALETA: HORNO Y BARRO — AESTHETIC --- */
     :root {
@@ -1818,7 +1818,7 @@ html, body {
         background-color: var(--crema-principal) !important;
         color: var(--texto-oscuro) !important;
         padding-bottom: 70px !important;
-        overscroll-behavior-y: contain !important; /* 🧊 Bloquea el estiramiento o rebote blanco del navegador */
+        overscroll-behavior-y: none !important; /* 🧊 Bloquea el estiramiento o rebote blanco del navegador */
     }
 
     .top-bar {
