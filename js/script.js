@@ -366,11 +366,15 @@
 	}
 	
 	function closeSide(id) {
-    	document.getElementById(id)?.classList.remove("active");
-    	if (!document.querySelector(".side-panel.active")) {
-        	document.body.style.overflow = "";
-    	}
-	}
+  document.getElementById(id)?.classList.remove("active");
+  // Esperar 1 frame para que el DOM refleje el cambio
+  requestAnimationFrame(() => {
+    if (!document.querySelector(".side-panel.active")) {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+  });
+}
 	
 	// --- Auth ---
 	function openAuth() {

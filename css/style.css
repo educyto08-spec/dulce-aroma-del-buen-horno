@@ -1812,14 +1812,7 @@ html, body {
     /* ==========================================================================
        🌐 BASE DE LA APP: BODY Y BARRA SUPERIOR
        ========================================================================== */
-
-    body {
-        background-image: none !important;
-        background-color: var(--crema-principal) !important;
-        color: var(--texto-oscuro) !important;
-        padding-bottom: 70px !important;
-        overscroll-behavior-y: none !important; /* 🧊 Bloquea el estiramiento o rebote blanco del navegador */
-    }
+body { overscroll-behavior-y: auto; }
 
     .top-bar {
         background-color: var(--cafe) !important;
