@@ -2314,3 +2314,19 @@ html, body {
     transition: opacity 0.3s ease;
 }
 .overlay-premios[hidden] { display: none; }
+
+/* Quitar efecto visual de selección en botones de la barra inferior */
+.mobile-bottom-nav button.bottom-nav-item {
+    background: none;
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.mobile-bottom-nav button.bottom-nav-item:focus,
+.mobile-bottom-nav button.bottom-nav-item:focus-visible {
+    outline: none;
+    box-shadow: none;
+}

@@ -1460,81 +1460,111 @@ function refrescarPanelPremios() {
 
 function setupRaspaGanaPremios() {
     const canvas = document.getElementById("scratchCardCanvasPremios");
-    const overlay = document.getElementById("raspaOverlayPremios");
+    const overlayRaspa = document.getElementById("raspaOverlayPremios");
     const mensaje = document.getElementById("raspaGanaMensajePremios");
     const btnNuevo = document.getElementById("btnNuevoRaspaGanaPremios");
     const puntosDisplay = document.getElementById("puntosUsuarioRaspaGanaPremios");
-    if (!canvas || !overlay) return;
+    if (!canvas || !overlayRaspa) return;
 
     const puntos = obtenerPuntos();
     if (puntosDisplay) puntosDisplay.textContent = puntos;
+    if (mensaje) mensaje.hidden = true;
+    if (btnNuevo) btnNuevo.hidden = true;
 
     const canPlay = puntos >= 10;
-    canvas.style.pointerEvents = canPlay ? "auto" : "none";
-    overlay.textContent = canPlay ? "¡Raspa aquí!" : `Necesitas 10 puntos (tienes ${puntos})`;
-    overlay.style.backgroundColor = canPlay
-        ? "rgba(123, 85, 51, 0.85)"
-        : "rgba(160,160,160,0.65)";
-    if (btnNuevo) btnNuevo.hidden = true;
-    if (mensaje) mensaje.hidden = true;
 
-    ctxPremios = canvas.getContext("2d");
+    // Dibujar la capa del raspa sobre un canvas fresco
+    const c = canvas;
+    ctxPremios = c.getContext("2d");
     if (!ctxPremios) return;
 
-    // Dibujar capa de raspar
-    ctxPremios.clearRect(0, 0, canvas.width, canvas.height);
-    ctxPremios.globalCompositeOperation = "source-over";
-    const grad = ctxPremios.createLinearGradient(0, 0, canvas.width, canvas.height);
-    grad.addColorStop(0, "#7b5533");
-    grad.addColorStop(1, "#c9a227");
-    ctxPremios.fillStyle = grad;
-    ctxPremios.beginPath();
-    ctxPremios.roundRect(0, 0, canvas.width, canvas.height, 12);
-    ctxPremios.fill();
-    ctxPremios.fillStyle = "#fff";
-    ctxPremios.font = "bold 18px 'Plus Jakarta Sans', sans-serif";
-    ctxPremios.textAlign = "center";
-    ctxPremios.textBaseline = "middle";
-    ctxPremios.fillText("🎁 ¡Raspa para ganar!", canvas.width / 2, canvas.height / 2);
-    ctxPremios.globalCompositeOperation = "destination-out";
-    ctxPremios.strokeStyle = "rgba(0,0,0,1)";
-    ctxPremios.lineWidth = 36;
-    ctxPremios.lineCap = "round";
-
-    // Clonar canvas para quitar listeners anteriores
-    const nuevoCanvas = canvas.cloneNode(true);
-    canvas.parentNode.replaceChild(nuevoCanvas, canvas);
-    const c = document.getElementById("scratchCardCanvasPremios");
-    ctxPremios = c.getContext("2d");
-    // Re-dibujar en el canvas nuevo
     ctxPremios.clearRect(0, 0, c.width, c.height);
     ctxPremios.globalCompositeOperation = "source-over";
-    ctxPremios.fillStyle = grad;
-    ctxPremios.beginPath();
-    if (ctxPremios.roundRect) ctxPremios.roundRect(0, 0, c.width, c.height, 12);
-    else ctxPremios.rect(0, 0, c.width, c.height);
+
+    if (canPlay) {
+        // Capa dorada raspable
+        const grad = ctxPremios.createLinearGradient(0, 0, c.width, c.height);
+        grad.addColorStop(0, "#c9a227");
+        grad.addColorStop(1, "#7b5533");
+        ctxPremios.fillStyle = grad;
+        if (ctxPremios.roundRect) ctxPremios.roundRect(0, 0, c.width, c.height, 12);
+        else ctxPremios.rect(0, 0, c.width, c.height);
+        ctxPremios.fill();
+        ctxPremios.fillStyle = "#fff";
+        ctxPremios.font = "bold 16px 'Plus Jakarta Sans', sans-serif";
+        ctxPremios.textAlign = "center";
+        ctxPremios.textBaseline = "middle";
+        ctxPremios.fillText("🪙 ¡Raspa para revelar!", c.width / 2, c.height / 2);
+
+        if (overlayRaspa) {
+            overlayRaspa.textContent = "";
+            overlayRaspa.style.display = "none";
+        }
+
+        ctxPremios.globalCompositeOperation = "destination-out";
+        ctxPremios.strokeStyle = "rgba(0,0,0,1)";
+        ctxPremios.lineWidth = 40;
+        ctxPremios.lineCap = "round";
+        c.style.pointerEvents = "auto";
+    } else {
+        // No puede jugar — mostrar capa gris con mensaje
+        ctxPremios.fillStyle = "rgba(180,180,180,0.85)";
+        if (ctxPremios.roundRect) ctxPremios.roundRect(0, 0, c.width, c.height, 12);
+        else ctxPremios.rect(0, 0, c.width, c.height);
+        ctxPremios.fill();
+        ctxPremios.fillStyle = "#555";
+        ctxPremios.font = "bold 14px 'Plus Jakarta Sans', sans-serif";
+        ctxPremios.textAlign = "center";
+        ctxPremios.textBaseline = "middle";
+        ctxPremios.fillText(`Necesitas 10 puntos (tienes ${puntos})`, c.width / 2, c.height / 2);
+        c.style.pointerEvents = "none";
+        return; // No registrar eventos de raspar
+    }
+
+    // Clonar para limpiar listeners anteriores
+    const nuevoCanvas = c.cloneNode(true);
+    c.parentNode.replaceChild(nuevoCanvas, c);
+    const canvas2 = document.getElementById("scratchCardCanvasPremios");
+    ctxPremios = canvas2.getContext("2d");
+
+    // Re-dibujar en el canvas clonado
+    ctxPremios.clearRect(0, 0, canvas2.width, canvas2.height);
+    ctxPremios.globalCompositeOperation = "source-over";
+    const grad2 = ctxPremios.createLinearGradient(0, 0, canvas2.width, canvas2.height);
+    grad2.addColorStop(0, "#c9a227");
+    grad2.addColorStop(1, "#7b5533");
+    ctxPremios.fillStyle = grad2;
+    if (ctxPremios.roundRect) ctxPremios.roundRect(0, 0, canvas2.width, canvas2.height, 12);
+    else ctxPremios.rect(0, 0, canvas2.width, canvas2.height);
     ctxPremios.fill();
     ctxPremios.fillStyle = "#fff";
-    ctxPremios.font = "bold 18px 'Plus Jakarta Sans', sans-serif";
+    ctxPremios.font = "bold 16px 'Plus Jakarta Sans', sans-serif";
     ctxPremios.textAlign = "center";
     ctxPremios.textBaseline = "middle";
-    ctxPremios.fillText("🎁 ¡Raspa para ganar!", c.width / 2, c.height / 2);
+    ctxPremios.fillText("🪙 ¡Raspa para revelar!", canvas2.width / 2, canvas2.height / 2);
     ctxPremios.globalCompositeOperation = "destination-out";
     ctxPremios.strokeStyle = "rgba(0,0,0,1)";
-    ctxPremios.lineWidth = 36;
+    ctxPremios.lineWidth = 40;
     ctxPremios.lineCap = "round";
+    canvas2.style.pointerEvents = "auto";
 
-    if (!canPlay) return;
+    let yaDisparo = false; // bandera para disparar solo una vez
 
     const getPoint = (e) => {
-        const rect = c.getBoundingClientRect();
+        const rect = canvas2.getBoundingClientRect();
         const src = e.touches ? e.touches[0] : e;
         return { x: src.clientX - rect.left, y: src.clientY - rect.top };
     };
 
-    const startS = (e) => { e.preventDefault(); isScratchingPremios = true; lastPointPremios = getPoint(e); };
+    const startS = (e) => {
+        e.preventDefault();
+        if (yaDisparo) return;
+        isScratchingPremios = true;
+        lastPointPremios = getPoint(e);
+    };
+
     const doScratch = (e) => {
-        if (!isScratchingPremios) return;
+        if (!isScratchingPremios || yaDisparo) return;
         e.preventDefault();
         const pt = getPoint(e);
         ctxPremios.beginPath();
@@ -1542,16 +1572,32 @@ function setupRaspaGanaPremios() {
         ctxPremios.lineTo(pt.x, pt.y);
         ctxPremios.stroke();
         lastPointPremios = pt;
-        checkProgressPremios(c);
+
+        // Disparar resultado tras el primer trazo significativo
+        const data = ctxPremios.getImageData(0, 0, canvas2.width, canvas2.height).data;
+        let transparentes = 0;
+        for (let i = 3; i < data.length; i += 4) if (data[i] === 0) transparentes++;
+        const progreso = transparentes / (canvas2.width * canvas2.height);
+
+        if (progreso >= 0.08 && !yaDisparo) { // 8% raspado — se activa rápido
+            yaDisparo = true;
+            isScratchingPremios = false;
+            canvas2.style.pointerEvents = "none";
+            // Revelar todo de golpe
+            ctxPremios.globalCompositeOperation = "source-over";
+            ctxPremios.clearRect(0, 0, canvas2.width, canvas2.height);
+            triggerRaspaGanaPremios();
+        }
     };
+
     const endS = () => { isScratchingPremios = false; lastPointPremios = null; };
 
-    c.addEventListener("mousedown", startS);
-    c.addEventListener("mousemove", doScratch);
-    c.addEventListener("mouseup", endS);
-    c.addEventListener("touchstart", startS, { passive: false });
-    c.addEventListener("touchmove", doScratch, { passive: false });
-    c.addEventListener("touchend", endS);
+    canvas2.addEventListener("mousedown", startS);
+    canvas2.addEventListener("mousemove", doScratch);
+    canvas2.addEventListener("mouseup", endS);
+    canvas2.addEventListener("touchstart", startS, { passive: false });
+    canvas2.addEventListener("touchmove", doScratch, { passive: false });
+    canvas2.addEventListener("touchend", endS);
 
     if (btnNuevo) btnNuevo.onclick = () => setupRaspaGanaPremios();
 }
