@@ -6,7 +6,7 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db  = getFirestore(app);
 const auth = getAuth(app);
 
 let vistaActiva = "pedidos";
@@ -57,21 +57,19 @@ function desviarAIndiceConAlerta(titulo, mensaje) {
 
 function cambiarSeccionAdmin(seccion) {
     vistaActiva = seccion;
-    const divPed = document.getElementById("seccionPedidosAdmin");
-    const divRes = document.getElementById("seccionReseñasAdmin");
-    const tabPed = document.getElementById("tabPedidos");
-    const tabRes = document.getElementById("tabReseñas");
+    document.querySelectorAll(".seccion").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
 
     if (seccion === "pedidos") {
-        divPed.style.display = "block";
-        divRes.style.display = "none";
-        tabPed.classList.add("active");
-        tabRes.classList.remove("active");
+        document.getElementById("seccionPedidos").classList.add("active");
+        document.querySelector(".nav-item:nth-child(1)").classList.add("active");
+        document.getElementById("topbarTitle").textContent = "Pedidos recibidos";
+        document.getElementById("topbarSub").textContent   = "Gestiona y actualiza el estado de cada comanda";
     } else {
-        divPed.style.display = "none";
-        divRes.style.display = "block";
-        tabRes.classList.add("active");
-        tabPed.classList.remove("active");
+        document.getElementById("seccionResenas").classList.add("active");
+        document.querySelector(".nav-item:nth-child(2)").classList.add("active");
+        document.getElementById("topbarTitle").textContent = "Opiniones de clientes";
+        document.getElementById("topbarSub").textContent   = "Modera las reseñas publicadas en la tienda";
     }
     actualizarVistaActivaAdmin();
 }
@@ -84,75 +82,111 @@ function actualizarVistaActivaAdmin() {
 async function cargarPedidosAdmin() {
     const contenedor = document.getElementById("contenedorPedidosAdmin");
     if (!contenedor) return;
-
-    contenedor.innerHTML = '<p class="text-muted admin-msg-full">🔄 Extrayendo comandas...</p>';
+    contenedor.innerHTML = `<div class="empty-state"><i class="fa-solid fa-rotate fa-spin"></i><p>Extrayendo comandas...</p></div>`;
 
     try {
         const q = query(collection(db, "pedidos"), orderBy("fechaCreacion", "desc"));
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
-            contenedor.innerHTML = '<p class="text-muted admin-msg-full">Aún no hay comandas registradas.</p>';
+            contenedor.innerHTML = `<div class="empty-state"><i class="fa-solid fa-receipt"></i><p>Aún no hay comandas registradas.</p></div>`;
             return;
         }
 
-        contenedor.innerHTML = "";
+        // KPIs
+        const todos = snapshot.docs.map(d => ({ _id: d.id, ...d.data() }));
+        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        document.getElementById("kpiPedidosHoy").textContent = todos.filter(p => new Date(p.fechaCreacion) >= hoy).length;
+        document.getElementById("kpiEnProceso").textContent  = todos.filter(p => !p.estado?.includes("Listo") && !p.estado?.includes("Entregado")).length;
+        document.getElementById("kpiEntregados").textContent = todos.filter(p => p.estado?.includes("Listo") || p.estado?.includes("Entregado")).length;
+        const total = todos.reduce((s, p) => s + (parseFloat(String(p.total).replace(/[^0-9.]/g, "")) || 0), 0);
+        document.getElementById("kpiVentaTotal").textContent = "$" + total.toFixed(0);
+        document.getElementById("badgePedidos").textContent  = todos.length;
 
+        contenedor.innerHTML = "";
         snapshot.forEach((docSnap) => {
             const pedido = docSnap.data();
-            const idDoc = docSnap.id;
-            let listaProductosHTML = "";
+            const idDoc  = docSnap.id;
+            const estadoActual = pedido.estado || "Recibido 🥖";
+            const esDom = (pedido.metodoEntrega || "").toLowerCase().includes("domicilio");
+            const fechaCompra = pedido.fechaCreacion ? new Date(pedido.fechaCreacion).toLocaleString() : "Reciente";
+
+            let productosHTML = "";
             if (Array.isArray(pedido.productos)) {
-                pedido.productos.forEach((prod) => {
-                    listaProductosHTML += `<li><strong>${prod.cantidad}x</strong> ${escapeHtml(prod.nombre)}</li>`;
+                pedido.productos.forEach(pr => {
+                    productosHTML += `<li><span>${pr.cantidad}× ${escapeHtml(pr.nombre)}</span><span>$${(pr.precio * pr.cantidad).toFixed(2)}</span></li>`;
                 });
             }
 
-            const fechaCompra = pedido.fechaCreacion ? new Date(pedido.fechaCreacion).toLocaleString() : "Reciente";
-            const estadoActual = pedido.estado || "Recibido 🥖";
+            let dotClass = "dot-recibido";
+            if (estadoActual.includes("Horno")) dotClass = "dot-horno";
+            else if (estadoActual.includes("Listo") || estadoActual.includes("Entregado")) dotClass = "dot-listo";
+
+            const ini = (pedido.cliente || "?").trim().split(" ").slice(0,2).map(w => w[0]?.toUpperCase() || "").join("");
 
             const card = document.createElement("div");
-            card.className = "card-pedido-admin nuevo-pedido";
+            card.className = "card-pedido";
+            card.id = "card-" + idDoc;
             card.innerHTML = `
-                <div class="admin-pedido-meta">
-                    <span><strong>Ref:</strong> ${escapeHtml(pedido.codigoPedido || "#WEB-XXXX")}</span>
-                    <span>${fechaCompra}</span>
+                <div class="card-pedido-top">
+                    <span class="pedido-estado-dot ${dotClass}"></span>
+                    <span class="pedido-codigo">${escapeHtml(pedido.codigoPedido || "#WEB-XXXX")}</span>
+                    <span class="pedido-fecha">${fechaCompra}</span>
                 </div>
-                <div class="admin-cliente-info">
-                    <p><i class="fa-solid fa-user" aria-hidden="true"></i> <strong>Cliente:</strong> ${escapeHtml(pedido.cliente)}</p>
-                    <p><i class="fa-solid fa-box" aria-hidden="true"></i> <strong>Entrega:</strong> ${escapeHtml(pedido.metodoEntrega || "Recoger en tienda")}</p>
-                    <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <strong>Dirección:</strong> ${escapeHtml(pedido.direccionEntrega || pedido.direccionRecoleccion || "—")}</p>
+                <div class="card-pedido-body">
+                    <div class="pedido-cliente-row">
+                        <div class="avatar-circle">${ini}</div>
+                        <div>
+                            <div class="pedido-cliente-nombre">${escapeHtml(pedido.cliente || "Cliente")}</div>
+                            <div class="pedido-cliente-meta">📅 ${escapeHtml(pedido.fechaRecoleccion || "—")} · ${escapeHtml(pedido.horarioRecoleccion || "—")}</div>
+                        </div>
+                    </div>
+                    <ul class="pedido-productos-lista">${productosHTML}</ul>
+                    <div class="pedido-entrega-badge ${esDom ? 'entrega-domicilio' : 'entrega-tienda'}">
+                        <i class="fa-solid ${esDom ? 'fa-motorcycle' : 'fa-store'}"></i>
+                        <div>
+                            <div>${escapeHtml(pedido.metodoEntrega || "Recoger en tienda")}</div>
+                            ${esDom && pedido.direccionEntrega ? `<div class="pedido-dir">${escapeHtml(pedido.direccionEntrega)}</div>` : ""}
+                        </div>
+                    </div>
                 </div>
-                <ul class="admin-productos-list">${listaProductosHTML}</ul>
-                <div class="admin-pedido-entrega">
-                    <i class="fa-regular fa-clock" aria-hidden="true"></i> Cita: ${escapeHtml(pedido.fechaRecoleccion)} | ${escapeHtml(pedido.horarioRecoleccion)}
-                </div>
-                <div class="admin-total-row">
-                    <span class="admin-total-price">${escapeHtml(String(pedido.total))}</span>
-                    <select class="selector-estado-pedido" data-pedido-id="${idDoc}" aria-label="Estado del pedido">
-                        <option value="Recibido 🥖" ${estadoActual === "Recibido 🥖" ? "selected" : ""}>Recibido 🥖</option>
-                        <option value="En Horno 🔥" ${estadoActual === "En Horno 🔥" ? "selected" : ""}>En Horno 🔥</option>
-                        <option value="Listo / Entregado ✅" ${estadoActual === "Listo / Entregado ✅" ? "selected" : ""}>Listo / Entregado ✅</option>
+                <div class="card-pedido-footer">
+                    <div class="pedido-total">
+                        <span>Total</span>${escapeHtml(String(pedido.total))}
+                    </div>
+                    <select class="select-estado" aria-label="Estado del pedido">
+                        <option ${estadoActual === "Recibido 🥖"           ? "selected" : ""}>Recibido 🥖</option>
+                        <option ${estadoActual === "En el horno 🔥"        ? "selected" : ""}>En el horno 🔥</option>
+                        <option ${estadoActual === "Listo para recoger ✅" ? "selected" : ""}>Listo para recoger ✅</option>
+                        <option ${estadoActual === "En camino 🏍️"          ? "selected" : ""}>En camino 🏍️</option>
+                        <option ${estadoActual === "Entregado 🎉"          ? "selected" : ""}>Entregado 🎉</option>
                     </select>
                 </div>
             `;
-            card.querySelector(".selector-estado-pedido").addEventListener("change", (e) => {
-                cambiarEstadoPedidoEnNube(idDoc, e.target.value);
+            card.querySelector(".select-estado").addEventListener("change", (e) => {
+                cambiarEstadoPedidoEnNube(idDoc, e.target.value, card);
             });
             contenedor.appendChild(card);
         });
     } catch (err) {
         console.error(err);
-        contenedor.innerHTML = '<p class="text-danger admin-msg-full">Error al consultar Firestore. Verifica las reglas de seguridad.</p>';
+        contenedor.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Error al consultar Firestore.</p></div>`;
     }
 }
 
-async function cambiarEstadoPedidoEnNube(idDoc, nuevoEstado) {
+async function cambiarEstadoPedidoEnNube(idDoc, nuevoEstado, card) {
     try {
         await updateDoc(doc(db, "pedidos", idDoc), { estado: nuevoEstado });
-        Swal.mixin({ toast: true, position: "top-end", showConfirmButton: false, timer: 1500 }).fire({
-            icon: "success", title: "Estado actualizado"
-        });
+        if (card) {
+            const dot = card.querySelector(".pedido-estado-dot");
+            dot.className = "pedido-estado-dot " + (
+                nuevoEstado.includes("Horno")    ? "dot-horno"  :
+                nuevoEstado.includes("Listo") || nuevoEstado.includes("Entregado") ? "dot-listo" :
+                "dot-recibido"
+            );
+        }
+        Swal.mixin({ toast: true, position: "top-end", showConfirmButton: false, timer: 1500 })
+            .fire({ icon: "success", title: "Estado actualizado" });
     } catch (err) {
         console.error(err);
         Swal.fire("Error", "No se pudo actualizar el estado.", "error");
@@ -162,43 +196,41 @@ async function cambiarEstadoPedidoEnNube(idDoc, nuevoEstado) {
 async function cargarReseñasAdmin() {
     const contenedor = document.getElementById("contenedorReseñasAdmin");
     if (!contenedor) return;
-
-    contenedor.innerHTML = '<p class="text-muted admin-msg-full">🔄 Cargando opiniones...</p>';
+    contenedor.innerHTML = `<div class="empty-state"><i class="fa-solid fa-rotate fa-spin"></i><p>Cargando opiniones...</p></div>`;
 
     try {
         const q = query(collection(db, "resenas"), orderBy("fecha", "desc"));
         const snapshot = await getDocs(q);
+        document.getElementById("badgeResenas").textContent = snapshot.size;
 
         if (snapshot.empty) {
-            contenedor.innerHTML = '<p class="text-muted admin-msg-full">No hay opiniones publicadas.</p>';
+            contenedor.innerHTML = `<div class="empty-state"><i class="fa-solid fa-star"></i><p>No hay opiniones publicadas.</p></div>`;
             return;
         }
 
         contenedor.innerHTML = "";
-
         snapshot.forEach((docSnap) => {
-            const reseña = docSnap.data();
+            const r = docSnap.data();
             const idDoc = docSnap.id;
-            const numEstrellas = reseña.calificacion || 5;
-            let estrellasHTML = '<div class="admin-stars">';
-            for (let i = 1; i <= 5; i++) {
-                estrellasHTML += i <= numEstrellas
-                    ? '<i class="fa-solid fa-star" aria-hidden="true"></i> '
-                    : '<i class="fa-regular fa-star admin-star-empty" aria-hidden="true"></i> ';
-            }
-            estrellasHTML += ` (${numEstrellas}/5)</div>`;
+            const num = r.calificacion || 5;
+            const estrellas = Array.from({length:5}, (_,i) =>
+                `<i class="fa-solid fa-star${i < num ? '' : ' empty'}"></i>`
+            ).join("");
 
             const card = document.createElement("div");
-            card.className = "card-reseña-admin";
+            card.className = "card-reseña";
             card.innerHTML = `
-                <div class="admin-reseña-meta"><span><strong>Autor:</strong> ${escapeHtml(reseña.usuario)}</span></div>
-                ${estrellasHTML}
-                <p class="admin-reseña-texto">"${escapeHtml(reseña.texto)}"</p>
-                <button type="button" class="btn-eliminar-reseña" data-reseña-id="${idDoc}">
-                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i> ELIMINAR OPINIÓN
+                <div class="reseña-top">
+                    <div class="reseña-stars">${estrellas}</div>
+                    <span class="reseña-fecha">${r.fecha ? new Date(r.fecha).toLocaleDateString("es-MX") : "—"}</span>
+                </div>
+                <p class="reseña-texto">"${escapeHtml(r.texto)}"</p>
+                <div class="reseña-usuario"><i class="fa-solid fa-circle-user"></i> ${escapeHtml(r.usuario || "Anónimo")}</div>
+                <button type="button" class="btn btn-danger btn-sm" style="margin-top:10px;width:100%;">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar
                 </button>
             `;
-            card.querySelector(".btn-eliminar-reseña").addEventListener("click", () => eliminarReseñaInapropiada(idDoc));
+            card.querySelector("button").addEventListener("click", () => eliminarReseñaInapropiada(idDoc));
             contenedor.appendChild(card);
         });
     } catch (err) {
@@ -208,19 +240,19 @@ async function cargarReseñasAdmin() {
 
 async function eliminarReseñaInapropiada(idDoc) {
     const result = await Swal.fire({
-        title: "¿Eliminar este comentario? 🗑️",
+        title: "¿Eliminar este comentario?",
         text: "Desaparecerá permanentemente del sitio público.",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#e74c3c",
-        cancelButtonColor: "#7c726a",
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#7b5533",
         confirmButtonText: "Sí, borrar",
-        cancelButtonText: "Mantener"
+        cancelButtonText: "Cancelar"
     });
     if (!result.isConfirmed) return;
     try {
         await deleteDoc(doc(db, "resenas", idDoc));
-        Swal.fire("¡Eliminado! 🔥", "La reseña fue borrada.", "success");
+        Swal.fire({ toast: true, position: "top-end", icon: "success", title: "Reseña eliminada", showConfirmButton: false, timer: 1600 });
         cargarReseñasAdmin();
     } catch (err) {
         console.error(err);
