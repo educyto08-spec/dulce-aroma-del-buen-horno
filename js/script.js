@@ -1484,8 +1484,8 @@ function setupRaspaGanaPremios() {
     if (canPlay) {
         // Capa dorada raspable
         const grad = ctxPremios.createLinearGradient(0, 0, c.width, c.height);
-        grad.addColorStop(0, "#c9a227");
-        grad.addColorStop(1, "#7b5533");
+       grad.addColorStop(0, "#d4a853");
+grad.addColorStop(1, "#a0522d");
         ctxPremios.fillStyle = grad;
         if (ctxPremios.roundRect) ctxPremios.roundRect(0, 0, c.width, c.height, 12);
         else ctxPremios.rect(0, 0, c.width, c.height);
@@ -1531,8 +1531,8 @@ function setupRaspaGanaPremios() {
     ctxPremios.clearRect(0, 0, canvas2.width, canvas2.height);
     ctxPremios.globalCompositeOperation = "source-over";
     const grad2 = ctxPremios.createLinearGradient(0, 0, canvas2.width, canvas2.height);
-    grad2.addColorStop(0, "#c9a227");
-    grad2.addColorStop(1, "#7b5533");
+    grad2.addColorStop(0, "#d4a853");
+grad2.addColorStop(1, "#a0522d");
     ctxPremios.fillStyle = grad2;
     if (ctxPremios.roundRect) ctxPremios.roundRect(0, 0, canvas2.width, canvas2.height, 12);
     else ctxPremios.rect(0, 0, canvas2.width, canvas2.height);

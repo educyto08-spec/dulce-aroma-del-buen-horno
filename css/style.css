@@ -1785,25 +1785,28 @@ html, body {
 @media (max-width: 768px) {
 
     /* --- CAMBIO RADICAL Y COMPLETO DE COLORES PARA LA APP (ESTILO REPOSTERÍA VIBRANTE / CHIC) --- */
+   @media (max-width: 768px) {
+
+    /* --- PALETA: HORNO Y BARRO — AESTHETIC --- */
     :root {
-        --cafe: #d44c77;                /* Rosa Pastel Encendido / Fresa Intenso */
-        --cafe-oscuro: #851c3e;         /* Arándano Profundo */
-        --cafe-claro: #e59bb1;          /* Rosa Suave / Algodón de azúcar */
-        --dorado: #b07ee6;              /* Lila Eléctrico / Dulce de violeta */
+        --cafe: #a0522d;                /* Sienna — marrón rojizo del horno */
+        --cafe-oscuro: #6b2f12;         /* Barro quemado profundo */
+        --cafe-claro: #c47a4a;          /* Canela suave */
+        --dorado: #d4a853;              /* Miel dorada */
 
-        --crema-principal: #fff0f3;     /* Fondo Fresa con Crema muy claro */
-        --crema-suave: #ffffff;         /* Tarjetas y Header en blanco */
-        --pastel-rosa: #ffe3e8;         /* Bloques secundarios */
-        --pastel-albaricoque: #f0e3ff;  /* Bloques especiales */
+        --crema-principal: #fdf6ee;     /* Vainilla muy claro — fondo base */
+        --crema-suave: #fffdf9;         /* Blanco marfil para cards */
+        --pastel-rosa: #f5e6d3;         /* Melocotón suave */
+        --pastel-albaricoque: #ede0cc;  /* Almendra tostada clara */
 
-        --texto-oscuro: #3a0f1d;        /* Marrón Arándano ultra oscuro */
-        --texto-mutado: #a67c89;        /* Gris rosáceo */
-        --borde: #ffd0da;               /* Bordes rosados */
+        --texto-oscuro: #2e1a0e;        /* Chocolate casi negro */
+        --texto-mutado: #8a6045;        /* Canela oscura */
+        --borde: #e8d5bc;               /* Borde trigo */
 
-        --sombra: 0 12px 30px rgba(212, 76, 119, 0.15);
-        --sombra-card: 0 6px 20px rgba(212, 76, 119, 0.08);
-        --radio: 24px;                  /* Estilo iOS/Android moderno */
-        --radio-sm: 14px;
+        --sombra: 0 12px 32px rgba(100, 45, 18, 0.13);
+        --sombra-card: 0 6px 20px rgba(100, 45, 18, 0.08);
+        --radio: 20px;
+        --radio-sm: 12px;
     }
 
     /* ==========================================================================
