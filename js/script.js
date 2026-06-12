@@ -1502,6 +1502,7 @@ grad.addColorStop(1, "#a0522d");
         }
 
         ctxPremios.globalCompositeOperation = "destination-out";
+      
         ctxPremios.strokeStyle = "rgba(0,0,0,1)";
         ctxPremios.lineWidth = 40;
         ctxPremios.lineCap = "round";
