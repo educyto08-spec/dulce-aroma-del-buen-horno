@@ -1369,9 +1369,11 @@ if (window.cordova !== undefined) {
             const account = document.getElementById("sideCuenta");
             const auth = document.getElementById("modalAuth");
 
-            if (cart?.classList.contains("active")) closeSide("cartSidebar");
-            else if (account?.classList.contains("active")) closeSide("sideCuenta");
-            else if (auth?.style.display === "flex") closeAuth();
+            const premios = document.getElementById("panelPremios");
+if (premios && !premios.hidden && premios.classList.contains("abierto")) cerrarPanelPremios();
+else if (cart?.classList.contains("active")) closeSide("cartSidebar");
+else if (account?.classList.contains("active")) closeSide("sideCuenta");
+else if (auth?.style.display === "flex") closeAuth();
         }, false);
     }, false);
 }
@@ -1387,9 +1389,13 @@ function abrirPanelPremios() {
     const panel = document.getElementById("panelPremios");
     const overlay = document.getElementById("overlayPremios");
     if (!panel) return;
+
+    // Primero lo hacemos visible con display:block, luego animamos
     panel.hidden = false;
     overlay.hidden = false;
-    // Forzar reflow para que la transición funcione
+    document.body.style.overflow = "hidden";
+
+    // Esperamos un frame para que el browser aplique display:block antes de la transición
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             panel.classList.add("abierto");
@@ -1404,7 +1410,13 @@ function cerrarPanelPremios() {
     if (!panel) return;
     panel.classList.remove("abierto");
     overlay.hidden = true;
-    setTimeout(() => { panel.hidden = true; }, 400);
+    document.body.style.overflow = "";
+    // Esperar que termine la animación antes de ocultar
+    setTimeout(() => {
+        if (!panel.classList.contains("abierto")) {
+            panel.hidden = true;
+        }
+    }, 420);
 }
 
 function refrescarPanelPremios() {

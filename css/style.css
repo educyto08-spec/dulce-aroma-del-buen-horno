@@ -2229,6 +2229,15 @@ html, body {
         background-color: var(--cafe) !important;
         border-radius: 2px !important;
     }
+    /* El panel de perfil y carrito deben aparecer sobre la barra inferior */
+.side-panel.active {
+    z-index: 100020 !important;
+}
+/* El overlay del panel premios también */
+.overlay-premios:not([hidden]) {
+    display: block;
+    z-index: 100009;
+}
 
 } /* Fin @media (max-width: 768px) */
 
@@ -2249,9 +2258,14 @@ html, body {
     transform: translateY(0);
     display: block !important;
 }
+/* DESPUÉS — CORRECTO */
 .panel-premios[hidden] {
-    display: block !important; /* La animación maneja la visibilidad */
+    display: none;
     pointer-events: none;
+}
+.panel-premios:not([hidden]) {
+    display: block;
+}
 }
 .panel-premios-header {
     display: flex;
