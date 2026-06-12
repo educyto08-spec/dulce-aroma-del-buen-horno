@@ -1377,15 +1377,209 @@ if (window.cordova !== undefined) {
 }
 
 // --- Integración Nativa: Manejo del botón "Atrás" ---
+
+// ===== PANEL PREMIOS =====
+let ctxPremios;
+let isScratchingPremios = false;
+let lastPointPremios = null;
+
+function abrirPanelPremios() {
+    const panel = document.getElementById("panelPremios");
+    const overlay = document.getElementById("overlayPremios");
+    if (!panel) return;
+    panel.hidden = false;
+    overlay.hidden = false;
+    // Forzar reflow para que la transición funcione
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            panel.classList.add("abierto");
+        });
+    });
+    refrescarPanelPremios();
+}
+
+function cerrarPanelPremios() {
+    const panel = document.getElementById("panelPremios");
+    const overlay = document.getElementById("overlayPremios");
+    if (!panel) return;
+    panel.classList.remove("abierto");
+    overlay.hidden = true;
+    setTimeout(() => { panel.hidden = true; }, 400);
+}
+
+function refrescarPanelPremios() {
+    // --- QR ---
+    const qrContainer = document.getElementById("qrcodeContainerPremios");
+    const qrIdEl = document.getElementById("qrUserIdTextoPremios");
+    const qrIdBloque = document.getElementById("qrUserIdPremios");
+    const textoQr = document.getElementById("textoQrPremios");
+
+    if (auth.currentUser && qrContainer) {
+        if (textoQr) textoQr.textContent = "Muestra este QR en caja para identificarte y acumular puntos.";
+        qrContainer.innerHTML = "";
+        const uid = auth.currentUser.uid;
+        new QRCode(qrContainer, {
+            text: uid,
+            width: 140, height: 140,
+            colorDark: "#6b4423",
+            colorLight: "#f8f3ea",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        if (qrIdEl) qrIdEl.textContent = uid.substring(0, 8) + "...";
+        if (qrIdBloque) qrIdBloque.hidden = false;
+    } else {
+        if (qrContainer) qrContainer.innerHTML = "";
+        if (qrIdBloque) qrIdBloque.hidden = true;
+        if (textoQr) textoQr.textContent = "Inicia sesión para generar tu QR personal y acumular puntos en caja.";
+    }
+
+    // --- Puntos ---
+    const puntosEl = document.getElementById("puntosUsuarioRaspaGanaPremios");
+    if (puntosEl) puntosEl.textContent = obtenerPuntos();
+
+    // --- Raspa y Gana ---
+    setupRaspaGanaPremios();
+}
+
+function setupRaspaGanaPremios() {
+    const canvas = document.getElementById("scratchCardCanvasPremios");
+    const overlay = document.getElementById("raspaOverlayPremios");
+    const mensaje = document.getElementById("raspaGanaMensajePremios");
+    const btnNuevo = document.getElementById("btnNuevoRaspaGanaPremios");
+    const puntosDisplay = document.getElementById("puntosUsuarioRaspaGanaPremios");
+    if (!canvas || !overlay) return;
+
+    const puntos = obtenerPuntos();
+    if (puntosDisplay) puntosDisplay.textContent = puntos;
+
+    const canPlay = puntos >= 10;
+    canvas.style.pointerEvents = canPlay ? "auto" : "none";
+    overlay.textContent = canPlay ? "¡Raspa aquí!" : `Necesitas 10 puntos (tienes ${puntos})`;
+    overlay.style.backgroundColor = canPlay
+        ? "rgba(123, 85, 51, 0.85)"
+        : "rgba(160,160,160,0.65)";
+    if (btnNuevo) btnNuevo.hidden = true;
+    if (mensaje) mensaje.hidden = true;
+
+    ctxPremios = canvas.getContext("2d");
+    if (!ctxPremios) return;
+
+    // Dibujar capa de raspar
+    ctxPremios.clearRect(0, 0, canvas.width, canvas.height);
+    ctxPremios.globalCompositeOperation = "source-over";
+    const grad = ctxPremios.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad.addColorStop(0, "#7b5533");
+    grad.addColorStop(1, "#c9a227");
+    ctxPremios.fillStyle = grad;
+    ctxPremios.beginPath();
+    ctxPremios.roundRect(0, 0, canvas.width, canvas.height, 12);
+    ctxPremios.fill();
+    ctxPremios.fillStyle = "#fff";
+    ctxPremios.font = "bold 18px 'Plus Jakarta Sans', sans-serif";
+    ctxPremios.textAlign = "center";
+    ctxPremios.textBaseline = "middle";
+    ctxPremios.fillText("🎁 ¡Raspa para ganar!", canvas.width / 2, canvas.height / 2);
+    ctxPremios.globalCompositeOperation = "destination-out";
+    ctxPremios.strokeStyle = "rgba(0,0,0,1)";
+    ctxPremios.lineWidth = 36;
+    ctxPremios.lineCap = "round";
+
+    // Clonar canvas para quitar listeners anteriores
+    const nuevoCanvas = canvas.cloneNode(true);
+    canvas.parentNode.replaceChild(nuevoCanvas, canvas);
+    const c = document.getElementById("scratchCardCanvasPremios");
+    ctxPremios = c.getContext("2d");
+    // Re-dibujar en el canvas nuevo
+    ctxPremios.clearRect(0, 0, c.width, c.height);
+    ctxPremios.globalCompositeOperation = "source-over";
+    ctxPremios.fillStyle = grad;
+    ctxPremios.beginPath();
+    if (ctxPremios.roundRect) ctxPremios.roundRect(0, 0, c.width, c.height, 12);
+    else ctxPremios.rect(0, 0, c.width, c.height);
+    ctxPremios.fill();
+    ctxPremios.fillStyle = "#fff";
+    ctxPremios.font = "bold 18px 'Plus Jakarta Sans', sans-serif";
+    ctxPremios.textAlign = "center";
+    ctxPremios.textBaseline = "middle";
+    ctxPremios.fillText("🎁 ¡Raspa para ganar!", c.width / 2, c.height / 2);
+    ctxPremios.globalCompositeOperation = "destination-out";
+    ctxPremios.strokeStyle = "rgba(0,0,0,1)";
+    ctxPremios.lineWidth = 36;
+    ctxPremios.lineCap = "round";
+
+    if (!canPlay) return;
+
+    const getPoint = (e) => {
+        const rect = c.getBoundingClientRect();
+        const src = e.touches ? e.touches[0] : e;
+        return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+    };
+
+    const startS = (e) => { e.preventDefault(); isScratchingPremios = true; lastPointPremios = getPoint(e); };
+    const doScratch = (e) => {
+        if (!isScratchingPremios) return;
+        e.preventDefault();
+        const pt = getPoint(e);
+        ctxPremios.beginPath();
+        ctxPremios.moveTo(lastPointPremios.x, lastPointPremios.y);
+        ctxPremios.lineTo(pt.x, pt.y);
+        ctxPremios.stroke();
+        lastPointPremios = pt;
+        checkProgressPremios(c);
+    };
+    const endS = () => { isScratchingPremios = false; lastPointPremios = null; };
+
+    c.addEventListener("mousedown", startS);
+    c.addEventListener("mousemove", doScratch);
+    c.addEventListener("mouseup", endS);
+    c.addEventListener("touchstart", startS, { passive: false });
+    c.addEventListener("touchmove", doScratch, { passive: false });
+    c.addEventListener("touchend", endS);
+
+    if (btnNuevo) btnNuevo.onclick = () => setupRaspaGanaPremios();
+}
+
+function checkProgressPremios(canvas) {
+    const data = ctxPremios.getImageData(0, 0, canvas.width, canvas.height).data;
+    let transparentes = 0;
+    for (let i = 3; i < data.length; i += 4) if (data[i] === 0) transparentes++;
+    if (transparentes / (canvas.width * canvas.height) >= 0.5) {
+        canvas.style.pointerEvents = "none";
+        const overlay = document.getElementById("raspaOverlayPremios");
+        if (overlay) overlay.style.display = "none";
+        triggerRaspaGanaPremios();
+    }
+}
+
+async function triggerRaspaGanaPremios() {
+    const mensaje = document.getElementById("raspaGanaMensajePremios");
+    const btnNuevo = document.getElementById("btnNuevoRaspaGanaPremios");
+    const puntosDisplay = document.getElementById("puntosUsuarioRaspaGanaPremios");
+    if (!mensaje) return;
+    mensaje.hidden = false;
+    mensaje.textContent = "Procesando tu premio...";
+
+    if (obtenerPuntos() >= 10) {
+        const exito = await canjearCuponSorpresa(db, idDocumentoUsuarioFirestore, { doc, updateDoc, arrayUnion });
+        if (puntosDisplay) puntosDisplay.textContent = obtenerPuntos();
+        mensaje.textContent = exito
+            ? "¡Felicidades! 🎉 Ganaste un pan gratis. ¡Revisa tu perfil para ver el cupón!"
+            : "Hubo un error al procesar tus puntos. Intenta de nuevo.";
+    } else {
+        mensaje.textContent = "No tienes suficientes puntos todavía.";
+    }
+    if (btnNuevo) btnNuevo.hidden = false;
+}
+
 Object.assign(window, {
     scrollAlCatalogo, enfocarBuscador, buscarProductos, openSide, closeSide,
     openAuth, closeAuth, switchTab, togglePasswordVisibility,
     cerrarSesionUsuario, agregarAlCarrito, cambiarCantidad, vaciarCarritoCompleto,
     finalizarCompraServidor, filtrarCategoria, seleccionarEstrellasVoto, enviarReseña,
     cargarReseñas, cargarPerfilUsuario, conmutarModoEdicionPerfil,
-    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast
+    guardarDatosPerfilActualizados, aplicarCupon, repetirUltimoPedido, mostrarToast,
+    abrirPanelPremios, cerrarPanelPremios
 });
-
 
 // Función para escuchar y pintar los cupones en el perfil en tiempo real
 function renderizarCuponesPerfil() {

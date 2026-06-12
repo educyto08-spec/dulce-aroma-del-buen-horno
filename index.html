@@ -665,7 +665,7 @@
 
     <script type="module" src="js/script.js"></script>
     
-   <nav class="mobile-bottom-nav">
+  <nav class="mobile-bottom-nav">
     <a href="#inicio" class="bottom-nav-item active">
         <i class="fas fa-home"></i>
         <span>Inicio</span>
@@ -678,11 +678,47 @@
         <i class="fas fa-shopping-basket"></i>
         <span>Bolsa</span>
     </a>
+    <!-- NUEVO: pestaña Premios -->
+    <a href="#" class="bottom-nav-item" id="btnNavPremios" onclick="abrirPanelPremios(); return false;">
+        <i class="fas fa-gift"></i>
+        <span>Premios</span>
+    </a>
     <a href="#" class="bottom-nav-item" onclick="openSide('sideCuenta'); return false;">
         <i class="fas fa-user"></i>
         <span>Perfil</span>
     </a>
 </nav>
-    
+<!-- ===== PANEL PREMIOS (QR + RASPA Y GANA) ===== -->
+<div id="panelPremios" class="panel-premios" hidden>
+    <div class="panel-premios-header">
+        <h2>🎁 Mis Premios</h2>
+        <button type="button" class="close-side" onclick="cerrarPanelPremios()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="panel-premios-body">
+
+        <!-- Bloque QR -->
+        <div class="premio-card" id="bloqueQrPremios">
+            <h4><i class="fa-solid fa-qrcode"></i> Tu Código de Cliente</h4>
+            <p id="textoQrPremios">Inicia sesión para generar tu QR y acumular puntos en caja.</p>
+            <div id="qrcodeContainerPremios" style="display:flex;justify-content:center;margin:14px 0;"></div>
+            <p class="qr-info-id" id="qrUserIdPremios" hidden>ID: <span id="qrUserIdTextoPremios"></span></p>
+        </div>
+
+        <!-- Bloque Raspa y Gana -->
+        <div class="premio-card">
+            <h4><i class="fa-solid fa-ticket"></i> Raspa y Gana</h4>
+            <p>Tienes <strong id="puntosUsuarioRaspaGanaPremios">0</strong> puntos acumulados.</p>
+            <p class="premio-hint" id="raspaHintPremios">Gana 1 punto por cada pieza pedida. A 10 puntos puedes raspar.</p>
+            <div id="scratchCardContainerPremios" class="scratch-card-container" style="margin:14px auto;">
+                <canvas id="scratchCardCanvasPremios" width="300" height="150"></canvas>
+                <div class="scratch-card-overlay" id="raspaOverlayPremios">¡Raspa aquí!</div>
+            </div>
+            <p id="raspaGanaMensajePremios" class="raspa-gana-mensaje" hidden></p>
+            <button id="btnNuevoRaspaGanaPremios" class="btn-primario" style="width:100%;margin-top:10px;" hidden>Jugar de nuevo</button>
+        </div>
+
+    </div>
+</div>
+<div id="overlayPremios" class="overlay-premios" hidden onclick="cerrarPanelPremios()"></div>
 </body>
 </html>

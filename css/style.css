@@ -2231,3 +2231,73 @@ html, body {
     }
 
 } /* Fin @media (max-width: 768px) */
+
+/* ===== PANEL PREMIOS ===== */
+.panel-premios {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100010;
+    background: var(--crema-suave);
+    border-radius: var(--radio) var(--radio) 0 0;
+    box-shadow: 0 -10px 40px rgba(58,15,29,0.18);
+    max-height: 90dvh;
+    overflow-y: auto;
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    transform: translateY(100%);
+}
+.panel-premios.abierto {
+    transform: translateY(0);
+    display: block !important;
+}
+.panel-premios[hidden] {
+    display: block !important; /* La animación maneja la visibilidad */
+    pointer-events: none;
+}
+.panel-premios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px 10px;
+    border-bottom: 1px solid var(--borde);
+    position: sticky; top: 0;
+    background: var(--crema-suave);
+    z-index: 2;
+}
+.panel-premios-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--cafe);
+}
+.panel-premios-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 90px; /* espacio sobre la barra inferior */
+}
+.premio-card {
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 18px;
+    box-shadow: var(--sombra-card);
+    text-align: center;
+}
+.premio-card h4 {
+    margin: 0 0 8px;
+    color: var(--cafe);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.premio-card p { margin: 0 0 6px; font-size: 0.88rem; color: var(--texto-mutado); }
+.premio-hint { font-size: 0.78rem !important; }
+.overlay-premios {
+    position: fixed; inset: 0;
+    background: rgba(58,15,29,0.45);
+    z-index: 100009;
+    transition: opacity 0.3s ease;
+}
+.overlay-premios[hidden] { display: none; }
