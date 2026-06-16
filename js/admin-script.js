@@ -1,7 +1,7 @@
 import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
     getFirestore, collection, getDocs, doc,
-    updateDoc, deleteDoc, getDoc, query, orderBy
+    updateDoc, deleteDoc, addDoc, getDoc, query, orderBy, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { firebaseConfig } from "./firebase-config.js";
@@ -12,10 +12,10 @@ const db   = getFirestore(app);
 const auth = getAuth(app);
 
 // ── Estado global ──────────────────────────────────────────────────
-let vistaActiva    = "pedidos";
+let vistaActiva     = "pedidos";
 let todosLosPedidos = [];
-let filtroActivo   = "todos";
-let busquedaActual = "";
+let filtroActivo    = "todos";
+let busquedaActual  = "";
 
 const ADMIN_EMAILS_RESPALDO = ["educyto08@gmail.com"];
 
@@ -49,6 +49,13 @@ function dotClass(estado = "") {
     if (estado.includes("camino"))  return "dot-horno";
     if (estado.includes("Listo") || estado.includes("Entregado")) return "dot-listo";
     return "dot-recibido";
+}
+
+function generarCodigoPedido() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "M-"; // prefijo M de Manual
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
 }
 
 function toast(icon, title) {
@@ -102,6 +109,8 @@ onAuthStateChanged(auth, async (user) => {
 
     ocultarLoading();
     cargarPedidosAdmin();
+    // Inicializar formulario manual con 1 producto vacío
+    agregarLineaProducto();
 });
 
 // ── KPIs ───────────────────────────────────────────────────────────
@@ -144,6 +153,7 @@ function renderPedidos(lista) {
         const dc     = dotClass(p.estado || "");
         const esDom  = (p.metodoEntrega || "").toLowerCase().includes("domicilio");
         const estado = p.estado || "Recibido 🥖";
+        const esManual = p.esManual === true;
 
         const productosHTML = Array.isArray(p.productos) && p.productos.length
             ? p.productos.map(pr =>
@@ -157,6 +167,17 @@ function renderPedidos(lista) {
         const cuponTag = (p.cuponUsado && p.cuponUsado !== "Ninguno")
             ? `<span class="cupon-tag">🎟 ${esc(p.cuponUsado)}</span>` : "";
 
+        const manualTag = esManual
+            ? `<span class="tag-manual">📝 Manual</span>` : "";
+
+        const notasHTML = p.notas
+            ? `<div style="font-size:.78rem;color:var(--muted);background:var(--cream);padding:6px 10px;border-radius:6px;">
+                   <i class="fa-solid fa-note-sticky" style="margin-right:5px;"></i>${esc(p.notas)}
+               </div>` : "";
+
+        const telefonoHTML = p.telefono
+            ? `<div class="pedido-cliente-meta">📞 ${esc(p.telefono)}</div>` : "";
+
         const card = document.createElement("div");
         card.className = "card-pedido";
         card.id = "card-" + p._id;
@@ -164,6 +185,7 @@ function renderPedidos(lista) {
             <div class="card-pedido-top">
                 <span class="pedido-estado-dot ${dc}"></span>
                 <span class="pedido-codigo">${esc(p.codigoPedido || "#---")}</span>
+                ${manualTag}
                 ${cuponTag}
                 <span class="pedido-fecha">${formatFecha(p.fechaCreacion)}</span>
             </div>
@@ -172,12 +194,14 @@ function renderPedidos(lista) {
                     <div class="avatar-circle">${esc(ini)}</div>
                     <div>
                         <div class="pedido-cliente-nombre">${esc(p.cliente || "Cliente")}</div>
+                        ${telefonoHTML}
                         <div class="pedido-cliente-meta">
                             📅 ${esc(p.fechaRecoleccion || "—")} · ${esc(p.horarioRecoleccion || "—")}
                         </div>
                     </div>
                 </div>
                 <ul class="pedido-productos-lista">${productosHTML}</ul>
+                ${notasHTML}
                 <div class="pedido-entrega-badge ${esDom ? "entrega-domicilio" : "entrega-tienda"}">
                     <i class="fa-solid ${esDom ? "fa-motorcycle" : "fa-store"}"></i>
                     <div>
@@ -198,15 +222,21 @@ function renderPedidos(lista) {
                     <option ${estado === "En camino 🏍️"           ? "selected" : ""}>En camino 🏍️</option>
                     <option ${estado === "Entregado 🎉"           ? "selected" : ""}>Entregado 🎉</option>
                 </select>
+                <button class="btn-delete-pedido" title="Eliminar este pedido" aria-label="Eliminar pedido">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
             </div>
         `;
 
         card.querySelector(".select-estado").addEventListener("change", async (e) => {
             await cambiarEstadoPedido(p._id, e.target.value, card);
-            // Actualizar estado en memoria
             const ref = todosLosPedidos.find(x => x._id === p._id);
             if (ref) ref.estado = e.target.value;
             actualizarKPIs(todosLosPedidos);
+        });
+
+        card.querySelector(".btn-delete-pedido").addEventListener("click", () => {
+            eliminarPedidoIndividual(p._id, card);
         });
 
         c.appendChild(card);
@@ -232,7 +262,7 @@ function aplicarFiltros() {
     renderPedidos(lista);
 }
 
-// ── Funciones públicas de filtros ──────────────────────────────────
+// ── Filtros públicos ───────────────────────────────────────────────
 function filtrarPedidos(filtro, btn) {
     filtroActivo = filtro;
     document.querySelectorAll(".filtro-chip").forEach(b => b.classList.remove("active"));
@@ -251,14 +281,110 @@ async function cambiarEstadoPedido(idDoc, nuevoEstado, card) {
         await updateDoc(doc(db, "pedidos", idDoc), { estado: nuevoEstado });
         if (card) {
             const dot = card.querySelector(".pedido-estado-dot");
-            if (dot) {
-                dot.className = "pedido-estado-dot " + dotClass(nuevoEstado);
-            }
+            if (dot) dot.className = "pedido-estado-dot " + dotClass(nuevoEstado);
         }
         toast("success", "Estado actualizado ✓");
     } catch (err) {
         console.error("Error actualizando estado:", err);
         Swal.fire("Error", "No se pudo actualizar el estado. Revisa tu conexión.", "error");
+    }
+}
+
+// ── Eliminar pedido individual ─────────────────────────────────────
+async function eliminarPedidoIndividual(idDoc, card) {
+    const result = await Swal.fire({
+        title: "¿Eliminar este pedido?",
+        text: "Esta acción no se puede deshacer.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#7b5533",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        await deleteDoc(doc(db, "pedidos", idDoc));
+
+        // Animación de salida
+        card.style.opacity = "0";
+        card.style.transform = "scale(.95)";
+        card.style.transition = "all .3s";
+        setTimeout(() => {
+            card.remove();
+            // Quitar del array en memoria
+            todosLosPedidos = todosLosPedidos.filter(p => p._id !== idDoc);
+            actualizarKPIs(todosLosPedidos);
+        }, 300);
+
+        toast("success", "Pedido eliminado");
+    } catch (err) {
+        console.error("Error eliminando pedido:", err);
+        Swal.fire("Error", "No se pudo eliminar el pedido.", "error");
+    }
+}
+
+// ── Eliminar TODOS los pedidos ─────────────────────────────────────
+async function eliminarTodosLosPedidos() {
+    if (!todosLosPedidos.length) {
+        toast("info", "No hay pedidos para eliminar");
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: "¿Eliminar TODOS los pedidos?",
+        html: `<p>Esta acción borrará <strong>${todosLosPedidos.length} pedido(s)</strong> de Firestore de forma permanente.</p>`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#7b5533",
+        confirmButtonText: "Sí, borrar todo",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (!result.isConfirmed) return;
+
+    // Segunda confirmación
+    const conf2 = await Swal.fire({
+        title: "Confirma de nuevo",
+        text: "Escribe BORRAR para confirmar",
+        input: "text",
+        inputPlaceholder: "BORRAR",
+        showCancelButton: true,
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#7b5533",
+        confirmButtonText: "Eliminar definitivamente",
+        cancelButtonText: "Cancelar",
+        preConfirm: (val) => {
+            if (val !== "BORRAR") {
+                Swal.showValidationMessage("Escribe exactamente: BORRAR");
+                return false;
+            }
+            return true;
+        }
+    });
+
+    if (!conf2.isConfirmed) return;
+
+    try {
+        // Firestore writeBatch acepta hasta 500 ops; para más pedidos se divide
+        const ids = todosLosPedidos.map(p => p._id);
+        const CHUNK = 490;
+        for (let i = 0; i < ids.length; i += CHUNK) {
+            const batch = writeBatch(db);
+            ids.slice(i, i + CHUNK).forEach(id => batch.delete(doc(db, "pedidos", id)));
+            await batch.commit();
+        }
+
+        todosLosPedidos = [];
+        actualizarKPIs([]);
+        aplicarFiltros();
+        toast("success", "Todos los pedidos eliminados");
+    } catch (err) {
+        console.error("Error al borrar todos los pedidos:", err);
+        Swal.fire("Error", "No se pudieron eliminar todos los pedidos.", "error");
     }
 }
 
@@ -275,11 +401,9 @@ async function cargarPedidosAdmin() {
 
     try {
         const snap = await getDocs(query(collection(db, "pedidos"), orderBy("fechaCreacion", "desc")));
-
         todosLosPedidos = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
         actualizarKPIs(todosLosPedidos);
         aplicarFiltros();
-
     } catch (err) {
         console.error("Error cargando pedidos:", err);
         c.innerHTML = `
@@ -384,7 +508,6 @@ async function eliminarResena(idDoc, card) {
         card.style.transition = "all .3s";
         setTimeout(() => {
             card.remove();
-            // Actualizar badge
             const badge = document.getElementById("badgeResenas");
             const actual = parseInt(badge.textContent) || 1;
             badge.textContent = Math.max(0, actual - 1);
@@ -393,6 +516,177 @@ async function eliminarResena(idDoc, card) {
     } catch (err) {
         console.error("Error eliminando reseña:", err);
         Swal.fire("Error", "No se pudo eliminar la reseña.", "error");
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ── PEDIDO MANUAL ─────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+
+let contadorLineas = 0;
+
+function agregarLineaProducto() {
+    contadorLineas++;
+    const id = `linea_${contadorLineas}`;
+    const lista = document.getElementById("productosManualLista");
+
+    const div = document.createElement("div");
+    div.className = "producto-linea";
+    div.id = id;
+    div.innerHTML = `
+        <input class="form-input" type="text"   placeholder="Nombre del producto"  data-campo="nombre">
+        <input class="form-input" type="number" placeholder="Cant." min="1" value="1" data-campo="cantidad" style="text-align:center;">
+        <input class="form-input" type="number" placeholder="Precio $" min="0" step="0.01" data-campo="precio">
+        <button class="btn-rm-producto" type="button" title="Quitar línea" onclick="quitarLineaProducto('${id}')">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    `;
+
+    // Actualizar total al escribir
+    div.querySelectorAll("input").forEach(inp =>
+        inp.addEventListener("input", actualizarTotalPreview)
+    );
+
+    lista.appendChild(div);
+    actualizarTotalPreview();
+}
+
+function quitarLineaProducto(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    actualizarTotalPreview();
+}
+
+function actualizarTotalPreview() {
+    const lineas = document.querySelectorAll("#productosManualLista .producto-linea");
+    let total = 0;
+    lineas.forEach(l => {
+        const cant   = parseFloat(l.querySelector("[data-campo='cantidad']")?.value) || 0;
+        const precio = parseFloat(l.querySelector("[data-campo='precio']")?.value)   || 0;
+        total += cant * precio;
+    });
+    const preview = document.getElementById("totalPreviewManual");
+    if (preview) preview.textContent = `Total: $${total.toFixed(2)}`;
+}
+
+function toggleDireccion() {
+    const sel   = document.getElementById("m_entrega");
+    const grupo = document.getElementById("grupoDir");
+    if (!sel || !grupo) return;
+    grupo.style.display = sel.value.includes("domicilio") ? "flex" : "none";
+}
+
+function limpiarFormularioManual() {
+    ["m_nombre","m_telefono","m_fecha","m_horario","m_notas","m_direccion"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
+    const sel = document.getElementById("m_entrega");
+    if (sel) sel.value = "Recoger en tienda";
+    toggleDireccion();
+
+    const lista = document.getElementById("productosManualLista");
+    if (lista) lista.innerHTML = "";
+    contadorLineas = 0;
+    agregarLineaProducto();
+    actualizarTotalPreview();
+}
+
+async function guardarPedidoManual() {
+    // Validaciones básicas
+    const nombre  = (document.getElementById("m_nombre")?.value || "").trim();
+    const fecha   = (document.getElementById("m_fecha")?.value || "").trim();
+    const horario = (document.getElementById("m_horario")?.value || "").trim();
+
+    if (!nombre) {
+        Swal.fire("Campo requerido", "Escribe el nombre del cliente.", "warning");
+        return;
+    }
+    if (!fecha) {
+        Swal.fire("Campo requerido", "Selecciona la fecha de recolección.", "warning");
+        return;
+    }
+    if (!horario) {
+        Swal.fire("Campo requerido", "Escribe el horario de recolección.", "warning");
+        return;
+    }
+
+    // Recolectar productos
+    const lineas  = document.querySelectorAll("#productosManualLista .producto-linea");
+    const productos = [];
+    let totalNum  = 0;
+    let productoValido = false;
+
+    lineas.forEach(l => {
+        const nombre_p = (l.querySelector("[data-campo='nombre']")?.value || "").trim();
+        const cantidad  = parseFloat(l.querySelector("[data-campo='cantidad']")?.value) || 0;
+        const precio    = parseFloat(l.querySelector("[data-campo='precio']")?.value)   || 0;
+        if (nombre_p && cantidad > 0) {
+            productos.push({ nombre: nombre_p, cantidad, precio });
+            totalNum += cantidad * precio;
+            productoValido = true;
+        }
+    });
+
+    if (!productoValido) {
+        Swal.fire("Sin productos", "Agrega al menos un producto con nombre y cantidad.", "warning");
+        return;
+    }
+
+    const metodoEntrega   = document.getElementById("m_entrega")?.value  || "Recoger en tienda";
+    const direccionEntrega = (document.getElementById("m_direccion")?.value || "").trim();
+    const telefono        = (document.getElementById("m_telefono")?.value || "").trim();
+    const notas           = (document.getElementById("m_notas")?.value    || "").trim();
+
+    // Construir documento
+    const nuevoPedido = {
+        cliente:           nombre,
+        telefono:          telefono || null,
+        fechaRecoleccion:  fecha,
+        horarioRecoleccion: horario,
+        metodoEntrega,
+        direccionEntrega:  metodoEntrega.includes("domicilio") ? direccionEntrega : null,
+        productos,
+        total:             `$${totalNum.toFixed(2)}`,
+        totalNum,
+        notas:             notas || null,
+        estado:            "Recibido 🥖",
+        codigoPedido:      generarCodigoPedido(),
+        fechaCreacion:     Date.now(),
+        esManual:          true,      // ← marca que fue creado desde el panel
+        cuponUsado:        "Ninguno"
+    };
+
+    try {
+        const docRef = await addDoc(collection(db, "pedidos"), nuevoPedido);
+
+        toast("success", "Pedido registrado ✓");
+
+        // Agregar a la memoria local y actualizar KPIs
+        todosLosPedidos.unshift({ _id: docRef.id, ...nuevoPedido });
+        actualizarKPIs(todosLosPedidos);
+
+        // Preguntar si quiere ir a ver los pedidos
+        const ir = await Swal.fire({
+            title: "¡Pedido guardado! 🥐",
+            html: `<p>Código: <strong>${nuevoPedido.codigoPedido}</strong></p><p>Cliente: ${nombre}</p><p>Total: $${totalNum.toFixed(2)}</p>`,
+            icon: "success",
+            showCancelButton: true,
+            confirmButtonColor: "#7b5533",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Ver pedidos",
+            cancelButtonText: "Registrar otro"
+        });
+
+        if (ir.isConfirmed) {
+            cambiarSeccionAdmin("pedidos", document.getElementById("navPedidos"));
+        } else {
+            limpiarFormularioManual();
+        }
+
+    } catch (err) {
+        console.error("Error guardando pedido manual:", err);
+        Swal.fire("Error", "No se pudo guardar el pedido. Revisa tu conexión.", "error");
     }
 }
 
@@ -410,14 +704,19 @@ function cambiarSeccionAdmin(seccion, btn) {
     if (btn)   btn.classList.add("active");
 
     const titulos = {
-        pedidos: ["Pedidos recibidos", "Gestiona y actualiza el estado de cada comanda"],
-        resenas: ["Opiniones de clientes", "Modera las reseñas publicadas en la tienda"]
+        pedidos: ["Pedidos recibidos",       "Gestiona y actualiza el estado de cada comanda"],
+        manual:  ["Pedido manual",            "Registra un pedido para cliente sin cuenta en la app"],
+        resenas: ["Opiniones de clientes",   "Modera las reseñas publicadas en la tienda"]
     };
-    document.getElementById("topbarTitle").textContent = titulos[seccion][0];
-    document.getElementById("topbarSub").textContent   = titulos[seccion][1];
+    document.getElementById("topbarTitle").textContent = titulos[seccion]?.[0] ?? "";
+    document.getElementById("topbarSub").textContent   = titulos[seccion]?.[1] ?? "";
+
+    // Ocultar el botón Sincronizar en la sección manual (no aplica)
+    const btnSync = document.getElementById("btnSincronizar");
+    if (btnSync) btnSync.style.display = seccion === "manual" ? "none" : "";
 
     if (seccion === "resenas") cargarResenasAdmin();
-    else cargarPedidosAdmin();
+    else if (seccion === "pedidos") cargarPedidosAdmin();
 }
 
 function actualizarVistaActivaAdmin() {
@@ -452,5 +751,11 @@ Object.assign(window, {
     actualizarVistaActivaAdmin,
     regresarAlSitioPublico,
     filtrarPedidos,
-    buscarEnPedidos
+    buscarEnPedidos,
+    agregarLineaProducto,
+    quitarLineaProducto,
+    limpiarFormularioManual,
+    guardarPedidoManual,
+    eliminarTodosLosPedidos,
+    toggleDireccion
 });

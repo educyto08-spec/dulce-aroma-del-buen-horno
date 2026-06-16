@@ -173,6 +173,8 @@
         .btn-ghost:hover { background: var(--cream); color: var(--text); }
         .btn-danger { background: var(--red); color: #fff; }
         .btn-danger:hover { background: #b91c1c; }
+        .btn-warning { background: var(--amber); color: #fff; }
+        .btn-warning:hover { background: #b45309; }
         .btn-sm { padding: 6px 12px; font-size: .78rem; }
         .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
@@ -226,11 +228,18 @@
             align-items: center;
             gap: 12px;
             margin-bottom: 18px;
+            flex-wrap: wrap;
         }
         .section-head h2 {
             font-size: 1rem;
             font-weight: 700;
             color: var(--text);
+        }
+        .section-head-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         /* ── FILTROS ── */
@@ -304,6 +313,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
         .pedido-estado-dot {
             width: 10px; height: 10px;
@@ -317,6 +327,16 @@
         .dot-entregado { background: #6b7280;      box-shadow: 0 0 0 3px #f3f4f6; }
         .pedido-codigo { font-weight: 800; font-size: .9rem; color: var(--cafe); }
         .pedido-fecha  { margin-left: auto; font-size: .73rem; color: var(--muted); white-space: nowrap; }
+        .tag-manual {
+            font-size: .65rem;
+            background: #f3e8db;
+            color: var(--cafe-dark);
+            border: 1px solid #d4b896;
+            padding: 2px 7px;
+            border-radius: 99px;
+            font-weight: 800;
+            letter-spacing: .3px;
+        }
         .card-pedido-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
         .pedido-cliente-row { display: flex; align-items: center; gap: 10px; }
         .avatar-circle {
@@ -365,7 +385,8 @@
             border-top: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         .pedido-total { font-size: 1.1rem; font-weight: 800; color: var(--text); }
         .pedido-total span { font-size: .72rem; font-weight: 500; color: var(--muted); display: block; }
@@ -390,6 +411,114 @@
             padding: 2px 8px;
             border-radius: 99px;
             font-weight: 700;
+        }
+        .btn-delete-pedido {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 5px 7px;
+            border-radius: 6px;
+            font-size: .85rem;
+            transition: all .15s;
+            flex-shrink: 0;
+        }
+        .btn-delete-pedido:hover { background: var(--red-bg); color: var(--red); }
+
+        /* ── FORMULARIO PEDIDO MANUAL ── */
+        .form-manual-card {
+            background: var(--cream-card);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 28px;
+            margin-bottom: 28px;
+        }
+        .form-manual-title {
+            font-size: .95rem;
+            font-weight: 800;
+            color: var(--cafe-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 20px;
+        }
+        .form-grid.full { grid-template-columns: 1fr; }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .form-group.span2 { grid-column: span 2; }
+        .form-label {
+            font-size: .73rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .7px;
+        }
+        .form-input, .form-select, .form-textarea {
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: .85rem;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--cream);
+            transition: border-color .15s;
+            outline: none;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--cafe);
+            background: #fff;
+        }
+        .form-textarea { resize: vertical; min-height: 80px; }
+
+        /* Líneas de productos manuales */
+        .productos-manual-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .producto-linea {
+            display: grid;
+            grid-template-columns: 1fr 70px 90px 36px;
+            gap: 8px;
+            align-items: center;
+        }
+        .producto-linea input { background: #fff; }
+        .btn-rm-producto {
+            background: none;
+            border: 1.5px solid var(--border);
+            color: var(--muted);
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: .85rem;
+            padding: 7px;
+            transition: all .15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-rm-producto:hover { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+        .form-manual-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .total-preview {
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--cafe);
+            margin-left: auto;
         }
 
         /* ── GRID RESEÑAS ── */
@@ -483,6 +612,9 @@
             .sidebar-brand p, .sidebar-brand h2, .nav-item span, .nav-badge { display: none; }
             .main { margin-left: 60px; }
             .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.span2 { grid-column: span 1; }
+            .producto-linea { grid-template-columns: 1fr 60px 80px 36px; }
         }
         @media (max-width: 600px) {
             .kpi-grid { grid-template-columns: 1fr 1fr; }
@@ -490,6 +622,7 @@
             .topbar { padding: 12px 16px; }
             .filtros-bar { gap: 6px; }
             .search-box input { width: 120px; }
+            .producto-linea { grid-template-columns: 1fr 50px 70px 32px; gap: 5px; }
         }
     </style>
 </head>
@@ -513,6 +646,10 @@
             <i class="fa-solid fa-receipt"></i>
             <span>Pedidos</span>
             <span class="nav-badge" id="badgePedidos">0</span>
+        </button>
+        <button class="nav-item" id="navManual" onclick="cambiarSeccionAdmin('manual', this)">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Pedido manual</span>
         </button>
         <button class="nav-item" id="navResenas" onclick="cambiarSeccionAdmin('resenas', this)">
             <i class="fa-solid fa-star"></i>
@@ -594,6 +731,11 @@
         <div id="seccionPedidos" class="seccion active">
             <div class="section-head">
                 <h2><i class="fa-solid fa-receipt" style="color:var(--cafe);margin-right:6px;"></i>Comandas del horno</h2>
+                <div class="section-head-actions">
+                    <button class="btn btn-danger btn-sm" onclick="eliminarTodosLosPedidos()">
+                        <i class="fa-solid fa-trash"></i> Eliminar todos
+                    </button>
+                </div>
             </div>
 
             <div class="filtros-bar">
@@ -612,6 +754,71 @@
                 <div class="empty-state">
                     <i class="fa-solid fa-fire-burner"></i>
                     <p>Conectando con el horno...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ SECCIÓN PEDIDO MANUAL ══ -->
+        <div id="seccionManual" class="seccion">
+            <div class="form-manual-card">
+                <div class="form-manual-title">
+                    <i class="fa-solid fa-user-pen" style="color:var(--cafe);"></i>
+                    Registrar pedido de cliente sin cuenta
+                </div>
+
+                <!-- Datos del cliente -->
+                <p class="form-label" style="margin-bottom:10px;">Datos del cliente</p>
+                <div class="form-grid" style="margin-bottom:20px;">
+                    <div class="form-group">
+                        <label class="form-label">Nombre completo *</label>
+                        <input class="form-input" id="m_nombre" type="text" placeholder="Ej. María López">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teléfono (opcional)</label>
+                        <input class="form-input" id="m_telefono" type="tel" placeholder="Ej. 442 123 4567">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fecha de recolección *</label>
+                        <input class="form-input" id="m_fecha" type="date">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Horario *</label>
+                        <input class="form-input" id="m_horario" type="text" placeholder="Ej. 10:00 – 11:00">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Método de entrega *</label>
+                        <select class="form-select" id="m_entrega" onchange="toggleDireccion()">
+                            <option value="Recoger en tienda">Recoger en tienda</option>
+                            <option value="Entrega a domicilio">Entrega a domicilio</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="grupoDir" style="display:none;">
+                        <label class="form-label">Dirección de entrega</label>
+                        <input class="form-input" id="m_direccion" type="text" placeholder="Calle, número, colonia...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notas / comentarios</label>
+                        <textarea class="form-textarea" id="m_notas" placeholder="Sin gluten, sin azúcar, mensaje especial..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Productos -->
+                <p class="form-label" style="margin-bottom:10px;">Productos del pedido</p>
+                <div class="productos-manual-lista" id="productosManualLista">
+                    <!-- líneas se agregan dinámicamente -->
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="agregarLineaProducto()" type="button">
+                    <i class="fa-solid fa-plus"></i> Agregar producto
+                </button>
+
+                <div class="form-manual-footer">
+                    <button class="btn btn-ghost" onclick="limpiarFormularioManual()" type="button">
+                        <i class="fa-solid fa-broom"></i> Limpiar
+                    </button>
+                    <button class="btn btn-primary" onclick="guardarPedidoManual()" type="button">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar pedido
+                    </button>
+                    <div class="total-preview" id="totalPreviewManual">Total: $0.00</div>
                 </div>
             </div>
         </div>
