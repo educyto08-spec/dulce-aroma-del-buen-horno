@@ -54,6 +54,7 @@
             height: 100vh;
             z-index: 100;
             overflow: hidden;
+            transition: width .2s;
         }
         .sidebar-brand {
             padding: 24px 20px 20px;
@@ -80,6 +81,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            overflow-y: auto;
         }
         .nav-item {
             display: flex;
@@ -97,9 +99,9 @@
             text-align: left;
             transition: all .15s;
         }
-        .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+        .nav-item:hover { background: rgba(255,255,255,.1); color: #fff; }
         .nav-item.active { background: var(--cafe); color: #fff; }
-        .nav-item i { width: 18px; text-align: center; font-size: .9rem; }
+        .nav-item i { width: 18px; text-align: center; font-size: .9rem; flex-shrink: 0; }
         .nav-badge {
             margin-left: auto;
             background: var(--gold);
@@ -137,6 +139,7 @@
             position: sticky;
             top: 0;
             z-index: 50;
+            box-shadow: 0 1px 4px rgba(44,26,14,.06);
         }
         .topbar-title {
             font-size: 1.05rem;
@@ -149,6 +152,8 @@
             margin-top: 1px;
         }
         .topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+        /* ── BOTONES ── */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -163,12 +168,13 @@
             font-family: inherit;
         }
         .btn-primary { background: var(--cafe); color: #fff; }
-        .btn-primary:hover { background: var(--cafe-dark); }
+        .btn-primary:hover { background: var(--cafe-dark); transform: translateY(-1px); }
         .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
         .btn-ghost:hover { background: var(--cream); color: var(--text); }
         .btn-danger { background: var(--red); color: #fff; }
         .btn-danger:hover { background: #b91c1c; }
         .btn-sm { padding: 6px 12px; font-size: .78rem; }
+        .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
         /* ── CONTENT ── */
         .content { padding: 28px; flex: 1; }
@@ -189,7 +195,9 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            transition: box-shadow .2s;
         }
+        .kpi-card:hover { box-shadow: var(--shadow-lg); }
         .kpi-top {
             display: flex;
             justify-content: space-between;
@@ -204,10 +212,10 @@
             justify-content: center;
             font-size: 1rem;
         }
-        .kpi-icon.cafe   { background: #f3e8db; color: var(--cafe); }
-        .kpi-icon.green  { background: var(--green-bg); color: var(--green); }
-        .kpi-icon.amber  { background: var(--amber-bg); color: var(--amber); }
-        .kpi-icon.blue   { background: var(--blue-bg); color: var(--blue); }
+        .kpi-icon.cafe  { background: #f3e8db; color: var(--cafe); }
+        .kpi-icon.green { background: var(--green-bg); color: var(--green); }
+        .kpi-icon.amber { background: var(--amber-bg); color: var(--amber); }
+        .kpi-icon.blue  { background: var(--blue-bg); color: var(--blue); }
         .kpi-label { font-size: .73rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
         .kpi-value { font-size: 1.65rem; font-weight: 800; color: var(--text); line-height: 1; }
         .kpi-sub { font-size: .75rem; color: var(--muted); }
@@ -224,7 +232,6 @@
             font-weight: 700;
             color: var(--text);
         }
-        .section-head-actions { margin-left: auto; display: flex; gap: 8px; }
 
         /* ── FILTROS ── */
         .filtros-bar {
@@ -259,7 +266,9 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 7px 14px;
+            transition: border-color .15s;
         }
+        .search-box:focus-within { border-color: var(--cafe); }
         .search-box input {
             border: none;
             outline: none;
@@ -286,9 +295,9 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: box-shadow .2s;
+            transition: box-shadow .2s, transform .15s;
         }
-        .card-pedido:hover { box-shadow: var(--shadow-lg); }
+        .card-pedido:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
         .card-pedido-top {
             padding: 14px 16px 10px;
             border-bottom: 1px solid var(--border);
@@ -300,19 +309,16 @@
             width: 10px; height: 10px;
             border-radius: 50%;
             flex-shrink: 0;
+            transition: background .3s;
         }
         .dot-recibido  { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-bg); }
         .dot-horno     { background: var(--blue);  box-shadow: 0 0 0 3px var(--blue-bg); }
         .dot-listo     { background: var(--green); box-shadow: 0 0 0 3px var(--green-bg); }
         .dot-entregado { background: #6b7280;      box-shadow: 0 0 0 3px #f3f4f6; }
         .pedido-codigo { font-weight: 800; font-size: .9rem; color: var(--cafe); }
-        .pedido-fecha  { margin-left: auto; font-size: .73rem; color: var(--muted); }
+        .pedido-fecha  { margin-left: auto; font-size: .73rem; color: var(--muted); white-space: nowrap; }
         .card-pedido-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        .pedido-cliente-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .pedido-cliente-row { display: flex; align-items: center; gap: 10px; }
         .avatar-circle {
             width: 36px; height: 36px;
             border-radius: 50%;
@@ -344,16 +350,16 @@
         .pedido-productos-lista li span:last-child { font-weight: 700; color: var(--cafe); }
         .pedido-entrega-badge {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 8px;
             padding: 8px 10px;
             border-radius: 7px;
             font-size: .78rem;
             font-weight: 600;
         }
-        .entrega-tienda   { background: var(--green-bg);  color: #166534; }
-        .entrega-domicilio { background: var(--blue-bg); color: #1e40af; }
-        .pedido-dir { font-size: .73rem; color: var(--muted); margin-top: 2px; }
+        .entrega-tienda    { background: var(--green-bg); color: #166534; }
+        .entrega-domicilio { background: var(--blue-bg);  color: #1e40af; }
+        .pedido-dir { font-size: .73rem; color: var(--muted); margin-top: 2px; font-weight: 400; }
         .card-pedido-footer {
             padding: 12px 16px;
             border-top: 1px solid var(--border);
@@ -361,11 +367,7 @@
             align-items: center;
             gap: 10px;
         }
-        .pedido-total {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: var(--text);
-        }
+        .pedido-total { font-size: 1.1rem; font-weight: 800; color: var(--text); }
         .pedido-total span { font-size: .72rem; font-weight: 500; color: var(--muted); display: block; }
         .select-estado {
             margin-left: auto;
@@ -391,12 +393,12 @@
         }
 
         /* ── GRID RESEÑAS ── */
-        .grid-reseñas {
+        .grid-resenas {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 18px;
         }
-        .card-reseña {
+        .card-resena {
             background: var(--cream-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -405,25 +407,38 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            transition: box-shadow .2s;
         }
-        .reseña-top { display: flex; align-items: center; gap: 10px; }
-        .reseña-stars { color: var(--gold); font-size: .85rem; }
-        .reseña-stars .fa-star.empty { color: #e5d5c0; }
-        .reseña-fecha { margin-left: auto; font-size: .72rem; color: var(--muted); }
-        .reseña-texto {
+        .card-resena:hover { box-shadow: var(--shadow-lg); }
+        .resena-top { display: flex; align-items: center; gap: 10px; }
+        .resena-stars { color: var(--gold); font-size: .85rem; letter-spacing: 1px; }
+        .resena-stars .vacio { color: #e5d5c0; }
+        .resena-fecha { margin-left: auto; font-size: .72rem; color: var(--muted); }
+        .resena-texto {
             font-size: .88rem;
             color: var(--text);
             font-style: italic;
             line-height: 1.6;
             flex: 1;
         }
-        .reseña-usuario {
+        .resena-usuario {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: .78rem;
             font-weight: 700;
             color: var(--muted);
+        }
+        .resena-calificacion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--amber-bg);
+            color: var(--amber);
+            font-size: .72rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 99px;
         }
 
         /* ── EMPTY STATE ── */
@@ -439,6 +454,23 @@
         /* ── SECCIONES ── */
         .seccion { display: none; }
         .seccion.active { display: block; }
+
+        /* ── LOADING OVERLAY ── */
+        #loadingOverlay {
+            position: fixed; inset: 0;
+            background: rgba(250,246,239,.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            gap: 16px;
+            font-weight: 700;
+            color: var(--cafe);
+            font-size: 1rem;
+        }
+        #loadingOverlay i { font-size: 2.5rem; }
+        #loadingOverlay.oculto { display: none; }
 
         /* ── SCROLLBAR ── */
         ::-webkit-scrollbar { width: 6px; }
@@ -456,10 +488,18 @@
             .kpi-grid { grid-template-columns: 1fr 1fr; }
             .content { padding: 16px; }
             .topbar { padding: 12px 16px; }
+            .filtros-bar { gap: 6px; }
+            .search-box input { width: 120px; }
         }
     </style>
 </head>
 <body>
+
+<!-- ══ LOADING ══ -->
+<div id="loadingOverlay">
+    <i class="fa-solid fa-fire-burner fa-beat"></i>
+    <span>Verificando acceso al horno...</span>
+</div>
 
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
@@ -469,12 +509,12 @@
         <p>Dulce Aroma</p>
     </div>
     <nav class="sidebar-nav">
-        <button class="nav-item active" onclick="cambiarSeccion('pedidos', this)">
+        <button class="nav-item active" id="navPedidos" onclick="cambiarSeccionAdmin('pedidos', this)">
             <i class="fa-solid fa-receipt"></i>
             <span>Pedidos</span>
             <span class="nav-badge" id="badgePedidos">0</span>
         </button>
-        <button class="nav-item" onclick="cambiarSeccion('resenas', this)">
+        <button class="nav-item" id="navResenas" onclick="cambiarSeccionAdmin('resenas', this)">
             <i class="fa-solid fa-star"></i>
             <span>Opiniones</span>
             <span class="nav-badge" id="badgeResenas" style="background:#c9a227;">0</span>
@@ -498,7 +538,7 @@
             <div class="topbar-subtitle" id="topbarSub">Gestiona y actualiza el estado de cada comanda</div>
         </div>
         <div class="topbar-actions">
-            <button class="btn btn-ghost" onclick="actualizarVistaActivaAdmin()">
+            <button class="btn btn-ghost" id="btnSincronizar" onclick="actualizarVistaActivaAdmin()">
                 <i class="fa-solid fa-rotate"></i> Sincronizar
             </button>
         </div>
@@ -557,11 +597,11 @@
             </div>
 
             <div class="filtros-bar">
-                <button class="filtro-chip active" data-filtro="todos" onclick="filtrarPedidos('todos', this)">Todos</button>
-                <button class="filtro-chip" data-filtro="Recibido" onclick="filtrarPedidos('Recibido', this)">🟡 Recibidos</button>
-                <button class="filtro-chip" data-filtro="Horno" onclick="filtrarPedidos('Horno', this)">🔵 En horno</button>
-                <button class="filtro-chip" data-filtro="Listo" onclick="filtrarPedidos('Listo', this)">🟢 Listos</button>
-                <button class="filtro-chip" data-filtro="Entregado" onclick="filtrarPedidos('Entregado', this)">⚫ Entregados</button>
+                <button class="filtro-chip active" data-filtro="todos"      onclick="filtrarPedidos('todos', this)">Todos</button>
+                <button class="filtro-chip" data-filtro="Recibido"          onclick="filtrarPedidos('Recibido', this)">🟡 Recibidos</button>
+                <button class="filtro-chip" data-filtro="Horno"             onclick="filtrarPedidos('Horno', this)">🔵 En horno</button>
+                <button class="filtro-chip" data-filtro="Listo"             onclick="filtrarPedidos('Listo', this)">🟢 Listos</button>
+                <button class="filtro-chip" data-filtro="Entregado"         onclick="filtrarPedidos('Entregado', this)">⚫ Entregados</button>
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="search" id="buscadorPedidos" placeholder="Buscar cliente o código..." oninput="buscarEnPedidos(this.value)">
@@ -571,7 +611,7 @@
             <div id="contenedorPedidosAdmin" class="grid-pedidos">
                 <div class="empty-state">
                     <i class="fa-solid fa-fire-burner"></i>
-                    <p>Conectando con el horno de Firestore...</p>
+                    <p>Conectando con el horno...</p>
                 </div>
             </div>
         </div>
@@ -581,7 +621,7 @@
             <div class="section-head">
                 <h2><i class="fa-solid fa-star" style="color:var(--gold);margin-right:6px;"></i>Opiniones de clientes</h2>
             </div>
-            <div id="contenedorReseñasAdmin" class="grid-reseñas">
+            <div id="contenedorResenasAdmin" class="grid-resenas">
                 <div class="empty-state">
                     <i class="fa-solid fa-star"></i>
                     <p>Cargando opiniones...</p>
@@ -593,245 +633,5 @@
 </div><!-- /main -->
 
 <script type="module" src="js/admin-script.js"></script>
-
-    import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy }
-        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { firebaseConfig }   from "./js/firebase-config.js";
-
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
-
-    // ── Estado global ──
-    let todosLosPedidos  = [];
-    let filtroActivo     = "todos";
-    let busquedaActual   = "";
-
-    // ── Helpers ──
-    function iniciales(nombre = "") {
-        return nombre.trim().split(" ").slice(0, 2).map(w => w[0]?.toUpperCase() || "").join("") || "?";
-    }
-    function formatFecha(ts) {
-        if (!ts) return "—";
-        return new Date(ts).toLocaleDateString("es-MX", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" });
-    }
-    function parseMonto(str) {
-        if (typeof str === "number") return str;
-        return parseFloat(String(str).replace(/[^0-9.]/g, "")) || 0;
-    }
-    function dotClass(estado = "") {
-        if (estado.includes("Horno"))   return "dot-horno";
-        if (estado.includes("Listo") || estado.includes("Entregado")) return "dot-listo";
-        return "dot-recibido";
-    }
-
-    // ── KPIs ──
-    function actualizarKPIs(pedidos) {
-        const hoy = new Date(); hoy.setHours(0,0,0,0);
-        const deHoy = pedidos.filter(p => new Date(p.fechaCreacion) >= hoy);
-        document.getElementById("kpiPedidosHoy").textContent  = deHoy.length;
-        document.getElementById("kpiEnProceso").textContent   = pedidos.filter(p => !p.estado?.includes("Listo") && !p.estado?.includes("Entregado")).length;
-        document.getElementById("kpiEntregados").textContent  = pedidos.filter(p => p.estado?.includes("Listo") || p.estado?.includes("Entregado")).length;
-        const total = pedidos.reduce((s, p) => s + parseMonto(p.total), 0);
-        document.getElementById("kpiVentaTotal").textContent  = "$" + total.toFixed(0);
-        document.getElementById("badgePedidos").textContent   = pedidos.length;
-    }
-
-    // ── Render pedidos ──
-    function renderPedidos(lista) {
-        const c = document.getElementById("contenedorPedidosAdmin");
-        if (!lista.length) {
-            c.innerHTML = `<div class="empty-state"><i class="fa-solid fa-receipt"></i><p>Sin pedidos con ese filtro.</p></div>`;
-            return;
-        }
-        c.innerHTML = lista.map(p => {
-            const ini  = iniciales(p.cliente);
-            const dot  = dotClass(p.estado);
-            const esDom = (p.metodoEntrega || "").toLowerCase().includes("domicilio");
-            const productosHTML = Array.isArray(p.productos)
-                ? p.productos.map(pr => `<li><span>${pr.cantidad}× ${pr.nombre}</span><span>$${(pr.precio * pr.cantidad).toFixed(2)}</span></li>`).join("")
-                : "<li><span>Sin detalle</span></li>";
-            const cuponTag = p.cuponUsado && p.cuponUsado !== "Ninguno"
-                ? `<span class="cupon-tag">🎟 ${p.cuponUsado}</span>` : "";
-
-            return `
-            <div class="card-pedido" id="card-${p._id}">
-                <div class="card-pedido-top">
-                    <span class="pedido-estado-dot ${dot}"></span>
-                    <span class="pedido-codigo">${p.codigoPedido || "#---"}</span>
-                    ${cuponTag}
-                    <span class="pedido-fecha">${formatFecha(p.fechaCreacion)}</span>
-                </div>
-                <div class="card-pedido-body">
-                    <div class="pedido-cliente-row">
-                        <div class="avatar-circle">${ini}</div>
-                        <div>
-                            <div class="pedido-cliente-nombre">${p.cliente || "Cliente"}</div>
-                            <div class="pedido-cliente-meta">📅 ${p.fechaRecoleccion || "—"} · ${p.horarioRecoleccion || "—"}</div>
-                        </div>
-                    </div>
-                    <ul class="pedido-productos-lista">${productosHTML}</ul>
-                    <div class="pedido-entrega-badge ${esDom ? 'entrega-domicilio' : 'entrega-tienda'}">
-                        <i class="fa-solid ${esDom ? 'fa-motorcycle' : 'fa-store'}"></i>
-                        <div>
-                            <div>${p.metodoEntrega || "Recoger en tienda"}</div>
-                            ${esDom && p.direccionEntrega ? `<div class="pedido-dir">${p.direccionEntrega}</div>` : ""}
-                        </div>
-                    </div>
-                </div>
-                <div class="card-pedido-footer">
-                    <div class="pedido-total">
-                        <span>Total</span>${p.total || "$0.00"}
-                    </div>
-                    <select class="select-estado" onchange="window._cambiarEstado('${p._id}', this.value)">
-                        <option ${p.estado === 'Recibido 🥖'            ? 'selected' : ''}>Recibido 🥖</option>
-                        <option ${p.estado === 'En el horno 🔥'         ? 'selected' : ''}>En el horno 🔥</option>
-                        <option ${p.estado === 'Listo para recoger ✅'  ? 'selected' : ''}>Listo para recoger ✅</option>
-                        <option ${p.estado === 'En camino 🏍️'           ? 'selected' : ''}>En camino 🏍️</option>
-                        <option ${p.estado === 'Entregado 🎉'           ? 'selected' : ''}>Entregado 🎉</option>
-                    </select>
-                </div>
-            </div>`;
-        }).join("");
-    }
-
-    // ── Filtrar + buscar ──
-    function aplicarFiltros() {
-        let lista = [...todosLosPedidos];
-        if (filtroActivo !== "todos") lista = lista.filter(p => (p.estado || "").includes(filtroActivo));
-        if (busquedaActual) {
-            const q = busquedaActual.toLowerCase();
-            lista = lista.filter(p =>
-                (p.cliente || "").toLowerCase().includes(q) ||
-                (p.codigoPedido || "").toLowerCase().includes(q)
-            );
-        }
-        renderPedidos(lista);
-    }
-
-    window.filtrarPedidos = (filtro, btn) => {
-        filtroActivo = filtro;
-        document.querySelectorAll(".filtro-chip").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        aplicarFiltros();
-    };
-    window.buscarEnPedidos = (val) => { busquedaActual = val; aplicarFiltros(); };
-
-    // ── Cambiar estado ──
-    window._cambiarEstado = async (id, nuevoEstado) => {
-        try {
-            await updateDoc(doc(db, "pedidos", id), { estado: nuevoEstado });
-            const p = todosLosPedidos.find(x => x._id === id);
-            if (p) p.estado = nuevoEstado;
-            actualizarKPIs(todosLosPedidos);
-            // Actualizar solo el dot sin re-renderizar todo
-            const card = document.getElementById("card-" + id);
-            if (card) {
-                const dot = card.querySelector(".pedido-estado-dot");
-                dot.className = "pedido-estado-dot " + dotClass(nuevoEstado);
-            }
-            Swal.fire({ toast: true, position: "top-end", icon: "success", title: "Estado actualizado", showConfirmButton: false, timer: 1600 });
-        } catch (e) {
-            Swal.fire("Error", "No se pudo actualizar el estado.", "error");
-        }
-    };
-
-    // ── Cargar pedidos ──
-    async function cargarPedidos() {
-        document.getElementById("contenedorPedidosAdmin").innerHTML =
-            `<div class="empty-state"><i class="fa-solid fa-rotate fa-spin"></i><p>Cargando pedidos...</p></div>`;
-        try {
-            const snap = await getDocs(query(collection(db, "pedidos"), orderBy("fechaCreacion", "desc")));
-            todosLosPedidos = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
-            actualizarKPIs(todosLosPedidos);
-            aplicarFiltros();
-        } catch (e) {
-            document.getElementById("contenedorPedidosAdmin").innerHTML =
-                `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Error al cargar. Revisa tu conexión.</p></div>`;
-        }
-    }
-
-    // ── Render reseñas ──
-    async function cargarResenas() {
-        const c = document.getElementById("contenedorReseñasAdmin");
-        c.innerHTML = `<div class="empty-state"><i class="fa-solid fa-rotate fa-spin"></i><p>Cargando opiniones...</p></div>`;
-        try {
-            const snap = await getDocs(query(collection(db, "resenas"), orderBy("fecha", "desc")));
-            document.getElementById("badgeResenas").textContent = snap.size;
-            if (snap.empty) {
-                c.innerHTML = `<div class="empty-state"><i class="fa-solid fa-star"></i><p>Aún no hay reseñas.</p></div>`;
-                return;
-            }
-            c.innerHTML = snap.docs.map(d => {
-                const r = d.data();
-                const estrellas = Array.from({length: 5}, (_, i) =>
-                    `<i class="fa-solid fa-star${i < (r.calificacion || 5) ? '' : ' empty'}"></i>`
-                ).join("");
-                return `
-                <div class="card-reseña">
-                    <div class="reseña-top">
-                        <div class="reseña-stars">${estrellas}</div>
-                        <span class="reseña-fecha">${formatFecha(r.fecha)}</span>
-                    </div>
-                    <p class="reseña-texto">"${r.texto || ""}"</p>
-                    <div class="reseña-usuario">
-                        <i class="fa-solid fa-circle-user"></i> ${r.usuario || "Anónimo"}
-                    </div>
-                    <button class="btn btn-danger btn-sm" onclick="window._eliminarResena('${d.id}', this)">
-                        <i class="fa-solid fa-trash"></i> Eliminar
-                    </button>
-                </div>`;
-            }).join("");
-        } catch (e) {
-            c.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Error al cargar reseñas.</p></div>`;
-        }
-    }
-
-    window._eliminarResena = async (id, btn) => {
-        const result = await Swal.fire({
-            title: "¿Eliminar esta reseña?",
-            text: "Esta acción no se puede deshacer.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#dc2626",
-            cancelButtonColor: "#7b5533",
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "Cancelar"
-        });
-        if (!result.isConfirmed) return;
-        try {
-            await deleteDoc(doc(db, "resenas", id));
-            btn.closest(".card-reseña").remove();
-            Swal.fire({ toast: true, position: "top-end", icon: "success", title: "Reseña eliminada", showConfirmButton: false, timer: 1600 });
-        } catch (e) {
-            Swal.fire("Error", "No se pudo eliminar.", "error");
-        }
-    };
-
-    // ── Navegación ──
-    window.cambiarSeccion = (seccion, btn) => {
-        document.querySelectorAll(".seccion").forEach(s => s.classList.remove("active"));
-        document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
-        document.getElementById("seccion" + seccion.charAt(0).toUpperCase() + seccion.slice(1)).classList.add("active");
-        btn.classList.add("active");
-        const titulos = {
-            pedidos:  ["Pedidos recibidos",  "Gestiona y actualiza el estado de cada comanda"],
-            resenas:  ["Opiniones de clientes", "Modera las reseñas publicadas en la tienda"]
-        };
-        document.getElementById("topbarTitle").textContent = titulos[seccion][0];
-        document.getElementById("topbarSub").textContent   = titulos[seccion][1];
-        if (seccion === "resenas") cargarResenas();
-    };
-
-    window.actualizarVistaActivaAdmin = () => {
-        cargarPedidos();
-        Swal.fire({ toast: true, position: "top-end", icon: "info", title: "Sincronizando...", showConfirmButton: false, timer: 1200 });
-    };
-
-    window.regresarAlSitioPublico = () => { window.location.href = "index.html"; };
-
-    // ── Init ──
-    cargarPedidos();
-</script>
 </body>
 </html>
