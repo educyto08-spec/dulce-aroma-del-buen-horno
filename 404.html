@@ -3,61 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página no encontrada - Dulce Aroma del Buen Horno</title>
+    <title>Página no encontrada — Dulce Aroma del Buen Horno</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --cafe: #7b5533;
-            --cafe-oscuro: #4a3220;
-            --crema: #faf5eb;
-            --borde: #e5d5c0;
+            --cafe:      #7b5533;
+            --cafe-dark: #4a3220;
+            --cafe-light:#a07850;
+            --cream:     #faf6ef;
+            --cream-2:   #f0e8da;
+            --gold:      #c9a227;
+            --text:      #2c1a0e;
+            --muted:     #8a7060;
+            --border:    #e8d9c4;
         }
-        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            margin: 0; min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #f5ede0 0%, #ede4d4 100%);
-            color: #3d2914; padding: 24px;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--cream);
+            color: var(--text);
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
         }
+
+        /* Fondo decorativo */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 55% 45% at 85% 15%, rgba(201,162,39,.12) 0%, transparent 65%),
+                radial-gradient(ellipse 45% 55% at 5% 85%, rgba(123,85,51,.09) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        /* Números flotantes decorativos */
+        .deco-nums {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .deco-nums span {
+            position: absolute;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(6rem, 18vw, 16rem);
+            font-weight: 700;
+            color: var(--cafe);
+            opacity: .04;
+            line-height: 1;
+            user-select: none;
+        }
+        .deco-nums span:nth-child(1) { top: -4%;  left: -3%; }
+        .deco-nums span:nth-child(2) { top: -4%;  right: -3%; }
+        .deco-nums span:nth-child(3) { bottom: -4%; left: 30%; }
+
+        /* Card principal */
         .card {
-            background: #fdfaf4;
-            border: 1px solid var(--borde);
-            border-radius: 8px;
-            padding: 48px 40px;
-            max-width: 420px;
+            position: relative;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 52px 44px 44px;
+            max-width: 440px;
+            width: 100%;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(61, 41, 20, 0.08);
+            box-shadow:
+                0 4px 24px rgba(44,26,14,.07),
+                0 1px 4px rgba(44,26,14,.04);
+            animation: slideUp .45s cubic-bezier(.22,.9,.36,1) both;
         }
-        .icono { font-size: 3rem; margin-bottom: 16px; }
-        h1 { font-size: 1.5rem; margin: 0 0 8px; color: var(--cafe); }
-        p { margin: 0 0 24px; line-height: 1.6; color: #8b7355; font-size: 0.95rem; }
-        a {
-            display: inline-block;
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Ícono con anillo */
+        .icon-ring {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f3e8db, var(--cream-2));
+            border: 1.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.6rem;
+            margin: 0 auto 28px;
+            position: relative;
+        }
+        .icon-ring::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px dashed rgba(123,85,51,.2);
+        }
+
+        /* Código 404 */
+        .codigo-404 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5rem;
+            font-weight: 700;
+            color: var(--cafe);
+            line-height: 1;
+            margin-bottom: 4px;
+            letter-spacing: -2px;
+        }
+
+        /* Etiqueta */
+        .etiqueta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f3e8db;
+            color: var(--cafe);
+            font-size: .7rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 99px;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .etiqueta i { font-size: .68rem; color: var(--gold); }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--text);
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        p {
+            font-size: .88rem;
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        /* Botones */
+        .btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: .85rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .15s;
+        }
+        .btn-primary {
             background: var(--cafe);
             color: white;
-            text-decoration: none;
-            padding: 14px 32px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            transition: background 0.2s;
         }
-        a:hover { background: var(--cafe-oscuro); }
-        .codigo { font-size: 4rem; font-weight: 800; color: var(--cafe); opacity: 0.25; line-height: 1; margin-bottom: 8px; }
+        .btn-primary:hover { background: var(--cafe-dark); transform: translateY(-1px); }
+        .btn-secondary {
+            background: transparent;
+            color: var(--cafe);
+            border: 1.5px solid var(--border);
+        }
+        .btn-secondary:hover { background: var(--cream); }
+
+        /* Divisor */
+        .divider {
+            margin: 28px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: .72rem;
+            color: var(--border);
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Links rápidos */
+        .quick-links {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .quick-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--cafe-light);
+            font-size: .75rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: background .12s;
+        }
+        .quick-link:hover { background: #f3e8db; color: var(--cafe); }
+        .quick-link i { font-size: .7rem; }
+
+        @media (max-width: 480px) {
+            .card { padding: 40px 24px 32px; }
+            .codigo-404 { font-size: 3.5rem; }
+        }
     </style>
 </head>
 <body>
+
+<!-- Números decorativos de fondo -->
+<div class="deco-nums" aria-hidden="true">
+    <span>4</span>
+    <span>4</span>
+    <span>0</span>
+</div>
+
+<main>
     <div class="card">
-        <div class="codigo">404</div>
-        <div class="icono" aria-hidden="true">🥖</div>
-        <h1>Esta página no está en el horno</h1>
-        <p>La ruta que buscas no existe o fue movida. Vuelve a nuestra tienda y elige tu pan favorito.</p>
-        <a href="index.html">Volver al catálogo</a>
+
+        <div class="icon-ring" aria-hidden="true">🥖</div>
+
+        <div class="codigo-404" aria-label="Error 404">404</div>
+
+        <div class="etiqueta">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            Página no encontrada
+        </div>
+
+        <h1>Este pan ya salió del horno</h1>
+
+        <p>
+            La página que buscas no existe, fue movida o ya no está disponible.
+            Vuelve a la tienda y elige lo que más se te antoje.
+        </p>
+
+        <div class="btns">
+            <a href="index.html" class="btn btn-primary">
+                <i class="fa-solid fa-house" aria-hidden="true"></i>
+                Ir al inicio
+            </a>
+            <a href="index.html#productos" class="btn btn-secondary">
+                <i class="fa-solid fa-bread-slice" aria-hidden="true"></i>
+                Ver el catálogo
+            </a>
+        </div>
+
+        <div class="divider">o ir directo a</div>
+
+        <nav class="quick-links" aria-label="Accesos rápidos">
+            <a href="index.html#pedido" class="quick-link">
+                <i class="fa-solid fa-receipt" aria-hidden="true"></i> Pedidos
+            </a>
+            <a href="index.html#nosotros" class="quick-link">
+                <i class="fa-solid fa-store" aria-hidden="true"></i> Nosotros
+            </a>
+            <a href="https://wa.me/529223773794" class="quick-link" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
+            </a>
+        </nav>
+
     </div>
+</main>
+
 </body>
 </html>
