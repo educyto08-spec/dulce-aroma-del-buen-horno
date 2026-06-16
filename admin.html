@@ -478,7 +478,79 @@
             border-color: var(--cafe);
             background: #fff;
         }
+        .form-input[readonly] {
+            background: #f5f0e8;
+            color: var(--muted);
+            cursor: default;
+            border-color: #ddd;
+        }
         .form-textarea { resize: vertical; min-height: 80px; }
+
+        /* ─ Chip de fecha/hora automática ─ */
+        .auto-datetime-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+            border: 1.5px solid #a5d6a7;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: .82rem;
+            color: #1b5e20;
+            font-weight: 600;
+        }
+        .auto-datetime-banner i { font-size: 1rem; color: var(--green); }
+        .auto-datetime-values {
+            display: flex;
+            gap: 16px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+        .auto-dt-pill {
+            background: #fff;
+            border: 1px solid #a5d6a7;
+            border-radius: 99px;
+            padding: 4px 12px;
+            font-size: .8rem;
+            font-weight: 700;
+            color: #166534;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ─ Entrega rápida chips ─ */
+        .entrega-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .entrega-chip {
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            background: #fff;
+            transition: all .15s;
+            font-weight: 600;
+            font-size: .82rem;
+            color: var(--text);
+        }
+        .entrega-chip input[type="radio"] { display: none; }
+        .entrega-chip i { font-size: 1.1rem; color: var(--muted); transition: color .15s; }
+        .entrega-chip.selected {
+            border-color: var(--cafe);
+            background: #fdf0e0;
+            color: var(--cafe-dark);
+        }
+        .entrega-chip.selected i { color: var(--cafe); }
+        .entrega-chip small { display: block; font-size: .7rem; font-weight: 400; color: var(--muted); margin-top: 1px; }
 
         /* — Selector de productos del catálogo — */
         .catalogo-selector-header {
@@ -573,6 +645,13 @@
         }
 
         /* — Resumen del pedido seleccionado — */
+        .resumen-box {
+            background: var(--cream);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 6px;
+        }
         .pedido-resumen-tabla {
             width: 100%;
             border-collapse: collapse;
@@ -693,29 +772,7 @@
             border: 1.5px solid #93c5fd;
         }
 
-        /* — Sección estado automático — */
-        .estado-automatico-banner {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #e8f5e9;
-            border: 1.5px solid #a5d6a7;
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-top: 16px;
-            font-size: .8rem;
-            color: #1b5e20;
-            font-weight: 600;
-        }
-        .estado-automatico-banner i { font-size: .9rem; }
-        .estado-auto-toggle {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: .78rem;
-        }
-        /* Toggle switch */
+        /* — Toggle switch — */
         .switch {
             position: relative;
             display: inline-block;
@@ -743,6 +800,29 @@
         .switch input:checked + .slider { background-color: var(--green); }
         .switch input:checked + .slider:before { transform: translateX(16px); }
 
+        /* — Estado automático banner — */
+        .estado-automatico-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #e8f5e9;
+            border: 1.5px solid #a5d6a7;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 16px;
+            font-size: .8rem;
+            color: #1b5e20;
+            font-weight: 600;
+        }
+        .estado-automatico-banner i { font-size: .9rem; }
+        .estado-auto-toggle {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .78rem;
+        }
+
         .form-manual-footer {
             display: flex;
             gap: 10px;
@@ -750,6 +830,33 @@
             flex-wrap: wrap;
             align-items: center;
         }
+
+        /* — Divider — */
+        .form-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+        .form-section-label {
+            font-size: .73rem;
+            font-weight: 800;
+            color: var(--cafe);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        /* — Sin productos placeholder — */
+        .catalogo-empty-hint {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--muted);
+        }
+        .catalogo-empty-hint i { font-size: 2rem; opacity: .3; display: block; margin-bottom: 8px; }
 
         /* ── GRID RESEÑAS ── */
         .grid-resenas {
@@ -969,11 +1076,11 @@
             </div>
 
             <div class="filtros-bar">
-                <button class="filtro-chip active" data-filtro="todos"      onclick="filtrarPedidos('todos', this)">Todos</button>
-                <button class="filtro-chip" data-filtro="Recibido"          onclick="filtrarPedidos('Recibido', this)">🟡 Recibidos</button>
-                <button class="filtro-chip" data-filtro="Horno"             onclick="filtrarPedidos('Horno', this)">🔵 En horno</button>
-                <button class="filtro-chip" data-filtro="Listo"             onclick="filtrarPedidos('Listo', this)">🟢 Listos</button>
-                <button class="filtro-chip" data-filtro="Entregado"         onclick="filtrarPedidos('Entregado', this)">⚫ Entregados</button>
+                <button class="filtro-chip active" data-filtro="todos"   onclick="filtrarPedidos('todos', this)">Todos</button>
+                <button class="filtro-chip" data-filtro="Recibido"       onclick="filtrarPedidos('Recibido', this)">🟡 Recibidos</button>
+                <button class="filtro-chip" data-filtro="Horno"          onclick="filtrarPedidos('Horno', this)">🔵 En horno</button>
+                <button class="filtro-chip" data-filtro="Listo"          onclick="filtrarPedidos('Listo', this)">🟢 Listos</button>
+                <button class="filtro-chip" data-filtro="Entregado"      onclick="filtrarPedidos('Entregado', this)">⚫ Entregados</button>
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="search" id="buscadorPedidos" placeholder="Buscar cliente o código..." oninput="buscarEnPedidos(this.value)">
@@ -996,8 +1103,18 @@
                     Registrar pedido de cliente en mostrador
                 </div>
 
-                <!-- Datos del cliente -->
-                <p class="form-label" style="margin-bottom:10px;">Datos del cliente</p>
+                <!-- ── Fecha y hora automática ── -->
+                <div class="auto-datetime-banner" id="autoDatetimeBanner">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Fecha y hora registradas automáticamente al guardar</span>
+                    <div class="auto-datetime-values">
+                        <div class="auto-dt-pill"><i class="fa-regular fa-calendar"></i> <span id="displayFechaAuto">—</span></div>
+                        <div class="auto-dt-pill"><i class="fa-regular fa-clock"></i> <span id="displayHoraAuto">—</span></div>
+                    </div>
+                </div>
+
+                <!-- ── Datos del cliente ── -->
+                <div class="form-section-label"><i class="fa-solid fa-user"></i> Datos del cliente</div>
                 <div class="form-grid" style="margin-bottom:20px;">
                     <div class="form-group">
                         <label class="form-label">Nombre completo *</label>
@@ -1007,63 +1124,72 @@
                         <label class="form-label">Teléfono (opcional)</label>
                         <input class="form-input" id="m_telefono" type="tel" placeholder="Ej. 442 123 4567">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Fecha de entrega *</label>
-                        <input class="form-input" id="m_fecha" type="date">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Horario *</label>
-                        <input class="form-input" id="m_horario" type="text" placeholder="Ej. 10:00 – 11:00">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Método de entrega *</label>
-                        <select class="form-select" id="m_entrega" onchange="toggleDireccion()">
-                            <option value="Recoger en tienda">Recoger en tienda</option>
-                            <option value="Entrega a domicilio">Entrega a domicilio</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="grupoDir" style="display:none;">
-                        <label class="form-label">Dirección de entrega</label>
-                        <input class="form-input" id="m_direccion" type="text" placeholder="Calle, número, colonia...">
-                    </div>
                     <div class="form-group span2">
                         <label class="form-label">Notas / comentarios</label>
-                        <textarea class="form-textarea" id="m_notas" placeholder="Sin gluten, sin azúcar, mensaje especial..."></textarea>
+                        <textarea class="form-textarea" id="m_notas" placeholder="Sin gluten, mensaje especial, personalización..."></textarea>
                     </div>
                 </div>
 
-                <!-- ══ SELECTOR DE PRODUCTOS DEL CATÁLOGO ══ -->
-                <div style="margin-bottom: 6px;">
-                    <div class="catalogo-selector-header">
-                        <p class="form-label">🥐 Elige los panes del catálogo</p>
-                        <div class="catalogo-search">
-                            <i class="fa-solid fa-magnifying-glass" style="color:var(--muted);font-size:.78rem;"></i>
-                            <input type="search" id="buscarPanCatalogo" placeholder="Buscar pan..." oninput="filtrarCatalogoManual(this.value)">
+                <!-- ── Método de entrega ── -->
+                <div class="form-section-label"><i class="fa-solid fa-truck"></i> Tipo de entrega</div>
+                <div class="entrega-chips" style="margin-bottom:16px;" id="entregaChipsGroup">
+                    <label class="entrega-chip selected" id="chipTienda">
+                        <input type="radio" name="m_entrega_radio" value="Recoger en tienda" checked>
+                        <i class="fa-solid fa-store"></i>
+                        <div>
+                            <strong>En mostrador</strong>
+                            <small>Cliente presente · Sin costo</small>
                         </div>
-                    </div>
-
-                    <!-- Filtro por categoría -->
-                    <div id="filtrosCatManual" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-                        <button class="filtro-chip active" data-cat="todos" onclick="filtrarCatManual('todos',this)">Todos</button>
-                        <button class="filtro-chip" data-cat="combos" onclick="filtrarCatManual('combos',this)">Combos</button>
-                        <button class="filtro-chip" data-cat="pan-dulce" onclick="filtrarCatManual('pan-dulce',this)">Pan dulce</button>
-                        <button class="filtro-chip" data-cat="donas" onclick="filtrarCatManual('donas',this)">Donas</button>
-                        <button class="filtro-chip" data-cat="cremas" onclick="filtrarCatManual('cremas',this)">Cremas</button>
-                        <button class="filtro-chip" data-cat="pasteles" onclick="filtrarCatManual('pasteles',this)">Pasteles</button>
-                        <button class="filtro-chip" data-cat="tradicional" onclick="filtrarCatManual('tradicional',this)">Tradicional</button>
-                    </div>
-
-                    <!-- Grid de panes -->
-                    <div class="catalogo-grid" id="catalogoManualGrid">
-                        <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">
-                            <i class="fa-solid fa-spinner fa-spin"></i> Cargando catálogo...
+                    </label>
+                    <label class="entrega-chip" id="chipDomicilio">
+                        <input type="radio" name="m_entrega_radio" value="Entrega a domicilio">
+                        <i class="fa-solid fa-motorcycle"></i>
+                        <div>
+                            <strong>A domicilio</strong>
+                            <small>+$35 MXN · requiere dirección</small>
                         </div>
+                    </label>
+                </div>
+
+                <!-- Dirección solo si domicilio -->
+                <div class="form-group" id="grupoDir" style="display:none;margin-bottom:16px;">
+                    <label class="form-label">Dirección de entrega *</label>
+                    <input class="form-input" id="m_direccion" type="text" placeholder="Calle, número, colonia, referencias...">
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- ── Catálogo de panes ── -->
+                <div class="form-section-label"><i class="fa-solid fa-bread-slice"></i> Elige los panes del catálogo</div>
+
+                <div class="catalogo-selector-header">
+                    <div class="catalogo-search">
+                        <i class="fa-solid fa-magnifying-glass" style="color:var(--muted);font-size:.78rem;"></i>
+                        <input type="search" id="buscarPanCatalogo" placeholder="Buscar pan..." oninput="filtrarCatalogoManual(this.value)">
+                    </div>
+                </div>
+
+                <!-- Filtro por categoría -->
+                <div id="filtrosCatManual" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                    <button class="filtro-chip active" data-cat="todos" onclick="filtrarCatManual('todos',this)">Todos</button>
+                    <button class="filtro-chip" data-cat="combos" onclick="filtrarCatManual('combos',this)">Combos</button>
+                    <button class="filtro-chip" data-cat="pan-dulce" onclick="filtrarCatManual('pan-dulce',this)">Pan dulce</button>
+                    <button class="filtro-chip" data-cat="donas" onclick="filtrarCatManual('donas',this)">Donas</button>
+                    <button class="filtro-chip" data-cat="cremas" onclick="filtrarCatManual('cremas',this)">Cremas</button>
+                    <button class="filtro-chip" data-cat="pasteles" onclick="filtrarCatManual('pasteles',this)">Pasteles</button>
+                    <button class="filtro-chip" data-cat="tradicional" onclick="filtrarCatManual('tradicional',this)">Tradicional</button>
+                </div>
+
+                <!-- Grid de panes -->
+                <div class="catalogo-grid" id="catalogoManualGrid">
+                    <div class="catalogo-empty-hint" style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Cargando catálogo...
                     </div>
                 </div>
 
                 <!-- Resumen de productos seleccionados -->
-                <div id="resumenPedidoManual" style="margin-bottom:6px;display:none;">
-                    <p class="form-label" style="margin-bottom:8px;">Resumen del pedido</p>
+                <div id="resumenPedidoManual" class="resumen-box" style="display:none;">
+                    <div class="form-section-label" style="margin-bottom:10px;"><i class="fa-solid fa-list-check"></i> Resumen del pedido</div>
                     <table class="pedido-resumen-tabla">
                         <thead>
                             <tr>
@@ -1073,8 +1199,7 @@
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody id="resumenPedidoBody">
-                        </tbody>
+                        <tbody id="resumenPedidoBody"></tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="2" style="font-weight:700;font-size:.85rem;padding-top:10px;">Total del pedido</td>
@@ -1085,7 +1210,7 @@
                     </table>
                 </div>
 
-                <!-- ══ CALCULADORA DE CAMBIO ══ -->
+                <!-- ── Calculadora de cambio ── -->
                 <div class="cambio-card">
                     <div class="cambio-card-title">
                         <i class="fa-solid fa-coins"></i> Calculadora de cambio
@@ -1107,7 +1232,7 @@
                     </div>
                 </div>
 
-                <!-- ══ ESTADO AUTOMÁTICO ══ -->
+                <!-- ── Estado automático ── -->
                 <div class="estado-automatico-banner">
                     <i class="fa-solid fa-circle-check"></i>
                     <span>Los pedidos manuales se marcan como <strong>Entregado 🎉</strong> automáticamente al guardar, ya que el cliente está presente en caja.</span>
@@ -1124,7 +1249,8 @@
                     <button class="btn btn-ghost" onclick="limpiarFormularioManual()" type="button">
                         <i class="fa-solid fa-broom"></i> Limpiar
                     </button>
-                    <button class="btn btn-primary" onclick="guardarPedidoManual()" type="button">
+                    <!-- FIX: llama a guardarPedidoManualNuevo que usa el catálogo -->
+                    <button class="btn btn-primary" onclick="guardarPedidoManualNuevo()" type="button" id="btnGuardarManual">
                         <i class="fa-solid fa-floppy-disk"></i> Guardar pedido
                     </button>
                 </div>
@@ -1152,35 +1278,47 @@
 // CATÁLOGO MANUAL — integración con PRODUCTOS_CATALOGO
 // ══════════════════════════════════════════════════════════════════
 
-// Mapa de cantidad seleccionada por producto: { id: cantidad }
-let seleccionManual = {};
+let seleccionManual   = {};
 let catalogoManualFull = [];
-let catActivaManual = "todos";
-let busquedaManual = "";
+let catActivaManual   = "todos";
+let busquedaManual    = "";
 
 // Importar catálogo del sitio principal
 import { PRODUCTOS_CATALOGO } from "./js/productos.js";
 
+// ─ Actualizar reloj en tiempo real ─
+function actualizarRelojAuto() {
+    const ahora = new Date();
+    const opcionesFecha = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+    const opcionesHora  = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+
+    const elFecha = document.getElementById("displayFechaAuto");
+    const elHora  = document.getElementById("displayHoraAuto");
+    if (elFecha) elFecha.textContent = ahora.toLocaleDateString("es-MX", opcionesFecha);
+    if (elHora)  elHora.textContent  = ahora.toLocaleTimeString("es-MX", opcionesHora);
+}
+
+// ─ Chips de método de entrega ─
+function configurarEntregaChips() {
+    document.querySelectorAll(".entrega-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            document.querySelectorAll(".entrega-chip").forEach(c => c.classList.remove("selected"));
+            chip.classList.add("selected");
+            const val = chip.querySelector("input[type=radio]").value;
+            const grupoDir = document.getElementById("grupoDir");
+            if (grupoDir) grupoDir.style.display = val.includes("domicilio") ? "flex" : "none";
+        });
+    });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
     catalogoManualFull = PRODUCTOS_CATALOGO;
     renderizarCatalogoManual();
+    configurarEntregaChips();
 
-    // Fecha por defecto = hoy
-    const hoy = new Date();
-    const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth()+1).padStart(2,"0");
-    const dd = String(hoy.getDate()).padStart(2,"0");
-    const inputFecha = document.getElementById("m_fecha");
-    if (inputFecha) {
-        inputFecha.value = `${yyyy}-${mm}-${dd}`;
-        inputFecha.setAttribute("min", `${yyyy}-${mm}-${dd}`);
-    }
-    const inputHorario = document.getElementById("m_horario");
-    if (inputHorario && !inputHorario.value) {
-        const h = hoy.getHours();
-        const m = hoy.getMinutes();
-        inputHorario.value = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
-    }
+    // Reloj en tiempo real
+    actualizarRelojAuto();
+    setInterval(actualizarRelojAuto, 1000);
 });
 
 function renderizarCatalogoManual() {
@@ -1195,14 +1333,14 @@ function renderizarCatalogoManual() {
     if (busquedaManual.trim()) {
         const q = busquedaManual.toLowerCase();
         lista = lista.filter(p =>
-            (p.nombre||"").toLowerCase().includes(q) ||
-            (p.descripcion||"").toLowerCase().includes(q)
+            (p.nombre || "").toLowerCase().includes(q) ||
+            (p.descripcion || "").toLowerCase().includes(q)
         );
     }
 
     if (!lista.length) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px;">
-            <i class="fa-solid fa-bread-slice" style="font-size:1.5rem;opacity:.3;display:block;margin-bottom:8px;"></i>
+        grid.innerHTML = `<div class="catalogo-empty-hint">
+            <i class="fa-solid fa-bread-slice"></i>
             Sin resultados para este filtro
         </div>`;
         return;
@@ -1211,10 +1349,10 @@ function renderizarCatalogoManual() {
     grid.innerHTML = "";
     lista.forEach(p => {
         const agotado = p.disponible === false;
-        const cant = seleccionManual[p.id] || 0;
+        const cant    = seleccionManual[p.id] || 0;
 
         const card = document.createElement("button");
-        card.type = "button";
+        card.type      = "button";
         card.className = "pan-card" + (cant > 0 ? " seleccionado" : "") + (agotado ? " agotado" : "");
         card.dataset.id = p.id;
         card.title = agotado ? "No disponible" : `Agregar ${p.nombre}`;
@@ -1239,10 +1377,10 @@ function togglePanManual(p) {
 }
 
 function actualizarResumenManual() {
-    const tbody = document.getElementById("resumenPedidoBody");
+    const tbody      = document.getElementById("resumenPedidoBody");
     const resumenDiv = document.getElementById("resumenPedidoManual");
-    const totalEl = document.getElementById("totalPedidoManualValor");
-    const cambioTotalDisplay = document.getElementById("cambioTotalDisplay");
+    const totalEl    = document.getElementById("totalPedidoManualValor");
+    const cambioDisp = document.getElementById("cambioTotalDisplay");
     if (!tbody || !resumenDiv || !totalEl) return;
 
     const idsConCantidad = Object.keys(seleccionManual).filter(id => seleccionManual[id] > 0);
@@ -1250,7 +1388,7 @@ function actualizarResumenManual() {
     if (!idsConCantidad.length) {
         resumenDiv.style.display = "none";
         totalEl.textContent = "$0.00";
-        if (cambioTotalDisplay) cambioTotalDisplay.textContent = "$0.00";
+        if (cambioDisp) cambioDisp.textContent = "$0.00";
         calcularCambio();
         return;
     }
@@ -1260,9 +1398,9 @@ function actualizarResumenManual() {
     let total = 0;
 
     idsConCantidad.forEach(id => {
-        const prod = catalogoManualFull.find(p => p.id == id);
+        const prod = catalogoManualFull.find(p => String(p.id) === String(id));
         if (!prod) return;
-        const cant = seleccionManual[id];
+        const cant     = seleccionManual[id];
         const subtotal = Number(prod.precio) * cant;
         total += subtotal;
 
@@ -1287,7 +1425,7 @@ function actualizarResumenManual() {
     });
 
     totalEl.textContent = `$${total.toFixed(2)}`;
-    if (cambioTotalDisplay) cambioTotalDisplay.textContent = `$${total.toFixed(2)}`;
+    if (cambioDisp) cambioDisp.textContent = `$${total.toFixed(2)}`;
     calcularCambio();
 }
 
@@ -1321,14 +1459,13 @@ window.filtrarCatManual = function(cat, btn) {
 // CALCULADORA DE CAMBIO
 // ══════════════════════════════════════════════════════════════════
 window.calcularCambio = function() {
-    const totalEl = document.getElementById("totalPedidoManualValor");
-    const pagoEl = document.getElementById("pagoCon");
+    const totalEl  = document.getElementById("totalPedidoManualValor");
+    const pagoEl   = document.getElementById("pagoCon");
     const resultEl = document.getElementById("cambioResultado");
     if (!totalEl || !pagoEl || !resultEl) return;
 
-    const totalStr = totalEl.textContent.replace(/[^0-9.]/g,"");
-    const total = parseFloat(totalStr) || 0;
-    const pago = parseFloat(pagoEl.value) || 0;
+    const total = parseFloat((totalEl.textContent || "0").replace(/[^0-9.]/g, "")) || 0;
+    const pago  = parseFloat(pagoEl.value) || 0;
 
     if (!pago && total > 0) {
         resultEl.textContent = "—";
@@ -1351,24 +1488,31 @@ window.calcularCambio = function() {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// EXPONER limpiarFormularioManual con el nuevo flujo
+// LIMPIAR FORMULARIO
 // ══════════════════════════════════════════════════════════════════
 window.limpiarFormularioManual = function() {
-    ["m_nombre","m_telefono","m_horario","m_notas","m_direccion"].forEach(id => {
+    ["m_nombre", "m_telefono", "m_notas", "m_direccion"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = "";
     });
-    const sel = document.getElementById("m_entrega");
-    if (sel) sel.value = "Recoger en tienda";
-    if (typeof toggleDireccion === "function") toggleDireccion();
 
-    seleccionManual = {};
-    busquedaManual = "";
-    catActivaManual = "todos";
-    document.querySelectorAll("#filtrosCatManual .filtro-chip").forEach((b,i) => {
-        b.classList.toggle("active", i===0);
+    // Restablecer chip de entrega a "Tienda"
+    document.querySelectorAll(".entrega-chip").forEach(c => c.classList.remove("selected"));
+    const chipTienda = document.getElementById("chipTienda");
+    if (chipTienda) chipTienda.classList.add("selected");
+    const radioTienda = chipTienda?.querySelector("input[type=radio]");
+    if (radioTienda) radioTienda.checked = true;
+    const grupoDir = document.getElementById("grupoDir");
+    if (grupoDir) grupoDir.style.display = "none";
+
+    seleccionManual  = {};
+    busquedaManual   = "";
+    catActivaManual  = "todos";
+    document.querySelectorAll("#filtrosCatManual .filtro-chip").forEach((b, i) => {
+        b.classList.toggle("active", i === 0);
     });
-    document.getElementById("buscarPanCatalogo").value = "";
+    const buscarInput = document.getElementById("buscarPanCatalogo");
+    if (buscarInput) buscarInput.value = "";
     renderizarCatalogoManual();
     actualizarResumenManual();
 
@@ -1378,81 +1522,96 @@ window.limpiarFormularioManual = function() {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// GUARDAR PEDIDO MANUAL (con estado automático)
+// GUARDAR PEDIDO MANUAL — función principal con fecha/hora auto
 // ══════════════════════════════════════════════════════════════════
 window.guardarPedidoManualNuevo = async function() {
-    const nombre  = (document.getElementById("m_nombre")?.value || "").trim();
-    const fecha   = (document.getElementById("m_fecha")?.value || "").trim();
-    const horario = (document.getElementById("m_horario")?.value || "").trim();
+    const nombre = (document.getElementById("m_nombre")?.value || "").trim();
 
     if (!nombre) {
         Swal.fire("Campo requerido", "Escribe el nombre del cliente.", "warning");
         return;
     }
-    if (!fecha) {
-        Swal.fire("Campo requerido", "Selecciona la fecha de entrega.", "warning");
-        return;
-    }
-    if (!horario) {
-        Swal.fire("Campo requerido", "Escribe el horario.", "warning");
-        return;
-    }
 
     const idsSeleccionados = Object.keys(seleccionManual).filter(id => seleccionManual[id] > 0);
     if (!idsSeleccionados.length) {
-        Swal.fire("Sin productos", "Agrega al menos un pan del catálogo.", "warning");
+        Swal.fire("Sin productos", "Agrega al menos un pan del catálogo antes de guardar.", "warning");
         return;
     }
 
+    // — Fecha y hora AUTOMÁTICAS al momento exacto de guardar —
+    const ahora      = new Date();
+    const yyyy       = ahora.getFullYear();
+    const mm         = String(ahora.getMonth() + 1).padStart(2, "0");
+    const dd         = String(ahora.getDate()).padStart(2, "0");
+    const hh         = String(ahora.getHours()).padStart(2, "0");
+    const min        = String(ahora.getMinutes()).padStart(2, "0");
+    const fechaHoy   = `${yyyy}-${mm}-${dd}`;
+    const horaAhora  = `${hh}:${min}`;
+
     const productos = idsSeleccionados.map(id => {
-        const prod = catalogoManualFull.find(p => p.id == id);
+        const prod = catalogoManualFull.find(p => String(p.id) === String(id));
         return { nombre: prod.nombre, cantidad: seleccionManual[id], precio: Number(prod.precio) };
     });
     const totalNum = productos.reduce((s, p) => s + p.precio * p.cantidad, 0);
 
-    const metodoEntrega    = document.getElementById("m_entrega")?.value || "Recoger en tienda";
+    // Leer método de entrega desde chips
+    const chipSeleccionado = document.querySelector(".entrega-chip.selected input[type=radio]");
+    const metodoEntrega    = chipSeleccionado?.value || "Recoger en tienda";
     const direccionEntrega = (document.getElementById("m_direccion")?.value || "").trim();
-    const telefono         = (document.getElementById("m_telefono")?.value || "").trim();
-    const notas            = (document.getElementById("m_notas")?.value || "").trim();
+    const telefono         = (document.getElementById("m_telefono")?.value  || "").trim();
+    const notas            = (document.getElementById("m_notas")?.value      || "").trim();
 
-    // Estado: Entregado automático si el toggle está ON
+    // Validar dirección si es domicilio
+    if (metodoEntrega.includes("domicilio") && !direccionEntrega) {
+        Swal.fire("Dirección requerida", "Escribe la dirección de entrega a domicilio.", "warning");
+        return;
+    }
+
+    // Estado automático si el toggle está ON
     const autoEntregado = document.getElementById("toggleAutoEntregado")?.checked ?? true;
     const estadoInicial = autoEntregado ? "Entregado 🎉" : "Recibido 🥖";
 
-    // Código pedido
+    // Código pedido con prefijo M-
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let codigoPedido = "M-";
-    for (let i=0;i<6;i++) codigoPedido += chars[Math.floor(Math.random()*chars.length)];
+    for (let i = 0; i < 6; i++) codigoPedido += chars[Math.floor(Math.random() * chars.length)];
 
     const nuevoPedido = {
-        cliente: nombre,
-        telefono: telefono || null,
-        fechaRecoleccion: fecha,
-        horarioRecoleccion: horario,
+        cliente:            nombre,
+        telefono:           telefono  || null,
+        fechaRecoleccion:   fechaHoy,
+        horarioRecoleccion: horaAhora,
         metodoEntrega,
-        direccionEntrega: metodoEntrega.includes("domicilio") ? direccionEntrega : null,
+        direccionEntrega:   metodoEntrega.includes("domicilio") ? direccionEntrega : null,
         productos,
-        total: `$${totalNum.toFixed(2)}`,
+        total:              `$${totalNum.toFixed(2)}`,
         totalNum,
-        notas: notas || null,
-        estado: estadoInicial,
+        notas:              notas || null,
+        estado:             estadoInicial,
         codigoPedido,
-        fechaCreacion: Date.now(),
-        esManual: true,
-        cuponUsado: "Ninguno"
+        fechaCreacion:      Date.now(),
+        esManual:           true,
+        cuponUsado:         "Ninguno"
     };
 
-    // Llamar al guardarPedidoManual del admin-script.js con el objeto ya construido
-    // Usamos el evento customizado para pasarle el pedido pre-armado
-    window._pedidoManualPrearmado = nuevoPedido;
+    // Deshabilitar botón mientras guarda
+    const btn = document.getElementById("btnGuardarManual");
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'; }
+
+    // Usar la función del admin-script (patch de Firestore)
     if (typeof window._guardarPedidoManualDesdeHTML === "function") {
         await window._guardarPedidoManualDesdeHTML(nuevoPedido);
-    } else {
-        // fallback: intentamos usar guardarPedidoManual estándar si existe
-        if (typeof window.guardarPedidoManual === "function") {
-            await window.guardarPedidoManual();
-        }
     }
+
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar pedido'; }
+};
+
+// También exponer toggleDireccion por compatibilidad (ya no se usa en el nuevo UI pero admin-script la llama)
+window.toggleDireccion = function() {
+    const sel   = document.querySelector('input[name="m_entrega_radio"]:checked');
+    const grupo = document.getElementById("grupoDir");
+    if (!sel || !grupo) return;
+    grupo.style.display = sel.value.includes("domicilio") ? "flex" : "none";
 };
 </script>
 
@@ -1460,13 +1619,13 @@ window.guardarPedidoManualNuevo = async function() {
 
 <script type="module">
 // ══════════════════════════════════════════════════════════════════
-// PATCH del admin-script para interceptar guardarPedidoManual
-// y usar el pedido pre-armado cuando viene desde el nuevo flujo
+// PATCH — interceptar guardarPedidoManual para guardar en Firestore
+// y actualizar la lista en memoria del admin-script
 // ══════════════════════════════════════════════════════════════════
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { firebaseConfig } from "./js/firebase-config.js";
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth }         from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { firebaseConfig }  from "./js/firebase-config.js";
 
 const _app  = initializeApp(firebaseConfig);
 const _db   = getFirestore(_app);
@@ -1476,7 +1635,7 @@ window._guardarPedidoManualDesdeHTML = async function(pedido) {
     try {
         const docRef = await addDoc(collection(_db, "pedidos"), pedido);
 
-        // Agregar a la lista en memoria del admin-script
+        // Actualizar el array en memoria del admin-script si existe
         if (Array.isArray(window._todosLosPedidos)) {
             window._todosLosPedidos.unshift({ _id: docRef.id, ...pedido });
         }
@@ -1484,10 +1643,24 @@ window._guardarPedidoManualDesdeHTML = async function(pedido) {
         const ir = await Swal.fire({
             title: "¡Pedido guardado! 🥐",
             html: `
-                <p>Código: <strong>${pedido.codigoPedido}</strong></p>
-                <p>Cliente: ${pedido.cliente}</p>
-                <p>Total: $${pedido.totalNum?.toFixed(2) ?? "0.00"}</p>
-                <p>Estado: <strong>${pedido.estado}</strong></p>
+                <div style="text-align:left;background:#faf6ef;border-radius:8px;padding:14px;margin-top:8px;font-size:.88rem;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                        <span style="color:#8a7060;">Código</span>
+                        <strong style="color:#7b5533;">${pedido.codigoPedido}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                        <span style="color:#8a7060;">Cliente</span>
+                        <strong>${pedido.cliente}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                        <span style="color:#8a7060;">Total</span>
+                        <strong style="color:#16a34a;font-size:1rem;">$${pedido.totalNum?.toFixed(2) ?? "0.00"}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#8a7060;">Estado</span>
+                        <strong>${pedido.estado}</strong>
+                    </div>
+                </div>
             `,
             icon: "success",
             showCancelButton: true,
