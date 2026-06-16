@@ -8,61 +8,466 @@
     <meta name="theme-color" content="#7b5533">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
     <style>
-        body.ra-page { margin: 0; min-height: 100dvh; background: linear-gradient(165deg, #f8f4ef 0%, #ebe3d8 100%); font-family: 'Plus Jakarta Sans', sans-serif; color: #3c3530; }
-        .ra-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(123, 85, 51, 0.15); background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10; }
-        .ra-header h1 { font-family: 'Playfair Display', serif; font-size: 1.35rem; margin: 8px 0 4px; color: #5c3d24; }
-        .ra-header p { margin: 0; font-size: 0.85rem; color: #7a6f66; }
-        .ra-back { display: inline-flex; align-items: center; gap: 6px; color: #7b5533; text-decoration: none; font-size: 0.8rem; font-weight: 600; }
-        .ra-viewer-wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 40px; }
-        model-viewer { width: 100%; height: min(62vh, 480px); background: #fff; border-radius: 12px; border: 1px solid rgba(123, 85, 51, 0.2); --poster-color: #f8f4ef; }
-        .ra-hint { text-align: center; font-size: 0.85rem; color: #7a6f66; margin-top: 16px; line-height: 1.5; }
-        .ra-fallback-img { width: 100%; border-radius: 12px; margin-top: 20px; box-shadow: 0 8px 32px rgba(60,53,48,0.1); }
-        .ra-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 24px; }
-        .ra-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
-        .ra-btn-primary { background: #7b5533; color: #fff; }
-        .ra-btn-secondary { background: #fff; color: #7b5533; border: 2px solid #7b5533; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cafe:       #7b5533;
+            --cafe-dark:  #4a3220;
+            --cafe-light: #a07850;
+            --cream:      #faf6ef;
+            --cream-2:    #f0e8da;
+            --text:       #2c1a0e;
+            --muted:      #8a7060;
+            --border:     rgba(123, 85, 51, 0.18);
+            --gold:       #c9a227;
+            --radius:     14px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--cream);
+            color: var(--text);
+            min-height: 100dvh;
+            line-height: 1.6;
+        }
+
+        /* ── FONDO DECORATIVO ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 80% 10%, rgba(201,162,39,.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 10% 90%, rgba(123,85,51,.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── HEADER ── */
+        .ra-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(250, 246, 239, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .ra-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--cafe);
+            text-decoration: none;
+            font-size: .82rem;
+            font-weight: 700;
+            padding: 7px 14px;
+            border-radius: 99px;
+            border: 1.5px solid var(--border);
+            background: white;
+            transition: all .15s;
+            white-space: nowrap;
+        }
+        .ra-back:hover {
+            background: var(--cafe);
+            color: white;
+            border-color: var(--cafe);
+        }
+        .ra-header-center {
+            flex: 1;
+            text-align: center;
+        }
+        .ra-header-center h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--cafe-dark);
+            line-height: 1.2;
+        }
+        .ra-header-center p {
+            font-size: .75rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .ra-header-spacer { width: 100px; }
+
+        /* ── MAIN ── */
+        .ra-main {
+            position: relative;
+            z-index: 1;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* ── BADGE PRONTO ── */
+        .ra-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #f3e8db, #faf0e2);
+            color: var(--cafe);
+            border: 1.5px solid rgba(123,85,51,.2);
+            border-radius: 99px;
+            font-size: .73rem;
+            font-weight: 700;
+            padding: 5px 14px;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            width: fit-content;
+            margin: 0 auto;
+        }
+        .ra-badge i { font-size: .75rem; color: var(--gold); }
+
+        /* ── VIEWER ── */
+        .ra-viewer-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(44,26,14,.08), 0 1px 4px rgba(44,26,14,.04);
+        }
+        model-viewer {
+            width: 100%;
+            height: min(65vh, 500px);
+            background: linear-gradient(160deg, #fdf9f5 0%, #f5eddf 100%);
+            --poster-color: #f5eddf;
+            display: block;
+        }
+        .ra-viewer-footer {
+            padding: 14px 18px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: #faf7f2;
+        }
+        .ra-viewer-footer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .78rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+        .ra-viewer-footer-info i { color: var(--cafe-light); }
+
+        /* ── BOTÓN AR ── */
+        .ar-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: .82rem;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            background: var(--cafe);
+            color: white;
+            transition: background .15s, transform .1s;
+            white-space: nowrap;
+        }
+        .ar-button:hover { background: var(--cafe-dark); transform: translateY(-1px); }
+        .ar-button:active { transform: scale(.98); }
+
+        /* ── SLOT DEL AR BUTTON dentro del model-viewer ── */
+        model-viewer > .ar-slot-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* ── INSTRUCCIONES ── */
+        .ra-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+        .ra-step {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .ra-step-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #f3e8db;
+            color: var(--cafe);
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ra-step-num {
+            font-size: .65rem;
+            font-weight: 800;
+            color: var(--gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .ra-step-title {
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+        .ra-step-desc {
+            font-size: .73rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ── IMAGEN REFERENCIA ── */
+        .ra-ref-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(44,26,14,.06);
+        }
+        .ra-ref-card-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--text);
+            background: #faf7f2;
+        }
+        .ra-ref-card-header i { color: var(--cafe-light); }
+        .ra-ref-img {
+            width: 100%;
+            display: block;
+            max-height: 320px;
+            object-fit: cover;
+        }
+
+        /* ── ACCIONES ── */
+        .ra-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        .ra-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 24px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: .85rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .15s;
+        }
+        .ra-btn-primary {
+            background: var(--cafe);
+            color: white;
+        }
+        .ra-btn-primary:hover { background: var(--cafe-dark); transform: translateY(-1px); }
+        .ra-btn-secondary {
+            background: white;
+            color: var(--cafe);
+            border: 2px solid var(--cafe);
+        }
+        .ra-btn-secondary:hover { background: #f3e8db; transform: translateY(-1px); }
+        .ra-btn-wa {
+            background: #25d366;
+            color: white;
+        }
+        .ra-btn-wa:hover { background: #1da851; transform: translateY(-1px); }
+
+        /* ── AVISO COMPATIBILIDAD ── */
+        .ra-compat {
+            text-align: center;
+            font-size: .75rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .ra-compat i { font-size: .75rem; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 600px) {
+            .ra-steps { grid-template-columns: 1fr; gap: 10px; }
+            .ra-header-spacer { display: none; }
+            .ra-main { padding: 20px 14px 48px; gap: 20px; }
+            .ra-viewer-footer { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 400px) {
+            .ra-actions { flex-direction: column; align-items: stretch; }
+            .ra-btn { justify-content: center; }
+        }
     </style>
 </head>
-<body class="ra-page">
-    <header class="ra-header">
-        <a href="index.html" class="ra-back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver a la tienda</a>
-        <h1>Realidad Aumentada</h1>
-        <p>Así se verá nuestra panadería — experiencia CODIGORA</p>
-    </header>
+<body>
 
-    <main class="ra-viewer-wrap">
+<!-- ══ HEADER ══ -->
+<header class="ra-header">
+    <a href="index.html" class="ra-back" aria-label="Volver a la tienda">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        <span>Volver</span>
+    </a>
+    <div class="ra-header-center">
+        <h1>Realidad Aumentada 🥐</h1>
+        <p>Experiencia CODIGORA — Dulce Aroma</p>
+    </div>
+    <div class="ra-header-spacer" aria-hidden="true"></div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="ra-main">
+
+    <!-- Badge -->
+    <div class="ra-badge">
+        <i class="fa-solid fa-cube" aria-hidden="true"></i>
+        Vista previa del local en 3D
+    </div>
+
+    <!-- Visor 3D -->
+    <div class="ra-viewer-card">
         <model-viewer
             src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
-            alt="Vista previa 3D de la panadería Dulce Aroma"
+            alt="Vista previa 3D de la panadería Dulce Aroma del Buen Horno"
             ar
             ar-modes="webxr scene-viewer quick-look"
             camera-controls
             touch-action="pan-y"
-            shadow-intensity="1"
-            exposure="1"
+            shadow-intensity="1.2"
+            exposure="1.1"
             environment-image="neutral"
-            poster="img/Combo.webp">
-            <button slot="ar-button" class="ra-btn ra-btn-primary" style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);">
-                <i class="fa-solid fa-cube" aria-hidden="true"></i> Ver en tu espacio (AR)
+            poster="img/Combo.webp"
+            loading="eager">
+
+            <button
+                slot="ar-button"
+                class="ar-button ar-slot-btn"
+                aria-label="Ver modelo en realidad aumentada">
+                <i class="fa-solid fa-cube" aria-hidden="true"></i>
+                Ver en tu espacio (AR)
             </button>
+
         </model-viewer>
 
-        <p class="ra-hint">
-            En tu celular, toca <strong>«Ver en tu espacio»</strong> para colocar el modelo con la cámara.
-            Pronto sustituiremos el modelo por el diseño final del local.
-        </p>
-
-        <img src="img/Combo.webp" alt="Referencia visual de la panadería" class="ra-fallback-img" width="720" height="405" loading="lazy">
-
-        <div class="ra-actions">
-            <a href="index.html#productos" class="ra-btn ra-btn-primary"><i class="fa-solid fa-bread-slice" aria-hidden="true"></i> Ver catálogo</a>
-            <a href="https://wa.me/529223773794" class="ra-btn ra-btn-secondary" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp</a>
+        <div class="ra-viewer-footer">
+            <div class="ra-viewer-footer-info">
+                <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                Arrastra para rotar · Pellizca para zoom
+            </div>
+            <div class="ra-viewer-footer-info">
+                <i class="fa-solid fa-info-circle" aria-hidden="true"></i>
+                Modelo de prueba — diseño final próximamente
+            </div>
         </div>
-    </main>
+    </div>
+
+    <!-- Pasos de uso -->
+    <div class="ra-steps" role="list" aria-label="Cómo usar la experiencia AR">
+
+        <div class="ra-step" role="listitem">
+            <div class="ra-step-icon" aria-hidden="true">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+            </div>
+            <div class="ra-step-num">Paso 1</div>
+            <div class="ra-step-title">Abre desde tu celular</div>
+            <div class="ra-step-desc">Funciona en iOS (Safari) y Android (Chrome). Escanea el código QR si estás en computadora.</div>
+        </div>
+
+        <div class="ra-step" role="listitem">
+            <div class="ra-step-icon" aria-hidden="true">
+                <i class="fa-solid fa-cube"></i>
+            </div>
+            <div class="ra-step-num">Paso 2</div>
+            <div class="ra-step-title">Toca «Ver en tu espacio»</div>
+            <div class="ra-step-desc">El botón aparece en la parte inferior del visor cuando tu dispositivo es compatible con AR.</div>
+        </div>
+
+        <div class="ra-step" role="listitem">
+            <div class="ra-step-icon" aria-hidden="true">
+                <i class="fa-solid fa-camera"></i>
+            </div>
+            <div class="ra-step-num">Paso 3</div>
+            <div class="ra-step-title">Apunta y coloca</div>
+            <div class="ra-step-desc">Usa tu cámara para detectar superficies planas y coloca el modelo donde quieras.</div>
+        </div>
+
+    </div>
+
+    <!-- Imagen de referencia -->
+    <div class="ra-ref-card">
+        <div class="ra-ref-card-header">
+            <i class="fa-solid fa-image" aria-hidden="true"></i>
+            Referencia visual del local
+        </div>
+        <img
+            src="img/Combo.webp"
+            alt="Vista de referencia del local Dulce Aroma del Buen Horno"
+            class="ra-ref-img"
+            width="780"
+            height="320"
+            loading="lazy">
+    </div>
+
+    <!-- Acciones -->
+    <div class="ra-actions">
+        <a href="index.html#productos" class="ra-btn ra-btn-primary">
+            <i class="fa-solid fa-bread-slice" aria-hidden="true"></i>
+            Ver catálogo
+        </a>
+        <a href="index.html#pedido" class="ra-btn ra-btn-secondary">
+            <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+            Hacer un pedido
+        </a>
+        <a
+            href="https://wa.me/529223773794"
+            class="ra-btn ra-btn-wa"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Contactar por WhatsApp (abre en nueva pestaña)">
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+            WhatsApp
+        </a>
+    </div>
+
+    <!-- Nota de compatibilidad -->
+    <p class="ra-compat">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        AR disponible en iOS 12+ con Safari y Android 8+ con Chrome
+    </p>
+
+</main>
+
 </body>
 </html>
